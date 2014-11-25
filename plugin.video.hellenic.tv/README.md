@@ -4,12 +4,13 @@ Hellenic TV
 
 About
 -----
-Live TV from Greece
+Greek television
 
 
 Attributions
 ---------------------
-- Main icon and fanart by jokster | http://tvaddons.ag
+- Main icon by jokster | http://tvaddons.ag
+- Main icon set by rayw1986 | http://tvaddons.ag
 
 
 License

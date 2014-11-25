@@ -4,7 +4,7 @@ NBA On-demand
 
 About
 -----
-Watch NBA games whenever you want
+NBA on demand
 
 
 Attributions

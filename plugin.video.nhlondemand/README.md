@@ -4,7 +4,7 @@ NHL On-demand
 
 About
 -----
-Watch NHL games whenever you want
+NHL on demand
 
 
 Attributions

@@ -2,6 +2,8 @@
 <settings>
 	<category label="30000">
 		<setting id="quality" type="bool" label="30001" default="true"/>
-		<setting id="euroleague" type="bool" label="30002" default="false"/>
+	</category>
+	<category label="30002">
+		<setting label="30003" type="action" action="RunPlugin(plugin://plugin.video.nbaondemand/?action=cache_clear_list)"/>
 	</category>
 </settings>

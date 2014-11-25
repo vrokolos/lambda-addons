@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    Football Today XBMC Addon
+    Football Today Addon
     Copyright (C) 2014 lambda
 
     This program is free software: you can redistribute it and/or modify
@@ -20,16 +20,21 @@
 
 import urllib,urllib2,re,os,threading,datetime,time,base64,xbmc,xbmcplugin,xbmcgui,xbmcaddon,xbmcvfs
 from operator import itemgetter
-try:    import json
-except: import simplejson as json
-try:    import CommonFunctions
-except: import commonfunctionsdummy as CommonFunctions
-try:    import StorageServer
-except: import storageserverdummy as StorageServer
+try:
+    from sqlite3 import dbapi2 as database
+except:
+    from pysqlite2 import dbapi2 as database
+try:
+    import CommonFunctions as common
+except:
+    import commonfunctionsdummy as common
+try:
+    import json
+except:
+    import simplejson as json
 
 
 action              = None
-common              = CommonFunctions
 language            = xbmcaddon.Addon().getLocalizedString
 setSetting          = xbmcaddon.Addon().setSetting
 getSetting          = xbmcaddon.Addon().getSetting
@@ -37,17 +42,14 @@ addonName           = xbmcaddon.Addon().getAddonInfo("name")
 addonVersion        = xbmcaddon.Addon().getAddonInfo("version")
 addonId             = xbmcaddon.Addon().getAddonInfo("id")
 addonPath           = xbmcaddon.Addon().getAddonInfo("path")
-addonFullId         = addonName + addonVersion
 addonDesc           = language(30450).encode("utf-8")
-cache               = StorageServer.StorageServer(addonFullId,1).cacheFunction
-cache2              = StorageServer.StorageServer(addonFullId,24).cacheFunction
-cache3              = StorageServer.StorageServer(addonFullId,720).cacheFunction
+dataPath            = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo("profile")).decode("utf-8")
 addonIcon           = os.path.join(addonPath,'icon.png')
-addonFanart         = os.path.join(addonPath,'fanart.jpg')
 addonArt            = os.path.join(addonPath,'resources/art')
-addonNext           = os.path.join(addonPath,'resources/art/Next.png')
-dataPath            = xbmc.translatePath('special://profile/addon_data/%s' % (addonId))
-viewData            = os.path.join(dataPath,'views.cfg')
+addonFanart         = os.path.join(addonPath,'fanart.jpg')
+addonNext           = os.path.join(addonPath,'resources/art/videos_next.png')
+addonSettings       = os.path.join(dataPath,'settings.db')
+addonCache          = os.path.join(dataPath,'cache.db')
 
 
 class main:
@@ -66,59 +68,38 @@ class main:
 
         try:        action = urllib.unquote_plus(params["action"])
         except:     action = None
-        try:        name = urllib.unquote_plus(params["name"])
-        except:     name = None
         try:        url = urllib.unquote_plus(params["url"])
         except:     url = None
-        try:        image = urllib.unquote_plus(params["image"])
-        except:     image = None
-        try:        date = urllib.unquote_plus(params["date"])
-        except:     date = None
-        try:        genre = urllib.unquote_plus(params["genre"])
-        except:     genre = None
-        try:        plot = urllib.unquote_plus(params["plot"])
-        except:     plot = None
-        try:        title = urllib.unquote_plus(params["title"])
-        except:     title = None
-        try:        show = urllib.unquote_plus(params["show"])
-        except:     show = None
+        try:        meta = urllib.unquote_plus(params["meta"])
+        except:     meta = None
         try:        query = urllib.unquote_plus(params["query"])
         except:     query = None
 
+
         if action == None:                          root().get()
+        elif action == 'cache_clear_list':          index().cache_clear_list()
         elif action == 'item_play':                 contextMenu().item_play()
         elif action == 'item_random_play':          contextMenu().item_random_play()
         elif action == 'item_queue':                contextMenu().item_queue()
-        elif action == 'item_play_from_here':       contextMenu().item_play_from_here(url)
         elif action == 'playlist_open':             contextMenu().playlist_open()
         elif action == 'settings_open':             contextMenu().settings_open()
-        elif action == 'addon_home':                contextMenu().addon_home()
         elif action == 'view_videos':               contextMenu().view('videos')
         elif action == 'videos':                    videos().get(url)
-        elif action == 'videos_games':              videos().root('games')
-        elif action == 'videos_premierleague':      videos().root('premierleague')
-        elif action == 'videos_laliga':             videos().root('laliga')
-        elif action == 'videos_bundesliga':         videos().root('bundesliga')
-        elif action == 'videos_seriea':             videos().root('seriea')
-        elif action == 'videos_ligue1':             videos().root('ligue1')
-        elif action == 'videos_eredivisie':         videos().root('eredivisie')
-        elif action == 'videos_primeiraliga':       videos().root('primeiraliga')
-        elif action == 'videos_uefachampionleague': videos().root('uefachampionleague')
-        elif action == 'videos_uefaeuropaleague':   videos().root('uefaeuropaleague')
-        elif action == 'videos_copalibertadores':   videos().root('copalibertadores')
-        elif action == 'videos_highlights':         videos().root2('highlights')
+        elif action == 'videos_games':              videos().root('lfv_games')
+        elif action == 'videos_highlights':         videos().root('lfv_highlights')
+        elif action == 'videos_premierleague':      videos().root('lfv_premierleague')
+        elif action == 'videos_laliga':             videos().root('lfv_laliga')
+        elif action == 'videos_bundesliga':         videos().root('lfv_bundesliga')
+        elif action == 'videos_seriea':             videos().root('lfv_seriea')
+        elif action == 'videos_ligue1':             videos().root('lfv_ligue1')
+        elif action == 'videos_eredivisie':         videos().root('lfv_eredivisie')
+        elif action == 'videos_primeiraliga':       videos().root('lfv_primeiraliga')
+        elif action == 'videos_uefachampionleague': videos().root('lfv_uefachampionleague')
+        elif action == 'videos_uefaeuropaleague':   videos().root('lfv_uefaeuropaleague')
+        elif action == 'videos_copalibertadores':   videos().root('lfv_copalibertadores')
         elif action == 'videos_search':             videos().search(query)
-        elif action == 'videos_parts':              videoparts().get(name, url, image, date, genre, plot, title, show)
+        elif action == 'videos_parts':              videoparts().get(url, meta)
         elif action == 'play':                      resolver().run(url)
-
-        if action == None:
-            pass
-        elif action.startswith('videos'):
-            xbmcplugin.setContent(int(sys.argv[1]), 'episodes')
-            index().container_view('videos', {'skin.confluence' : 504})
-        xbmcplugin.setPluginFanart(int(sys.argv[1]), addonFanart)
-        xbmcplugin.endOfDirectory(int(sys.argv[1]))
-        return
 
 class getUrl(object):
     def __init__(self, url, close=True, proxy=None, post=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
@@ -136,7 +117,7 @@ class getUrl(object):
         else:
             request = urllib2.Request(url,None)
         if mobile == True:
-            request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7')
+            request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; CPU; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7')
         else:
             request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0) Gecko/20100101 Firefox/6.0')
         if not referer == None:
@@ -220,23 +201,22 @@ class index:
         if not check == addonName: return True
 
     def container_refresh(self):
-        xbmc.executebuiltin("Container.Refresh")
+        xbmc.executebuiltin('Container.Refresh')
 
     def container_data(self):
         if not xbmcvfs.exists(dataPath):
             xbmcvfs.mkdir(dataPath)
-        if not xbmcvfs.exists(viewData):
-            file = xbmcvfs.File(viewData, 'w')
-            file.write('')
-            file.close()
 
     def container_view(self, content, viewDict):
         try:
             skin = xbmc.getSkinDir()
-            file = xbmcvfs.File(viewData)
-            read = file.read().replace('\n','')
-            file.close()
-            view = re.compile('"%s"[|]"%s"[|]"(.+?)"' % (skin, content)).findall(read)[0]
+            record = (skin, content)
+            dbcon = database.connect(addonSettings)
+            dbcur = dbcon.cursor()
+            dbcur.execute("SELECT * FROM views WHERE skin = '%s' AND view_type = '%s'" % (record[0], record[1]))
+            view = dbcur.fetchone()
+            view = view[2]
+            if view == None: raise Exception()
             xbmc.executebuiltin('Container.SetViewMode(%s)' % str(view))
         except:
             try:
@@ -245,111 +225,205 @@ class index:
             except:
                 pass
 
+    def cache(self, function, timeout, *args):
+        try:
+            response = None
+
+            f = repr(function)
+            f = re.sub('.+\smethod\s|.+function\s|\sat\s.+|\sof\s.+', '', f)
+
+            import hashlib
+            a = hashlib.md5()
+            for i in args: a.update(str(i))
+            a = str(a.hexdigest())
+        except:
+            pass
+
+        try:
+            dbcon = database.connect(addonCache)
+            dbcur = dbcon.cursor()
+            dbcur.execute("SELECT * FROM rel_list WHERE func = '%s' AND args = '%s'" % (f, a))
+            match = dbcur.fetchone()
+
+            response = eval(match[2].encode('utf-8'))
+
+            t1 = int(re.sub('[^0-9]', '', str(match[3])))
+            t2 = int(datetime.datetime.now().strftime("%Y%m%d%H%M"))
+            update = abs(t2 - t1) >= int(timeout*60)
+            if update == False:
+                return response
+        except:
+            pass
+
+        try:
+            r = function(*args)
+            if (r == None or r == []) and not response == None:
+                return response
+            elif (r == None or r == []):
+                return r
+        except:
+            return
+
+        try:
+            r = repr(r)
+            t = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+            dbcur.execute("CREATE TABLE IF NOT EXISTS rel_list (""func TEXT, ""args TEXT, ""response TEXT, ""added TEXT, ""UNIQUE(func, args)"");")
+            dbcur.execute("DELETE FROM rel_list WHERE func = '%s' AND args = '%s'" % (f, a))
+            dbcur.execute("INSERT INTO rel_list Values (?, ?, ?, ?)", (f, a, r, t))
+            dbcon.commit()
+        except:
+            pass
+
+        try:
+            return eval(r.encode('utf-8'))
+        except:
+            pass
+
+    def cache_clear_list(self):
+        try:
+            dbcon = database.connect(addonCache)
+            dbcur = dbcon.cursor()
+            dbcur.execute("DROP TABLE IF EXISTS rel_list")
+            dbcur.execute("VACUUM")
+            dbcon.commit()
+
+            index().infoDialog(language(30303).encode("utf-8"))
+        except:
+            pass
+
     def rootList(self, rootList):
+        if rootList == None or len(rootList) == 0: return
+
         total = len(rootList)
         for i in rootList:
             try:
-                name = language(i['name']).encode("utf-8")
+                try: name = language(i['name']).encode("utf-8")
+                except: name = i['name']
+
                 image = '%s/%s' % (addonArt, i['image'])
-                action = i['action']
-                u = '%s?action=%s' % (sys.argv[0], action)
+
+                root = i['action']
+                u = '%s?action=%s' % (sys.argv[0], root)
+                try: u += '&url=%s' % urllib.quote_plus(i['url'])
+                except: pass
+                if u == '': raise Exception()
 
                 cm = []
 
                 item = xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=image)
-                item.setInfo( type="Video", infoLabels={ "Label": name, "Title": name, "Plot": addonDesc } )
+                item.setInfo(type="Video", infoLabels={"title": name, "plot": addonDesc})
                 item.setProperty("Fanart_Image", addonFanart)
                 item.addContextMenuItems(cm, replaceItems=False)
                 xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=item,totalItems=total,isFolder=True)
             except:
                 pass
 
-    def nextList(self, nextList):
-        try: next = nextList[0]['next']
-        except: return
-        if next == '': return
-        name, url, image = language(30361).encode("utf-8"), next, addonNext
-        sysurl = urllib.quote_plus(url)
-
-        u = '%s?action=videos&url=%s' % (sys.argv[0], sysurl)
-
-        item = xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=image)
-        item.setInfo( type="Video", infoLabels={ "Label": name, "Title": name, "Plot": addonDesc } )
-        item.setProperty("Fanart_Image", addonFanart)
-        item.addContextMenuItems([], replaceItems=False)
-        xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=item,isFolder=True)
+        xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=True)
 
     def videoList(self, videoList):
-        if videoList == None: return
+        if videoList == None or len(videoList) == 0: return
 
         total = len(videoList)
         for i in videoList:
             try:
                 name, url, image, date, genre, plot, title, show = i['name'], i['url'], i['image'], i['date'], i['genre'], i['plot'], i['title'], i['show']
-                if show == '': show = addonName
-                if image == '': image = addonFanart
-                if plot == '': plot = addonDesc
-                if genre == '': genre = ' '
-                if date == '': date = ' '
 
-                sysname, sysurl, sysimage, sysdate, sysgenre, sysplot, systitle, sysshow = urllib.quote_plus(name), urllib.quote_plus(url), urllib.quote_plus(image), urllib.quote_plus(date), urllib.quote_plus(genre), urllib.quote_plus(plot), urllib.quote_plus(title), urllib.quote_plus(show)
-                u = '%s?action=videos_parts&name=%s&url=%s&image=%s&date=%s&genre=%s&plot=%s&title=%s&show=%s' % (sys.argv[0], sysname, sysurl, sysimage, sysdate, sysgenre, sysplot, systitle, sysshow)
+                try: fanart = i['fanart']
+                except: fanart = '0'
 
-                meta = {'label': title, 'title': title, 'studio': show, 'premiered': date, 'genre': genre, 'plot': plot}
+                meta = {'name': name, 'title': title, 'studio': show, 'premiered': date, 'genre': genre, 'plot': plot, 'image': image, 'fanart': fanart}
+
+                sysmeta = urllib.quote_plus(json.dumps(meta))
+                sysurl = urllib.quote_plus(url)
+
+                if fanart == '0': fanart = addonFanart
+                if image == '0': image = addonFanart
+                if show == '0': meta.update({'studio': addonName})
+                if plot == '0': meta.update({'plot': addonDesc})
+                meta = dict((k,v) for k, v in meta.iteritems() if not v == '0')
+
+                u = '%s?action=videos_parts&url=%s&meta=%s' % (sys.argv[0], sysurl, sysmeta)
 
                 cm = []
                 cm.append((language(30401).encode("utf-8"), 'RunPlugin(%s?action=item_play)' % (sys.argv[0])))
-                cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=item_queue)' % (sys.argv[0])))
-                cm.append((language(30410).encode("utf-8"), 'RunPlugin(%s?action=view_videos)' % (sys.argv[0])))
-                cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
-                cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=playlist_open)' % (sys.argv[0])))
-                cm.append((language(30409).encode("utf-8"), 'RunPlugin(%s?action=addon_home)' % (sys.argv[0])))
+                cm.append((language(30403).encode("utf-8"), 'RunPlugin(%s?action=item_queue)' % (sys.argv[0])))
+                cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=playlist_open)' % (sys.argv[0])))
+                cm.append((language(30406).encode("utf-8"), 'RunPlugin(%s?action=view_videos)' % (sys.argv[0])))
+                cm.append((language(30405).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
 
                 item = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=image)
-                item.setInfo( type="Video", infoLabels = meta )
-                item.setProperty("IsPlayable", "true")
+                item.setProperty("Fanart_Image", fanart)
+                item.setInfo(type="Video", infoLabels = meta)
                 item.setProperty("Video", "true")
-                item.setProperty("Fanart_Image", addonFanart)
+                item.setProperty("IsPlayable", "true")
                 item.addContextMenuItems(cm, replaceItems=True)
                 xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=item,totalItems=total,isFolder=True)
             except:
                 pass
 
+        try:
+            next = videoList[0]['next']
+            if next == '': raise Exception()
+            name, url, image = language(30361).encode("utf-8"), next, addonNext
+            u = '%s?action=videos&url=%s' % (sys.argv[0], urllib.quote_plus(url))
+            item = xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=image)
+            item.setInfo( type="Video", infoLabels={"title": name, "plot": addonDesc})
+            item.setProperty("Fanart_Image", addonFanart)
+            item.addContextMenuItems([], replaceItems=False)
+            xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=item,isFolder=True)
+        except:
+            pass
+
+        xbmcplugin.setContent(int(sys.argv[1]), 'episodes')
+        xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=True)
+        for i in range(0, 200):
+            if xbmc.getCondVisibility('Container.Content(episodes)'):
+                return index().container_view('videos', {'skin.confluence' : 504})
+            xbmc.sleep(100)
+
     def videopartList(self, videopartList):
-        if videopartList == None: return
+        if videopartList == None or len(videopartList) == 0: return
 
         total = len(videopartList)
         for i in videopartList:
             try:
-                name, url, image, date, genre, plot, title, show = i['name'], i['url'], i['image'], i['date'], i['genre'], i['plot'], i['title'], i['show']
-                if show == '': show = addonName
-                if image == '': image = addonFanart
-                if plot == '': plot = addonDesc
-                if genre == '': genre = ' '
-                if date == '': date = ' '
+                name, url = i['name'], i['url']
+                meta = json.loads(i['meta'])
+                image, fanart, show, plot = meta['image'], meta['fanart'], meta['studio'], meta['plot']
 
                 sysurl = urllib.quote_plus(url)
+
+                if fanart == '0': fanart = addonFanart
+                if image == '0': image = addonFanart
+                if show == '0': meta.update({'studio': addonName})
+                if plot == '0': meta.update({'plot': addonDesc})
+                meta = dict((k,v) for k, v in meta.iteritems() if not v == '0')
+
                 u = '%s?action=play&url=%s' % (sys.argv[0], sysurl)
 
-                meta = {'label': title, 'title': title, 'studio': show, 'premiered': date, 'genre': genre, 'plot': plot}
-
                 cm = []
-                cm.append((language(30405).encode("utf-8"), 'RunPlugin(%s?action=item_queue)' % (sys.argv[0])))
-                cm.append((language(30403).encode("utf-8"), 'RunPlugin(%s?action=item_play_from_here&url=%s)' % (sys.argv[0], sysurl)))
-                cm.append((language(30410).encode("utf-8"), 'RunPlugin(%s?action=view_videos)' % (sys.argv[0])))
-                cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
-                cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=playlist_open)' % (sys.argv[0])))
-                cm.append((language(30409).encode("utf-8"), 'RunPlugin(%s?action=addon_home)' % (sys.argv[0])))
+                cm.append((language(30401).encode("utf-8"), 'RunPlugin(%s?action=item_play)' % (sys.argv[0])))
+                cm.append((language(30403).encode("utf-8"), 'RunPlugin(%s?action=item_queue)' % (sys.argv[0])))
+                cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=playlist_open)' % (sys.argv[0])))
+                cm.append((language(30406).encode("utf-8"), 'RunPlugin(%s?action=view_videos)' % (sys.argv[0])))
+                cm.append((language(30405).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
 
                 item = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=image)
-                item.setInfo( type="Video", infoLabels = meta )
-                item.setProperty("IsPlayable", "true")
+                item.setProperty("Fanart_Image", fanart)
+                item.setInfo(type="Video", infoLabels = meta)
                 item.setProperty("Video", "true")
-                item.setProperty("Fanart_Image", addonFanart)
+                item.setProperty("IsPlayable", "true")
                 item.addContextMenuItems(cm, replaceItems=True)
                 xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=item,totalItems=total,isFolder=False)
             except:
                 pass
+
+        xbmcplugin.setContent(int(sys.argv[1]), 'episodes')
+        xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=True)
+        for i in range(0, 200):
+            if xbmc.getCondVisibility('Container.Content(episodes)'):
+                return index().container_view('videos', {'skin.confluence' : 504})
+            xbmc.sleep(100)
 
 class contextMenu:
     def item_play(self):
@@ -369,42 +443,11 @@ class contextMenu:
     def item_queue(self):
         xbmc.executebuiltin('Action(Queue)')
 
-    def item_play_from_here(self, url):
-        playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
-        playlist.clear()
-        playlist.unshuffle()
-        total = xbmc.getInfoLabel('Container.NumItems')
-        for i in range(0, int(total)):
-            i = str(i)
-            label = xbmc.getInfoLabel('ListItemNoWrap(%s).Label' % i)
-            if label == '': break
-
-            params = {}
-            path = xbmc.getInfoLabel('ListItemNoWrap(%s).FileNameAndPath' % i)
-            path = urllib.quote_plus(path).replace('+%26+', '+&+')
-            query = path.split('%3F', 1)[-1].split('%26')
-            for i in query: params[urllib.unquote_plus(i).split('=')[0]] = urllib.unquote_plus(i).split('=')[1]
-            u = '%s?action=play&url=%s' % (sys.argv[0], params["url"])
-
-            meta = {'title': xbmc.getInfoLabel('ListItemNoWrap(%s).title' % i), 'studio': xbmc.getInfoLabel('ListItemNoWrap(%s).studio' % i), 'writer': xbmc.getInfoLabel('ListItemNoWrap(%s).writer' % i), 'director': xbmc.getInfoLabel('ListItemNoWrap(%s).director' % i), 'rating': xbmc.getInfoLabel('ListItemNoWrap(%s).rating' % i), 'duration': xbmc.getInfoLabel('ListItemNoWrap(%s).duration' % i), 'premiered': xbmc.getInfoLabel('ListItemNoWrap(%s).premiered' % i), 'plot': xbmc.getInfoLabel('ListItemNoWrap(%s).plot' % i)}
-            poster, fanart = xbmc.getInfoLabel('ListItemNoWrap(%s).icon' % i), xbmc.getInfoLabel('ListItemNoWrap(%s).Property(Fanart_Image)' % i)
-
-            item = xbmcgui.ListItem(label, iconImage="DefaultVideo.png", thumbnailImage=poster)
-            item.setInfo( type="Video", infoLabels= meta )
-            item.setProperty("IsPlayable", "true")
-            item.setProperty("Video", "true")
-            item.setProperty("Fanart_Image", fanart)
-            playlist.add(u, item)
-        xbmc.Player().play(playlist)
-
     def playlist_open(self):
         xbmc.executebuiltin('ActivateWindow(VideoPlaylist)')
 
-    def settings_open(self):
-        xbmc.executebuiltin('Addon.OpenSettings(%s)' % (addonId))
-
-    def addon_home(self):
-        xbmc.executebuiltin('Container.Update(plugin://%s/,replace)' % (addonId))
+    def settings_open(self, id=addonId):
+        xbmc.executebuiltin('Addon.OpenSettings(%s)' % id)
 
     def view(self, content):
         try:
@@ -426,14 +469,13 @@ class contextMenu:
             for view in views:
                 label = xbmc.getInfoLabel('Control.GetLabel(%s)' % (view))
                 if not (label == '' or label == None): break
-            file = xbmcvfs.File(viewData)
-            read = file.read()
-            file.close()
-            file = open(viewData, 'w')
-            for line in re.compile('(".+?\n)').findall(read):
-                if not line.startswith('"%s"|"%s"|"' % (skin, content)): file.write(line)
-            file.write('"%s"|"%s"|"%s"\n' % (skin, content, str(view)))
-            file.close()
+            record = (skin, content, str(view))
+            dbcon = database.connect(addonSettings)
+            dbcur = dbcon.cursor()
+            dbcur.execute("CREATE TABLE IF NOT EXISTS views (""skin TEXT, ""view_type TEXT, ""view_id TEXT, ""UNIQUE(skin, view_type)"");")
+            dbcur.execute("DELETE FROM views WHERE skin = '%s' AND view_type = '%s'" % (record[0], record[1]))
+            dbcur.execute("INSERT INTO views Values (?, ?, ?)", record)
+            dbcon.commit()
             viewName = xbmc.getInfoLabel('Container.Viewmode')
             index().infoDialog('%s%s%s' % (language(30301).encode("utf-8"), viewName, language(30302).encode("utf-8")))
         except:
@@ -442,77 +484,53 @@ class contextMenu:
 class root:
     def get(self):
         rootList = []
-        rootList.append({'name': 30501, 'image': 'Games.png', 'action': 'videos_games'})
-        rootList.append({'name': 30502, 'image': 'Highlights.png', 'action': 'videos_highlights'})
-        rootList.append({'name': 30503, 'image': 'Search.png', 'action': 'videos_search'})
-        rootList.append({'name': 30504, 'image': 'Premier League.png', 'action': 'videos_premierleague'})
-        rootList.append({'name': 30505, 'image': 'La Liga.png', 'action': 'videos_laliga'})
-        rootList.append({'name': 30506, 'image': 'Bundesliga.png', 'action': 'videos_bundesliga'})
-        rootList.append({'name': 30507, 'image': 'Serie A.png', 'action': 'videos_seriea'})
-        rootList.append({'name': 30508, 'image': 'Ligue 1.png', 'action': 'videos_ligue1'})
-        rootList.append({'name': 30509, 'image': 'Eredivisie.png', 'action': 'videos_eredivisie'})
-        rootList.append({'name': 30510, 'image': 'Primeira Liga.png', 'action': 'videos_primeiraliga'})
-        rootList.append({'name': 30511, 'image': 'UEFA Champions League.png', 'action': 'videos_uefachampionleague'})
-        rootList.append({'name': 30512, 'image': 'UEFA Europa League.png', 'action': 'videos_uefaeuropaleague'})
-        rootList.append({'name': 30513, 'image': 'Copa Libertadores.png', 'action': 'videos_copalibertadores'})
+        rootList.append({'name': 30501, 'image': 'videos_games.png', 'action': 'videos_games'})
+        rootList.append({'name': 30502, 'image': 'videos_highlights.png', 'action': 'videos_highlights'})
+        rootList.append({'name': 30503, 'image': 'videos_search.png', 'action': 'videos_search'})
+        rootList.append({'name': 'Premier League', 'image': 'videos_premierleague.png', 'action': 'videos_premierleague'})
+        rootList.append({'name': 'La Liga', 'image': 'videos_laliga.png', 'action': 'videos_laliga'})
+        rootList.append({'name': 'Bundesliga', 'image': 'videos_bundesliga.png', 'action': 'videos_bundesliga'})
+        rootList.append({'name': 'Serie A', 'image': 'videos_seriea.png', 'action': 'videos_seriea'})
+        rootList.append({'name': 'Ligue 1', 'image': 'videos_ligue1.png', 'action': 'videos_ligue1'})
+        rootList.append({'name': 'Eredivisie', 'image': 'videos_eredivisie.png', 'action': 'videos_eredivisie'})
+        rootList.append({'name': 'Primeira Liga', 'image': 'videos_primeiraliga.png', 'action': 'videos_primeiraliga'})
+        rootList.append({'name': 'UEFA Champions League', 'image': 'videos_uefachampionleague.png', 'action': 'videos_uefachampionleague'})
+        rootList.append({'name': 'UEFA Europa League', 'image': 'videos_uefaeuropaleague.png', 'action': 'videos_uefaeuropaleague'})
+        rootList.append({'name': 'Copa Libertadores', 'image': 'videos_copalibertadores.png', 'action': 'videos_copalibertadores'})
         index().rootList(rootList)
 
 class link:
     def __init__(self):
         self.lfv_base = 'http://livefootballvideo.com'
         self.lfv_search = 'http://www.google.com/cse?cx=partner-pub-9069051203647610:8413886168&sa=Search&ie=UTF-8&nojs=1&ref=livefootballvideo.com/&q=%s'
-        self.lfv_games = 'http://livefootballvideo.com/fullmatch'
-        self.lfv_highlights = 'http://livefootballvideo.com/highlights'
-        self.lfv_premierleague = 'http://livefootballvideo.com/competitions/premier-league'
-        self.lfv_laliga = 'http://livefootballvideo.com/competitions/la-liga'
-        self.lfv_bundesliga = 'http://livefootballvideo.com/competitions/bundesliga'
-        self.lfv_seriea = 'http://livefootballvideo.com/competitions/serie-a'
-        self.lfv_ligue1 = 'http://livefootballvideo.com/competitions/ligue-1'
-        self.lfv_eredivisie = 'http://livefootballvideo.com/competitions/eredivisie'
-        self.lfv_primeiraliga = 'http://livefootballvideo.com/competitions/primeira-liga'
-        self.lfv_uefachampionleague = 'http://livefootballvideo.com/competitions/uefa-champions-league'
-        self.lfv_uefaeuropaleague = 'http://livefootballvideo.com/competitions/uefa-europa-league'
-        self.lfv_copalibertadores = 'http://livefootballvideo.com/competitions/copa-libertadores'
+        self.lfv_games = 'http://livefootballvideo.com/fullmatch/'
+        self.lfv_highlights = 'http://livefootballvideo.com/highlights/'
+        self.lfv_premierleague = 'http://livefootballvideo.com/competitions/premier-league/'
+        self.lfv_laliga = 'http://livefootballvideo.com/competitions/la-liga/'
+        self.lfv_bundesliga = 'http://livefootballvideo.com/competitions/bundesliga/'
+        self.lfv_seriea = 'http://livefootballvideo.com/competitions/serie-a/'
+        self.lfv_ligue1 = 'http://livefootballvideo.com/competitions/ligue-1/'
+        self.lfv_eredivisie = 'http://livefootballvideo.com/competitions/eredivisie/'
+        self.lfv_primeiraliga = 'http://livefootballvideo.com/competitions/primeira-liga/'
+        self.lfv_uefachampionleague = 'http://livefootballvideo.com/competitions/uefa-champions-league/'
+        self.lfv_uefaeuropaleague = 'http://livefootballvideo.com/competitions/uefa-europa-league/'
+        self.lfv_copalibertadores = 'http://livefootballvideo.com/competitions/copa-libertadores/'
+        self.quality = getSetting("quality")
 
 class videos:
     def __init__(self):
         self.list = []
 
     def root(self, url):
-        if url == 'games': url = link().lfv_games
-        elif url == 'premierleague': url = link().lfv_premierleague
-        elif url == 'laliga': url = link().lfv_laliga
-        elif url == 'bundesliga': url = link().lfv_bundesliga
-        elif url == 'seriea': url = link().lfv_seriea
-        elif url == 'ligue1': url = link().lfv_ligue1
-        elif url == 'eredivisie': url = link().lfv_eredivisie
-        elif url == 'primeiraliga': url = link().lfv_primeiraliga
-        elif url == 'uefachampionleague': url = link().lfv_uefachampionleague
-        elif url == 'uefaeuropaleague': url = link().lfv_uefaeuropaleague
-        elif url == 'copalibertadores': url = link().lfv_copalibertadores
-
-        self.list = self.lfv_list(url)
-        #self.list = cache(self.lfv_list, url)
+        url = getattr(link(), url)
+        if '/highlights/' in url: self.list = index().cache(self.lfv_list2, 1, url)
+        else: self.list = index().cache(self.lfv_list, 1, url)
         index().videoList(self.list)
-        index().nextList(self.list)
-
-    def root2(self, url):
-        if url == 'highlights': url = link().lfv_highlights
-
-        self.list = self.lfv_list2(url)
-        #self.list = cache(self.lfv_list2, url)
-        index().videoList(self.list)
-        index().nextList(self.list)
 
     def get(self, url):
-        if '/highlights/' in url:
-            #self.list = self.lfv_list2(url)
-            self.list = cache(self.lfv_list2, url)
-        else:
-            #self.list = self.lfv_list(url)
-            self.list = cache(self.lfv_list, url)
+        if '/highlights/' in url: self.list = index().cache(self.lfv_list2, 1, url)
+        else: self.list = index().cache(self.lfv_list, 1, url)
         index().videoList(self.list)
-        index().nextList(self.list)
 
     def search(self, query=None):
         if query == None:
@@ -523,7 +541,6 @@ class videos:
             self.query = link().lfv_search % urllib.quote_plus(self.query)
             self.list = self.lfv_list3(self.query)
             index().videoList(self.list)
-
 
     def lfv_list(self, url):
         try:
@@ -562,10 +579,22 @@ class videos:
                 url = url.encode('utf-8')
 
                 image = common.parseDOM(video, "img", ret="src")[0]
+                if not image.startswith('http'): image = '0'
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
-                self.list.append({'name': name, 'url': url, 'image': image, 'date': date, 'genre': 'Sports', 'plot': '', 'title': title, 'show': '', 'next': next})
+                try: show = re.compile('/(fullmatch|highlights)/.+?/(.+?)/').findall(url)[0][1]
+                except: show = '0'
+                show = show.replace('-', ' ').upper()
+                show = common.replaceHTMLCodes(show)
+                show = show.encode('utf-8')
+
+                plot = '%s\n%s' % (title, date)
+                if not show == '0': plot = '%s\n%s' % (show, plot)
+                plot = common.replaceHTMLCodes(plot)
+                plot = plot.encode('utf-8')
+
+                self.list.append({'name': name, 'url': url, 'image': image, 'date': date, 'genre': 'Sports', 'plot': plot, 'title': title, 'show': show, 'next': next})
             except:
                 pass
 
@@ -611,7 +640,18 @@ class videos:
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
-                self.list.append({'name': name, 'url': url, 'image': '', 'date': date, 'genre': 'Sports', 'plot': '', 'title': title, 'show': '', 'next': next})
+                try: show = re.compile('/(fullmatch|highlights)/.+?/(.+?)/').findall(url)[0][1]
+                except: show = '0'
+                show = show.replace('-', ' ').upper()
+                show = common.replaceHTMLCodes(show)
+                show = show.encode('utf-8')
+
+                plot = '%s\n%s' % (title, date)
+                if not show == '0': plot = '%s\n%s' % (show, plot)
+                plot = common.replaceHTMLCodes(plot)
+                plot = plot.encode('utf-8')
+
+                self.list.append({'name': name, 'url': url, 'image': '0', 'date': date, 'genre': 'Sports', 'plot': plot, 'title': title, 'show': show, 'next': next})
             except:
                 pass
 
@@ -637,7 +677,18 @@ class videos:
 
                 if not ('/fullmatch/' in url or '/highlights/' in url): raise Exception()
 
-                self.list.append({'name': name, 'url': url, 'image': '', 'date': '', 'genre': 'Sports', 'plot': '', 'title': name, 'show': '', 'next': ''})
+                try: show = re.compile('/(fullmatch|highlights)/.+?/(.+?)/').findall(url)[0][1]
+                except: show = '0'
+                show = show.replace('-', ' ').upper()
+                show = common.replaceHTMLCodes(show)
+                show = show.encode('utf-8')
+
+                plot = name.replace('-', '\n')
+                if not show == '0': plot = '%s\n%s' % (show, plot)
+                plot = common.replaceHTMLCodes(plot)
+                plot = plot.encode('utf-8')
+
+                self.list.append({'name': name, 'url': url, 'image': '0', 'date': '0', 'genre': 'Sports', 'plot': plot, 'title': name, 'show': show})
             except:
                 pass
 
@@ -647,23 +698,21 @@ class videoparts:
     def __init__(self):
         self.list = []
 
-    def get(self, name, url, image, date, genre, plot, title, show):
-        if '/highlights/' in url:
-            #self.list = self.lfv_list2(name, url, image, date, genre, plot, title, show)
-            self.list = cache(self.lfv_list2, name, url, image, date, genre, plot, title, show)
-        else:
-            #self.list = self.lfv_list(name, url, image, date, genre, plot, title, show)
-            self.list = cache(self.lfv_list, name, url, image, date, genre, plot, title, show)
-
+    def get(self, url, meta=''):
+        if '/highlights/' in url: self.list = self.lfv_list2(url, meta)
+        else: self.list = self.lfv_list(url, meta)
         index().videopartList(self.list)
 
-
-    def lfv_list(self, name, url, image, date, genre, plot, title, show):
+    def lfv_list(self, url, meta):
         try:
             result = getUrl(url, timeout='30').result
             result = result.replace('<object', '<iframe').replace(' data=', ' src=')
-            result = common.parseDOM(result, "div", attrs = { "id": "fullvideo" })[0]
-            videos = common.parseDOM(result, "div", attrs = { "class": "et-learn-more.+?" })
+
+            title = common.parseDOM(result, "h1", attrs = { "class": "title" })[0]
+            title = title.split(':', 1)[-1].split('>', 1)[-1].split('<', 1)[0].strip()
+
+            videos = common.parseDOM(result, "div", attrs = { "id": "fullvideo" })[0]
+            videos = common.parseDOM(videos, "div", attrs = { "class": "et-learn-more.+?" })
         except:
             return
 
@@ -673,13 +722,13 @@ class videoparts:
                 lang = lang.split("-")[-1].strip()
 
                 if 'proxy.link=lfv*' in video:
-                    import GKDecrypter
+                    import gkdecrypter
                     parts = re.compile('proxy[.]link=lfv[*](.+?)&').findall(video)
                     parts = uniqueList(parts).list
-                    parts = [GKDecrypter.decrypter(198,128).decrypt(i,base64.urlsafe_b64decode('Y0ZNSENPOUhQeHdXbkR4cWJQVlU='),'ECB').split('\0')[0] for i in parts]
+                    parts = [gkdecrypter.decrypter(198,128).decrypt(i,base64.urlsafe_b64decode('Y0ZNSENPOUhQeHdXbkR4cWJQVlU='),'ECB').split('\0')[0] for i in parts]
                 else:
-                    video = video.replace('"//', '"http://')
-                    parts = re.findall('"(http://.+?)"', video, re.I)
+                    video = video.replace('"//', '"http://').replace("'//", '"http://')
+                    parts = re.findall('[\'|\"](http://.+?)[\'|\"]', video, re.I)
                     parts = [i for i in parts if any(i.startswith(x) for x in resolver().hostList)]
 
                 count = 0
@@ -695,33 +744,39 @@ class videoparts:
                     if not any(url.startswith(i) for i in resolver().hostList): continue
                     url = url.encode('utf-8')
 
-                    self.list.append({'name': name, 'url': url, 'image': image, 'date': date, 'genre': genre, 'plot': plot, 'title': title, 'show': show})
+                    self.list.append({'name': name, 'url': url, 'meta': meta})
             except:
                 pass
 
         return self.list
 
-    def lfv_list2(self, name, url, image, date, genre, plot, title, show):
+    def lfv_list2(self, url, meta):
         try:
             result = getUrl(url, timeout='30').result
-            result = result.replace('"//', '"http://')
 
-            result = re.findall('"(http://.+?)"', result, re.I)
-            result = uniqueList(result).list
+            title = common.parseDOM(result, "h1", attrs = { "class": "title" })[0]
+            title = title.split(':', 1)[-1].split('>', 1)[-1].split('<', 1)[0].strip()
 
-            videos = [i for i in result if any(i.startswith(x) for x in resolver().hostList)]
+            videos = result.replace('"//', '"http://').replace("'//", '"http://')
+            videos = re.findall('[\'|\"](http://.+?)[\'|\"]', videos, re.I)
+            videos = uniqueList(videos).list
+            videos = [i for i in videos if any(i.startswith(x) for x in resolver().hostList)]
             videos = [i for i in videos if not i.endswith('.js')]
         except:
             return
 
         for video in videos:
             try:
+                name = title
+                name = common.replaceHTMLCodes(name)
+                name = name.encode('utf-8')
+
                 url = video
                 url = common.replaceHTMLCodes(url)
                 if url.startswith('//') : url = 'http:' + url
                 url = url.encode('utf-8')
 
-                self.list.append({'name': name, 'url': url, 'image': image, 'date': date, 'genre': genre, 'plot': plot, 'title': title, 'show': show})
+                self.list.append({'name': name, 'url': url, 'meta': meta})
             except:
                 pass
 
@@ -730,6 +785,8 @@ class videoparts:
 class resolver:
     def __init__(self):
         self.vk_base = 'http://vk.com'
+        self.mailru_base = 'http://videoapi.my.mail.ru'
+        self.mailru_base2 = 'http://api.video.mail.ru'
         self.dailymotion_base = 'http://www.dailymotion.com'
         self.facebook_base = 'http://www.facebook.com/video'
         self.playwire_base = 'http://cdn.playwire.com'
@@ -742,6 +799,8 @@ class resolver:
     def run(self, url):
         try:
             if url.startswith(self.vk_base): url = self.vk(url)
+            elif url.startswith(self.mailru_base): url = self.mailru(url)
+            elif url.startswith(self.mailru_base2): url = self.mailru(url)
             elif url.startswith(self.dailymotion_base): url = self.dailymotion(url)
             elif url.startswith(self.facebook_base): url = self.facebook(url)
             elif url.startswith(self.playwire_base): url = self.playwire(url)
@@ -754,101 +813,120 @@ class resolver:
             player().run(url)
             return url
         except:
-            index().infoDialog(language(30303).encode("utf-8"))
+            index().infoDialog(language(30304).encode("utf-8"))
             return
 
     def host_list(self):
-        return [self.vk_base, self.dailymotion_base, self.facebook_base, self.playwire_base, self.youtube_base, self.rutube_base, self.videa_base, self.sapo_base]
+        return [self.vk_base, self.mailru_base, self.mailru_base2, self.dailymotion_base, self.facebook_base, self.playwire_base, self.youtube_base, self.rutube_base, self.videa_base, self.sapo_base]
 
     def vk(self, url):
         try:
             if not 'hash' in url: url = self.vk_private(url)
 
             url = url.replace('http://', 'https://')
-            url = url.encode('utf-8')
-
             result = getUrl(url).result
-            url = None
-            try: url = re.compile('url240=(.+?)&').findall(result)[0]
-            except: pass
-            try: url = re.compile('url360=(.+?)&').findall(result)[0]
-            except: pass
-            try: url = re.compile('url480=(.+?)&').findall(result)[0]
-            except: pass
-            try: url = re.compile('url720=(.+?)&').findall(result)[0]
-            except: pass
 
+            hd = re.compile('url(1080|720)=(.+?)&').findall(result)
+            sd = re.compile('url(540|480|360)=(.+?)&').findall(result)
+            if len(hd) == 0 or not link().quality == 'true': hd = sd
+
+            url = hd[-1][1]
             return url
         except:
             return
 
     def vk_private(self, url):
-        urln = 'http://livefootballvideo.com/player/vkru/plugins/plugins_vk.php'
+        try:
+            urln = 'http://livefootballvideo.com/playerF/vkru/plugins/plugins_vk.php'
+            oid, vid = re.compile('\/video(.*)_(.*)').findall(url)[0]
 
-        result = re.compile('\/video(.*)_(.*)').findall(url)[0]
-        oid, vid = result[0], result[1]
+            post = {'getacc':'true'}
+            result = getUrl(urln, post=urllib.urlencode(post)).result
+            result = result.replace('\n','')
 
-        post = {'getacc':'true'}
-        post = urllib.urlencode(post)
-        result = getUrl(urln, post=post).result
-        result = re.compile('u=(.*)&p=(.*)&').findall(result)[0]
-        username, pwd = result[0], result[1]
-        ipostfield = "pass=%s&email=%s&act=login&captcha_sid=&captcha_key=&role=al_frame&_origin=http://vk.com&expire=" % (pwd, username)
+            username, pwd = re.compile('u=(.*)&p=(.*)&').findall(result)[0]
+            ipostfield = "pass=%s&email=%s&act=login&captcha_sid=&captcha_key=&role=al_frame&_origin=http://vk.com&expire=" % (pwd, username)
 
-        post = {'icookie':'remixlang=3',
-                'ipostfield':ipostfield,
-				'ihttpheader':'true',
-				'iagent':'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0',
-				'isslverify':'true',
-				'iheader':'true',
-				'url':'https://login.vk.com/?act=login',
-				'ipost':'true'}
-        post = urllib.urlencode(post)
-        result = getUrl(urln, post=post).result
-        result = re.compile('Set-Cookie: h=(.*?)\;.*?\sSet-Cookie:\ss=(.*?);.*?\sSet-Cookie:\sl=(.*?);.*?\sSet-Cookie:\sp=(.*?);.*?\sLocation.*?hash=(.*)').findall(result)
-        h, s, l, p, hash = result[0][0], result[0][1], result[0][2], result[0][3], result[0][4]
-        icookiePost = "h=%s; s=%s; p=%s; l=%s; remixlang=3" % (h,s,p,l)
-        if hash[len(hash)-1] == '\r': hash = hash[:-1]
-        urlPost = 'http://vk.com/login.php?act=slogin&to=&s=%s&__q_hash=%s' % (s,hash)
+            post = {'icookie':'remixlang=3',
+                    'ipostfield':ipostfield,
+    				'ihttpheader':'true',
+    				'iagent':'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0',
+    				'isslverify':'true',
+    				'iheader':'true',
+    				'url':'https://login.vk.com/?act=login',
+    				'ipost':'true'
+    				}
+            result = getUrl(urln, post=urllib.urlencode(post)).result
+            result = result.replace('\n','')
 
-        post = {'icookie':icookiePost,
-				'iheader':'true',
-				'url':urlPost,
-				'ihttpheader':'true',
-				'iagent':'	Mozilla/5.0 (Windows NT 6.1; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0'}
-        post = urllib.urlencode(post)
-        result = getUrl(urln, post=post).result
-        remixId = re.compile('remixsid=(.*?);').findall(result)[0]
-        icookiePost = "remixlang=3; remixsid=%s" % (remixId)
-        ipostFieldPost = "vid=%s&act=video_embed_box&al=1&oid=%s"	% (vid,oid)
+            h, s, l, p, hash = re.compile('Set-Cookie: h=(.*?)\;.*?Set-Cookie:\ss=(.*?);.*?Set-Cookie:\sl=(.*?);.*?Set-Cookie:\sp=(.*?);.*?Location.*?hash=(.*)').findall(result)[0]
+            icookiePost = "h=%s; s=%s; p=%s; l=%s; remixlang=3" % (h,s,p,l)
+            if hash[len(hash)-1] == '\r': hash = hash[:-1]
+            urlPost = 'http://vk.com/login.php?act=slogin&to=&s=%s&__q_hash=%s' % (s,hash)
 
-        post = {'icookie':icookiePost,
-				'ipostfield':ipostFieldPost,
-				'ihttpheader':'true',
-				'iagent':'	Mozilla/5.0 (Windows NT 6.1; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0',
-				'iheader':'true',
-				'url':'http://vk.com/al_video.php'
-				}
-        post = urllib.urlencode(post)
-        result = getUrl(urln, post=post).result
-        url = re.compile('iframe src=&quot;(.*)";').findall(result)[0]
-        return url
+            post = {'icookie':icookiePost,
+    				'url':urlPost,
+    				'iagent':'	Mozilla/5.0 (Windows NT 6.1; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0',
+    				'ihttpheader':'true',
+    				'iheader':'true'
+    				}
+            result = getUrl(urln, post=urllib.urlencode(post)).result
+            result = result.replace('\n','')
+
+            remixId = re.compile('remixsid=(.*?);').findall(result)[0]
+            icookiePost = "remixlang=3; remixsid=%s" % (remixId)
+            ipostFieldPost = "vid=%s&act=video_embed_box&al=1&oid=%s" % (vid,oid)
+
+            post = {'icookie':icookiePost,
+    				'ipostfield':ipostFieldPost,
+    				'ihttpheader':'true',
+    				'iagent':'	Mozilla/5.0 (Windows NT 6.1; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0',
+    				'iheader':'true',
+    				'url':'http://vk.com/al_video.php'
+    				}
+            result = getUrl(urln, post=urllib.urlencode(post)).result
+            result = result.replace('\n','')
+
+            url = re.compile('iframe src=&quot;(.*?)";').findall(result)[0]
+            return url
+        except:
+            return
+
+    def mailru(self, url):
+        try:
+            url = url.replace('/my.mail.ru/video/', '/api.video.mail.ru/videos/embed/')
+            url = url.replace('/videoapi.my.mail.ru/', '/api.video.mail.ru/')
+            result = getUrl(url).result
+
+            url = re.compile('metadataUrl":"(.+?)"').findall(result)[0]
+            cookie = getUrl(url, output='cookie').result
+            result = getUrl(url).result
+            result = json.loads(result)
+            result = result['videos']
+
+            hd = [i for i in result if (i['key'] == '1080p' or i ['key'] == '720p')]
+            sd = [i for i in result if not (i['key'] == '1080p' or i ['key'] == '720p')]
+            if len(hd) == 0 or not link().quality == 'true': hd = sd
+
+            url = hd[-1]['url']
+            url += "|Cookie=%s" % urllib.quote(cookie)
+            return url
+        except:
+            return
 
     def dailymotion(self, url):
         try:
             url = url.replace('dailymotion.com/video/', 'dailymotion.com/embed/video/')
 
             result = getUrl(url).result
-            url = None
-            try: url = re.compile('"stream_h264_ld_url":"(.+?)"').findall(result)[0]
-            except: pass
-            try: url = re.compile('"stream_h264_url":"(.+?)"').findall(result)[0]
-            except: pass
-            try: url = re.compile('"stream_h264_hq_url":"(.+?)"').findall(result)[0]
-            except: pass
-            try: url = re.compile('"stream_h264_hd_url":"(.+?)"').findall(result)[0]
-            except: pass
 
+            hd = re.compile('"stream_h264_hd_url":"(.+?)"').findall(result)
+            sd = re.compile('"stream_h264_hq_url":"(.+?)"').findall(result)
+            sd += re.compile('"stream_h264_url":"(.+?)"').findall(result)
+            sd += re.compile('"stream_h264_ld_url":"(.+?)"').findall(result)
+            if len(hd) == 0 or not link().quality == 'true': hd = sd
+
+            url = hd[0]
             url = urllib.unquote(url).decode('utf-8').replace('\\/', '/')
             return url
         except:

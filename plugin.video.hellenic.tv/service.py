@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    Hellenic TV XBMC Addon
+    Hellenic TV Addon
     Copyright (C) 2014 lambda
 
     This program is free software: you can redistribute it and/or modify
@@ -18,34 +18,23 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import urllib,urllib2,re,os,threading,datetime,time,xbmc,xbmcplugin,xbmcgui,xbmcaddon
+import urllib2,re,os,threading,datetime,time,xbmc,xbmcgui,xbmcaddon,xbmcvfs
 from operator import itemgetter
-try:    import json
-except: import simplejson as json
-try:    import CommonFunctions
-except: import commonfunctionsdummy as CommonFunctions
+try:
+    import CommonFunctions as common
+except:
+    import commonfunctionsdummy as common
+try:
+    import json
+except:
+    import simplejson as json
 
 
 action              = None
-common              = CommonFunctions
-language            = xbmcaddon.Addon().getLocalizedString
-setSetting          = xbmcaddon.Addon().setSetting
-getSetting          = xbmcaddon.Addon().getSetting
-addonName           = xbmcaddon.Addon().getAddonInfo("name")
-addonVersion        = xbmcaddon.Addon().getAddonInfo("version")
-addonId             = xbmcaddon.Addon().getAddonInfo("id")
 addonPath           = xbmcaddon.Addon().getAddonInfo("path")
-addonFullId         = addonName + addonVersion
-addonIcon           = os.path.join(addonPath,'icon.png')
-addonFanart         = os.path.join(addonPath,'fanart.jpg')
-addonEPG            = os.path.join(addonPath,'xmltv.xml')
-addonChannels       = os.path.join(addonPath,'channels.xml')
 addonLogos          = os.path.join(addonPath,'resources/logos')
-addonSlideshow      = os.path.join(addonPath,'resources/slideshow')
-addonStrings        = os.path.join(addonPath,'resources/language/Greek/strings.xml')
-dataPath            = xbmc.translatePath('special://profile/addon_data/%s' % (addonId))
-fallback            = os.path.join(addonPath,'resources/fallback/fallback.mp4')
-akamaiProxy         = os.path.join(addonPath,'akamaisecurehd.py')
+addonChannels       = os.path.join(addonPath,'resources/channels.xml')
+addonEPG            = os.path.join(addonPath,'xmltv.xml')
 
 
 class main:
@@ -57,9 +46,10 @@ class main:
                 count -= 1
                 time.sleep(1)
 
+
 class getUrl(object):
     def __init__(self, url, close=True, proxy=None, post=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
-        if not proxy is None:
+        if not proxy == None:
             proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
             opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
             opener = urllib2.install_opener(opener)
@@ -68,17 +58,17 @@ class getUrl(object):
             cookie_handler = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
             opener = urllib2.build_opener(cookie_handler, urllib2.HTTPBasicAuthHandler(), urllib2.HTTPHandler())
             opener = urllib2.install_opener(opener)
-        if not post is None:
+        if not post == None:
             request = urllib2.Request(url, post)
         else:
             request = urllib2.Request(url,None)
         if mobile == True:
-            request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7')
+            request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; CPU; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7')
         else:
-            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0) Gecko/20100101 Firefox/6.0')
-        if not referer is None:
+            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36')
+        if not referer == None:
             request.add_header('Referer', referer)
-        if not cookie is None:
+        if not cookie == None:
             request.add_header('cookie', cookie)
         response = urllib2.urlopen(request, timeout=int(timeout))
         if output == 'cookie':
@@ -91,16 +81,6 @@ class getUrl(object):
             response.close()
         self.result = result
 
-class uniqueList(object):
-    def __init__(self, list):
-        uniqueSet = set()
-        uniqueList = []
-        for n in list:
-            if n not in uniqueSet:
-                uniqueSet.add(n)
-                uniqueList.append(n)
-        self.list = uniqueList
-
 class Thread(threading.Thread):
     def __init__(self, target, *args):
         self._target = target
@@ -110,21 +90,6 @@ class Thread(threading.Thread):
         self._target(*self._args)
 
 class index:
-    def infoDialog(self, str, header=addonName):
-        try: xbmcgui.Dialog().notification(header, str, addonIcon, 3000, sound=False)
-        except: xbmc.executebuiltin("Notification(%s,%s, 3000, %s)" % (header, str, addonIcon))
-
-    def okDialog(self, str1, str2, header=addonName):
-        xbmcgui.Dialog().ok(header, str1, str2)
-
-    def selectDialog(self, list, header=addonName):
-        select = xbmcgui.Dialog().select(header, list)
-        return select
-
-    def yesnoDialog(self, str1, str2, header=addonName, str3='', str4=''):
-        answer = xbmcgui.Dialog().yesno(header, str1, str2, '', str4, str3)
-        return answer
-
     def getProperty(self, str):
         property = xbmcgui.Window(10000).getProperty(str)
         return property
@@ -134,13 +99,6 @@ class index:
 
     def clearProperty(self, str):
         xbmcgui.Window(10000).clearProperty(str)
-
-    def addon_status(self, id):
-        check = xbmcaddon.Addon(id=id).getAddonInfo("name")
-        if not check == addonName: return True
-
-    def container_refresh(self):
-        xbmc.executebuiltin("Container.Refresh")
 
 class epg:
     def __init__(self):
@@ -182,23 +140,16 @@ class epg:
         if xbmc.abortRequested == True: sys.exit()
         try:
             self.channels = []
-            self.dummyData = {}
-            file = open(addonChannels,'r')
-            channels = file.read()
+            file = xbmcvfs.File(addonChannels)
+            result = file.read()
             file.close()
-            file = open(addonStrings,'r')
-            strings = file.read()
-            file.close()
-            channels = common.parseDOM(channels, "channel", attrs = { "active": "True" })
+            channels = common.parseDOM(result, "channel", attrs = { "active": "True" })
         except:
             return
         for channel in channels:
             try:
-                epg = common.parseDOM(channel, "epg")[0]
-                epg = common.parseDOM(strings, "string", attrs = { "id": epg })[0]
                 channel = common.parseDOM(channel, "name")[0]
                 self.channels.append(channel)
-                self.dummyData.update({channel: epg})
             except:
                 pass
 
@@ -312,9 +263,9 @@ class epg:
 
     def dummy_programme(self, channel):
         if xbmc.abortRequested == True: sys.exit()
-        programmeList = []
-        desc = self.dummyData[channel]
+        desc = 'ƒÂÌ ı‹Ò˜ÔıÌ ÎÁÒÔˆÔÒﬂÂÚ.'.decode('iso-8859-7')
         self.get_titleDict()
+        programmeList = []
 
         for date in self.dates:
             for i in range(0, 2400, 1200):
@@ -407,63 +358,31 @@ class epg:
             self.xmltv += '<channel id="%s">\n' % (channel)
             self.xmltv += '<display-name>%s</display-name>\n' % (channel)
             self.xmltv += '<icon src="%s/%s.png"/>\n' % (addonLogos, channel)
-            self.xmltv += '<stream>plugin://plugin.video.hellenic.tv/?action=play&amp;channel=%s</stream>\n' % (channel.replace(' ','_'))
+            self.xmltv += '<stream>plugin://plugin.video.hellenic.tv/?action=play_live&amp;channel=%s</stream>\n' % (channel.replace(' ','_'))
             self.xmltv += '</channel>\n'
 
         self.get_channelDict()
+
+        for c in self.channelDict:
+            try:
+                if not c[0] in self.channels: raise Exception()
+                self.channels = [i for i in self.channels if not i == c[0]]
+                if c[1] == 'OTE': self.ote_programme(c[0], c[2])
+                elif c[1] == 'TVC': self.tvc_programme(c[0], c[2])
+            except:
+                pass
+
         for channel in self.channels:
-            try: self.channelDict[channel]
-            except: self.dummy_programme(channel)
+            self.dummy_programme(channel)
+
         self.xmltv += '</tv>'
+        write = self.xmltv.replace('\n','').encode('utf8')
 
-        try: os.remove(addonEPG)
+        try: xbmcvfs.delete(addonEPG)
         except: pass
-        file = open(addonEPG, 'w')
-        file.write(self.xmltv.replace('\n','').encode('utf8'))
+        file = xbmcvfs.File(addonEPG, 'w')
+        file.write(str(write))
         file.close()
-
-    def get_channelDict(self):
-        self.channelDict = {
-            'MEGA'                      : self.ote_programme("MEGA", "90"),
-            'ANT1'                      : self.ote_programme("ANT1", "150"),
-            'STAR'                      : self.ote_programme("STAR", "98"),
-            'ALPHA'                     : self.ote_programme("ALPHA", "132"),
-            'SKAI'                      : self.ote_programme("SKAI", "120"),
-            'MACEDONIA TV'              : self.ote_programme("MACEDONIA TV", "152"),
-            'NERIT'                     : self.ote_programme("NERIT", "593"),
-            'BOYLH TV'                  : self.ote_programme("BOYLH TV", "119"),
-            'EURONEWS'                  : self.ote_programme("EURONEWS", "19"),
-            #'NICKELODEON'              : self.ote_programme("NICKELODEON", "117"),
-            #'MTV'                      : self.ote_programme("MTV", "121"),
-            'MAD TV'                    : self.ote_programme("MAD TV", "144"),
-            'KONTRA CHANNEL'            : self.ote_programme("KONTRA CHANNEL", "44"),
-            'EXTRA 3'                   : self.ote_programme("EXTRA 3", "135"),
-            'ART CHANNEL'              : self.ote_programme("ART CHANNEL", "156"),
-            #'ZOOM'                     : self.ote_programme("ZOOM", "157"),
-            'BLUE SKY'                  : self.ote_programme("BLUE SKY", "153"),
-            #'CHANNEL 9'                : self.ote_programme("CHANNEL 9", "163"),
-            #'SBC TV'                   : self.ote_programme("SBC TV", "136"),
-            'TV 100'                    : self.ote_programme("TV 100", "137"),
-            '4E TV'                     : self.ote_programme("4E TV", "133"),
-            #'STAR KENTRIKIS ELLADOS'    : self.ote_programme("STAR KENTRIKIS ELLADOS", "139"),
-            'EPIRUS TV1'                : self.ote_programme("EPIRUS TV1", "145"),
-            'CORFU CHANNEL'             : self.ote_programme("CORFU CHANNEL", "166"),
-            'BEST TV'                   : self.ote_programme("BEST TV", "165"),
-            'KRITI TV'                  : self.ote_programme("KRITI TV", "138"),
-            'TV AIGAIO'                 : self.ote_programme("TV AIGAIO", "164"),
-            'DIKTYO TV'                 : self.ote_programme("DIKTYO TV", "146"),
-            'DELTA TV'                  : self.ote_programme("DELTA TV", "147"),
-
-            'E TV'                      : self.tvc_programme("E TV", "326"),
-            'ACTION 24'                 : self.tvc_programme("ACTION 24", "189"),
-            'MEGA CYPRUS'               : self.tvc_programme("MEGA CYPRUS", "306"),
-            'ANT1 CYPRUS'               : self.tvc_programme("ANT1 CYPRUS", "258"),
-            'SIGMA'                     : self.tvc_programme("SIGMA", "305"),
-            #'TV PLUS'                  : self.tvc_programme("TV PLUS", "289"),
-            #'EXTRA TV'                 : self.tvc_programme("EXTRA TV", "290"),
-            'CAPITAL'                   : self.tvc_programme("CAPITAL", "282"),
-            'RIK SAT'                   : self.tvc_programme("RIK SAT", "83")
-        }
 
     def get_titleDict(self):
         self.titleDict = {
@@ -476,6 +395,50 @@ class epg:
             'SMILE TV'                  : '–¡…ƒ… œ –—œ√—¡ÃÃ¡'.decode('iso-8859-7'),
             'GNOMI TV'                  : 'Ãœ’”… œ –—œ√—¡ÃÃ¡'.decode('iso-8859-7')
         }
+
+    def get_channelDict(self):
+        self.channelDict = [
+            ('MEGA',                      'OTE', '90'),
+            ('ANT1',                      'OTE', '150'),
+            ('STAR',                      'OTE', '98'),
+            ('ALPHA',                     'OTE', '132'),
+            ('SKAI',                      'OTE', '120'),
+            ('NERIT',                     'OTE', '593'),
+            ('MACEDONIA TV',              'OTE', '152'),
+            ('BOYLH TV',                  'OTE', '119'),
+            ('EURONEWS',                  'OTE', '19'),
+            ('NICKELODEON',               'OTE', '117'),
+            ('MTV',                       'OTE', '121'),
+            ('MAD TV',                    'OTE', '144'),
+            ('KONTRA CHANNEL',            'OTE', '44'),
+            ('BLUE SKY',                  'OTE', '153'),
+            ('ART CHANNEL',               'OTE', '156'),
+            ('EXTRA 3',                   'OTE', '135'),
+            ('CHANNEL 9',                 'OTE', '163'),
+            ('SBC TV',                    'OTE', '136'),
+            ('AB CHANNEL',                'OTE', '157'),
+            ('TV 100',                    'OTE', '137'),
+            ('4E TV',                     'OTE', '133'),
+            ('STAR KENTRIKIS ELLADOS',    'OTE', '139'),
+            ('EPIRUS TV1',                'OTE', '145'),
+            ('CORFU CHANNEL',             'OTE', '166'),
+            ('BEST TV',                   'OTE', '165'),
+            ('KRITI TV',                  'OTE', '138'),
+            ('KOSMOS',                    'OTE', '169'),
+            ('TV AIGAIO',                 'OTE', '164'),
+            ('DIKTYO TV',                 'OTE', '146'),
+            ('DELTA TV',                  'OTE', '147'),
+
+            ('E TV',                      'TVC', '326'),
+            ('ACTION 24',                 'TVC', '189'),
+            ('MEGA CYPRUS',               'TVC', '306'),
+            ('ANT1 CYPRUS',               'TVC', '258'),
+            ('SIGMA',                     'TVC', '305'),
+            ('TV PLUS',                   'TVC', '289'),
+            ('EXTRA TV',                  'TVC', '290'),
+            ('CAPITAL',                   'TVC', '282'),
+            ('RIK SAT',                   'TVC', '83')
+        ]
 
 
 main()

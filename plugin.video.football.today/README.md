@@ -4,12 +4,12 @@ Football Today
 
 About
 -----
-Watch football games whenever you want
+Football on demand
 
 
 Attributions
 ---------------------
-- GKDecrypter by shani_08 | http://tvaddons.ag
+- Gkdecrypter by shani_08 | http://tvaddons.ag
 - Main icon by azad720 | http://tvaddons.ag
 - Dutch translation by Marquerite | http://tvaddons.ag
 - French translation by nek | http://tvaddons.ag
