@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    Hellenic TV Addon
+    Hellenic TV Add-on
     Copyright (C) 2014 lambda
 
     This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,7 @@
 
 import urllib2,re,os,threading,datetime,time,xbmc,xbmcgui,xbmcaddon,xbmcvfs
 from operator import itemgetter
+
 try:
     import CommonFunctions as common
 except:

@@ -1,4 +1,29 @@
 ------------------------
+Genesis v3.2.0 (4-Dec-14)
+------------------------
+
+- Added Movietube source.
+- Added Moviezone source.
+- Added Sweflix source.
+- Removed Popcornered source.
+- Removed Yourflix source.
+- Removed HDlord source.
+- Removed istreamHD source.
+- Removed Simplymovies source.
+- NOTE: Host priorities are reset because of new sources.
+- Fixed issues with broken or blocked sources.
+- Re-work of sources loading.
+- Tweaked all available sources.
+- Tweaked all available resolvers.
+- Host selection in a Folder is now default.
+- Re-work of Latest HD Movies.
+- Re-work of Latest Movies.
+- Re-work of Latest Episodes.
+- Added Metro theme.
+- Code cosmetics.
+
+
+------------------------
 Genesis v3.1.1 (7-Nov-14)
 ------------------------
 

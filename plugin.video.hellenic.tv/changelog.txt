@@ -1,4 +1,14 @@
 ------------------------
+Hellenic TV v3.0.1 (4-Dec-14)
+------------------------
+
+- Updated live tv channels.
+- Fixed issues with tv show listings.
+- Tweaked all available resolvers.
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.0.0 (24-Nov-14)
 ------------------------
 

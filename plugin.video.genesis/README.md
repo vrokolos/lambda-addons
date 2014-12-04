@@ -15,6 +15,7 @@ Attributions
 - Clean theme by jokster | http://tvaddons.ag
 - Embossed theme by jokster | http://tvaddons.ag
 - GOne theme by jokster | http://tvaddons.ag
+- Metro theme by rayw1986 | http://tvaddons.ag
 - Dutch translation by dynamic2 | http://tvaddons.ag
 - Greek translation by mezger | http://tvaddons.ag
 - Hebrew translation by finalmakerr | http://tvaddons.ag

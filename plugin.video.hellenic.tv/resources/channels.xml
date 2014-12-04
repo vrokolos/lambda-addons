@@ -60,7 +60,8 @@
 		</channel>
 		<channel active="True">
 			<name>EURONEWS</name>
-			<url>rtmp://fr-par-3.stream-relay.hexaglobe.net:1935/rtpeuronewslive playpath=gr_video750_rtp.sdp swfUrl=http://gr.euronews.com/media/player_live_1_14.swf live=1 timeout=10</url>
+			<type>hls</type>
+			<url>http://ewns-hls-b-cdn.hexaglobe.net/d781becd138a3b331584790268f23d14/5480b5ec/euronews_gre.smil/playlist.m3u8</url>
 			<base>http://gr.euronews.com/news/streaming-live/</base>
 		</channel>
 	</area>
@@ -154,7 +155,7 @@
 		<channel active="True">
 			<name>BLUE SKY</name>
 			<type>hls</type>
-			<url>http://188.40.142.123:1935/bluesky/bluesky.stream/playlist.m3u8</url>
+			<url>http://46.4.73.93:1935/bluesky/bluesky.stream/playlist.m3u8</url>
 			<base>http://www.blueskytv.gr/live-tv/</base>
 		</channel>
 		<channel active="True">
@@ -329,7 +330,7 @@
 		<channel active="True">
 			<name>EPIRUS TV1</name>
 			<type>livestream</type>
-			<url>http://www.livestream.com/epirustv1live</url>
+			<url>http://www.livestream.com/epirustv1</url>
 			<base>http://epirustv1.gr/</base>
 		</channel>
 		<channel active="True">

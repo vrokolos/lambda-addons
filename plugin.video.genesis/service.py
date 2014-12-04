@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    Genesis XBMC Addon
+    Genesis Add-on
     Copyright (C) 2014 lambda
 
     This program is free software: you can redistribute it and/or modify

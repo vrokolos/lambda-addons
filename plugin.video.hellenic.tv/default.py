@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    Hellenic TV Addon
+    Hellenic TV Add-on
     Copyright (C) 2014 lambda
 
     This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,7 @@
 
 import urllib,urllib2,re,os,threading,datetime,time,base64,xbmc,xbmcplugin,xbmcgui,xbmcaddon,xbmcvfs
 from operator import itemgetter
+
 try:
     from sqlite3 import dbapi2 as database
 except:
@@ -898,7 +899,7 @@ class root:
         rootList.append({'name': 30532, 'image': 'shows_favourites.jpg', 'action': 'shows_favourites'})
         try:
             titles = gm().showtitles()
-            for i in range(0, len(titles)): titles[i].update({'image': 'years_movies.jpg', 'action': 'movies'})
+            for i in range(0, len(titles)): titles[i].update({'image': 'titles_shows.jpg', 'action': 'shows'})
             rootList += titles
         except:
             pass
