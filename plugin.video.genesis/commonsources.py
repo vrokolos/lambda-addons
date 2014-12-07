@@ -876,18 +876,22 @@ class moviezone:
             result = getUrl(self.base_link + url).result
 
             url = re.compile('server_php\s+=\s+"(.+?)"').findall(result)
-            url = [i for i in url if i.endswith('.php')][0]
+            url = [i for i in url if i.endswith('.php')][::-1][:2]
 
             post = common.parseDOM(result, "div", ret="file", attrs = { "id": "mediainfo" })[0]
             post = urllib.urlencode({'url': post})
 
-            request = urllib2.Request(url, post)
-            request.add_header('Origin', self.base_link)
-            response = urllib2.urlopen(request, timeout=5)
-            result = response.read()
-            response.close()
+            def get_php(url, post):
+                request = urllib2.Request(url, post)
+                request.add_header('Origin', self.base_link)
+                response = urllib2.urlopen(request, timeout=5)
+                result = response.read()
+                response.close()
+                result = json.loads(result)
+                return result
 
-            result = json.loads(result)
+            try: result = get_php(url[0], post)
+            except: result = get_php(url[1], post)
             result = result['content']
 
             links = [i['url'] for i in result]
@@ -918,7 +922,7 @@ class moviezone:
 
 class muchmovies:
     def __init__(self):
-        self.base_link = 'http://www.buzzfilms.co'
+        self.base_link = 'http://umovies.me'
         self.search_link = '/search/%s'
 
     def get_movie(self, imdb, title, year):
@@ -927,11 +931,12 @@ class muchmovies:
             query = self.base_link + self.search_link % query
 
             result = getUrl(query, mobile=True).result
-            result = common.parseDOM(result, "li", attrs = { "data-icon": "false" })
+            result = common.parseDOM(result, "ul", attrs = { "class": "movies.+?" })
+            result = common.parseDOM(result, "li")
 
             title = cleantitle().movie(title)
             years = ['(%s)' % str(year), '(%s)' % str(int(year)+1), '(%s)' % str(int(year)-1)]
-            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "h2")[0]) for i in result]
+            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "h3")[0]) for i in result]
             result = [i for i in result if title == cleantitle().movie(i[1])]
             result = [i[0] for i in result if any(x in i[1] for x in years)][0]
 

@@ -1,4 +1,16 @@
 ------------------------
+Genesis v3.2.1 (7-Dec-14)
+------------------------
+
+- Fixed issue with Muchmovies source.
+- Fixed issue with Moviezone source.
+- Added "Featured" for main menu Movies.
+- Tweaked various listings.
+- Fixed issues with cache.
+- Code cosmetics.
+
+
+------------------------
 Genesis v3.2.0 (4-Dec-14)
 ------------------------
 

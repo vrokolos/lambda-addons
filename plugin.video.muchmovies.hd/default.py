@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    Much Movies HD XBMC Addon
+    Much Movies HD Add-on
     Copyright (C) 2014 lambda
 
     This program is free software: you can redistribute it and/or modify
@@ -900,16 +900,19 @@ class root:
 
 class link:
     def __init__(self):
-        self.muchmovies_base = 'http://www.buzzfilms.co'
-        self.muchmovies_sort = 'http://www.buzzfilms.co/session/sort'
-        self.muchmovies_title = 'http://www.buzzfilms.co/movies?sort_by=title'
-        self.muchmovies_release = 'http://www.buzzfilms.co/movies?sort_by=release'
-        self.muchmovies_added = 'http://www.buzzfilms.co/movies?sort_by=date_added'
-        self.muchmovies_rating = 'http://www.buzzfilms.co/movies?sort_by=rating'
-        self.muchmovies_root = 'http://www.buzzfilms.co/movies'
-        self.muchmovies_search = 'http://www.buzzfilms.co/search'
-        self.muchmovies_genre = 'http://www.buzzfilms.co/genres'
-        self.muchmovies_backup = 'http://123movies.me'
+        self.muchmovies_base = 'http://umovies.me'
+        self.muchmovies_sort = 'http://umovies.me/session/sort'
+        self.muchmovies_title = 'http://umovies.me/movies?sort_by=title'
+        self.muchmovies_release = 'http://umovies.me/movies?sort_by=release'
+        self.muchmovies_added = 'http://umovies.me/movies?sort_by=date_added'
+        self.muchmovies_rating = 'http://umovies.me/movies?sort_by=rating'
+        self.muchmovies_root = 'http://umovies.me/movies'
+        self.muchmovies_search = 'http://umovies.me/search'
+        self.muchmovies_genre = 'http://umovies.me/genres'
+
+    def fix(self, url):
+        url = re.sub('http://www.muchmovies.org|http://www.buzzfilms.co|http://123movies.me', 'http://umovies.me', url)
+        return url
 
 class pages:
     def __init__(self):
@@ -923,7 +926,8 @@ class pages:
     def muchmovies_list(self):
         try:
             result = getUrl(link().muchmovies_root, mobile=True).result
-            pages = common.parseDOM(result, "div", attrs = { "class": "pagenav" })[0]
+
+            pages = common.parseDOM(result, "select", attrs = { "class": "goto" })[0]
             pages = re.compile('(<option.+?</option>)').findall(pages)
         except:
             return
@@ -958,13 +962,14 @@ class genres:
     def muchmovies_list(self):
         try:
             result = getUrl(link().muchmovies_genre, mobile=True).result
-            genres = common.parseDOM(result, "ul", attrs = { "id": "genres" })
+
+            genres = common.parseDOM(result, "ul", attrs = { "class": "genres.+?" })
             genres = common.parseDOM(genres, "li")
         except:
             return
         for genre in genres:
             try:
-                name = common.parseDOM(genre, "h2")[0]
+                name = common.parseDOM(genre, "h3")[0]
                 name = common.replaceHTMLCodes(name)
                 name = name.encode('utf-8')
 
@@ -1035,33 +1040,38 @@ class movies:
             post = url.split('?')[-1]
             result = getUrl(link().muchmovies_sort, post=post, mobile=True, close=False).result
             result = getUrl(url, mobile=True).result
-            movies = common.parseDOM(result, "li", attrs = { "data-icon": "false" })
+
+            movies = common.parseDOM(result, "ul", attrs = { "class": "movies.+?" })
+            movies = common.parseDOM(movies, "li")
         except:
             return
+
         try:
-            try:
-                next = common.parseDOM(result, "a", ret="href", attrs = { "data-icon": "arrow-r", "class": "ui-disabled" })[0]
-                next = ''
-            except:
-                next = common.parseDOM(result, "a", ret="href", attrs = { "data-icon": "arrow-r" })[0]
-                next = '%s%s?%s' % (link().muchmovies_base, next, post)
+            next = common.parseDOM(result, "ul", attrs = {"class": "segmented.+?" })[0]
+            next = common.parseDOM(next, "li")
+            next = [i for i in next if '>Next<' in i][0]
+            next = common.parseDOM(next, "a", ret="href")[0]
+            if next == '#': raise Exception()
+            next = '%s%s?%s' % (link().muchmovies_base, next, post)
+            next = common.replaceHTMLCodes(next)
+            next = next.encode('utf-8')
         except:
             next = ''
+
         for movie in movies:
             try:
-                name = common.parseDOM(movie, "h2")[0]
-                name = common.replaceHTMLCodes(name)
-                name = name.encode('utf-8')
-
-                match = re.findall('(.+?)[(](\d{4})[)]', name)[0]
-
-                title = match[0].strip()
+                title = common.parseDOM(movie, "h3")[0]
+                title = re.compile('(.+?) [(]\d{4}[)]$').findall(title)[0]
                 title = common.replaceHTMLCodes(title)
                 title = title.encode('utf-8')
 
-                year = match[-1].strip()
-                year = re.sub('[^0-9]', '', year)
+                year = common.parseDOM(movie, "h3")[0]
+                year = re.compile('.+? [(](\d{4})[)]$').findall(year)[0]
                 year = year.encode('utf-8')
+
+                name = '%s (%s)' % (title, year)
+                try: name = name.encode('utf-8')
+                except: pass
 
                 url = common.parseDOM(movie, "a", ret="href")[0]
                 url = '%s%s' % (link().muchmovies_base, url)
@@ -1165,12 +1175,11 @@ class resolver:
 
     def muchmovies(self, url):
         try:
-            url = url.replace('muchmovies.org', 'buzzfilms.co')
+            url = link().fix(url)
             result = getUrl(url, mobile=True).result
 
             url = common.parseDOM(result, "a", ret="href", attrs = { "data-role": "button" })
             url = [i for i in url if str('.mp4') in i][0]
-
             return url
         except:
             return

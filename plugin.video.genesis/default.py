@@ -165,6 +165,7 @@ class main:
         elif action == 'movies_added':                movies().added()
         elif action == 'movies_theaters':             movies().theaters()
         elif action == 'movies_trending':             movies().trending()
+        elif action == 'movies_featured':             movies().featured()
         elif action == 'movies_trakt_collection':     movies().trakt_collection()
         elif action == 'movies_trakt_watchlist':      movies().trakt_watchlist()
         elif action == 'movies_imdb_watchlist':       movies().imdb_watchlist()
@@ -1489,12 +1490,16 @@ class contextMenu:
             result = getUrl(url, post=post, timeout='30').result
             updated = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
             record = ('movies', link().trakt_user, result, updated)
+
             dbcon = database.connect(addonCache)
             dbcur = dbcon.cursor()
             dbcur.execute("CREATE TABLE IF NOT EXISTS trakt (""info TEXT, ""user TEXT, ""result TEXT, ""updated TEXT, ""UNIQUE(info, user)"");")
             dbcur.execute("DELETE FROM trakt WHERE info = '%s' AND user = '%s'" % (record[0], record[1]))
             dbcur.execute("INSERT INTO trakt Values (?, ?, ?, ?)", record)
             dbcon.commit()
+
+            service_trakt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+            setSetting('service_trakt', service_trakt)
         except:
             pass
 
@@ -1505,12 +1510,16 @@ class contextMenu:
             result = getUrl(url, post=post, timeout='30').result
             updated = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
             record = ('shows', link().trakt_user, result, updated)
+
             dbcon = database.connect(addonCache)
             dbcur = dbcon.cursor()
             dbcur.execute("CREATE TABLE IF NOT EXISTS trakt (""info TEXT, ""user TEXT, ""result TEXT, ""updated TEXT, ""UNIQUE(info, user)"");")
             dbcur.execute("DELETE FROM trakt WHERE info = '%s' AND user = '%s'" % (record[0], record[1]))
             dbcur.execute("INSERT INTO trakt Values (?, ?, ?, ?)", record)
             dbcon.commit()
+
+            service_trakt_tv = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+            setSetting('service_trakt_tv', service_trakt_tv)
         except:
             pass
 
@@ -1720,6 +1729,9 @@ class contextMenu:
 
     def library_update(self, silent=False):
         try:
+            service_run = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+            setSetting('service_run', service_run)
+
             match = []
 
             seasons, episodes = [], []
@@ -1908,8 +1920,10 @@ class root:
 
         root_movies = getSetting("root_movies")
         if root_movies == '1':
-            rootList.append({'name': 30505, 'image': 'movies_added.jpg', 'action': 'movies_added_hd'})
+            rootList.append({'name': 30505, 'image': 'movies_added.jpg', 'action': 'movies_featured'})
         elif root_movies == '2':
+            rootList.append({'name': 30505, 'image': 'movies_added.jpg', 'action': 'movies_added_hd'})
+        elif root_movies == '3':
             rootList.append({'name': 30505, 'image': 'movies_added.jpg', 'action': 'movies_added'})
 
         if not (link().trakt_user == '' or link().trakt_password == ''):
@@ -2123,7 +2137,7 @@ class people:
 
     def imdb_list(self, url):
         try:
-            result = getUrl(url, timeout='10').result
+            result = getUrl(url, timeout='30').result
             result = result.decode('iso-8859-1').encode('utf-8')
             people = common.parseDOM(result, "tr", attrs = { "class": ".+? detailed" })
         except:
@@ -2167,7 +2181,7 @@ class genres:
 
     def imdb_list(self):
         try:
-            result = getUrl(link().imdb_genre, timeout='10').result
+            result = getUrl(link().imdb_genre, timeout='30').result
             result = common.parseDOM(result, "table", attrs = { "class": "genre-table" })[0]
             genres = common.parseDOM(result, "h3")
         except:
@@ -2195,7 +2209,7 @@ class genres:
 
     def imdb_list2(self):
         try:
-            result = getUrl(link().imdb_genre, timeout='10').result
+            result = getUrl(link().imdb_genre, timeout='30').result
             result = common.parseDOM(result, "div", attrs = { "class": "article" })
             result = [i for i in result if str('"tv_genres"') in i][0]
             genres = common.parseDOM(result, "td")
@@ -2232,7 +2246,7 @@ class languages:
 
     def imdb_list(self):
         try:
-            result = getUrl(link().imdb_language, timeout='10').result
+            result = getUrl(link().imdb_language, timeout='30').result
             result = common.parseDOM(result, "table", attrs = { "class": "splash" })[0]
             languages = common.parseDOM(result, "td")
         except:
@@ -2455,7 +2469,7 @@ class channels:
             title = self.list[i]['title']
             year = self.list[i]['year']
             url = link().imdb_api_search % urllib.quote_plus(title)
-            result = getUrl(url, timeout='10').result
+            result = getUrl(url, timeout='30').result
             result = common.replaceHTMLCodes(result)
             result = json.loads(result)
             for x in result.keys(): match += result[x]
@@ -2552,7 +2566,20 @@ class movies:
     def trending(self):
         url = link().trakt_trending % link().trakt_key
         self.list = index().cache(self.trakt_list, 24, url)
-        index().movieList(self.list[:500])
+        try: self.list = self.list[:500]
+        except: return
+        index().movieList(self.list)
+
+    def featured(self):
+        url = link().trakt_trending % link().trakt_key
+        self.list = index().cache(self.trakt_list, 24, url)
+
+        year = (datetime.datetime.utcnow() - datetime.timedelta(hours = 5)).strftime("%Y")
+        years = [str(year), str(int(year)-1)]
+
+        try: self.list = [i for i in self.list if i['year'] in years][:200]
+        except: return
+        index().movieList(self.list)
 
     def trakt_collection(self):
         url = link().trakt_collection % (link().trakt_key, link().trakt_user)
@@ -2610,7 +2637,7 @@ class movies:
     def imdb_list(self, url):
         try:
             url = url.replace(link().imdb_base, link().imdb_akas)
-            result = getUrl(url, timeout='10').result
+            result = getUrl(url, timeout='30').result
             result = result.decode('iso-8859-1').encode('utf-8')
             movies = common.parseDOM(result, "tr", attrs = { "class": ".+?" })
         except:
@@ -2732,12 +2759,12 @@ class movies:
     def imdb_list2(self, url, idx=True):
         try:
             if url == link().imdb_watchlist % link().imdb_user:
-                result = getUrl(url, timeout='10').result
+                result = getUrl(url, timeout='30').result
                 url = re.compile('/export[?]list_id=(ls\d*)').findall(result)[0]
                 url = link().imdb_list % url
 
             url = url.replace(link().imdb_base, link().imdb_akas)
-            result = getUrl(url, timeout='10').result
+            result = getUrl(url, timeout='30').result
 
             try:
                 if idx == True: raise Exception()
@@ -2745,7 +2772,7 @@ class movies:
                 pages = re.compile('Page \d+? of (\d*)').findall(pages)[0]
                 for i in range(1, int(pages)):
                     u = url.replace('&start=1', '&start=%s' % str(i*100+1))
-                    try: result += getUrl(u, timeout='10').result
+                    try: result += getUrl(u, timeout='30').result
                     except: pass
             except:
                 pass
@@ -3322,7 +3349,7 @@ class shows:
     def imdb_list(self, url):
         try:
             url = url.replace(link().imdb_base, link().imdb_akas)
-            result = getUrl(url, timeout='10').result
+            result = getUrl(url, timeout='30').result
             result = result.decode('iso-8859-1').encode('utf-8')
             shows = common.parseDOM(result, "tr", attrs = { "class": ".+?" })
         except:
@@ -3412,12 +3439,12 @@ class shows:
     def imdb_list2(self, url, idx=True):
         try:
             if url == link().imdb_watchlist % link().imdb_user:
-                result = getUrl(url, timeout='10').result
+                result = getUrl(url, timeout='30').result
                 url = re.compile('/export[?]list_id=(ls\d*)').findall(result)[0]
                 url = link().imdb_tv_list % url
 
             url = url.replace(link().imdb_base, link().imdb_akas)
-            result = getUrl(url, timeout='10').result
+            result = getUrl(url, timeout='30').result
 
             try:
                 if idx == True: raise Exception()
@@ -3425,7 +3452,7 @@ class shows:
                 pages = re.compile('Page \d+? of (\d*)').findall(pages)[0]
                 for i in range(1, int(pages)):
                     u = url.replace('&start=1', '&start=%s' % str(i*100+1))
-                    try: result += getUrl(u, timeout='10').result
+                    try: result += getUrl(u, timeout='30').result
                     except: pass
             except:
                 pass
@@ -3759,7 +3786,7 @@ class seasons:
 
             match = []
             url = link().imdb_api_search % urllib.quote_plus(show)
-            result = getUrl(url, timeout='10').result
+            result = getUrl(url, timeout='30').result
             result = common.replaceHTMLCodes(result)
             result = json.loads(result)
             for i in result.keys(): match += result[i]

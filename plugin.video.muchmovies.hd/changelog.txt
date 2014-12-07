@@ -1,4 +1,12 @@
 ------------------------
+Much Movies HD v1.7.0 (7-Dec-14)
+------------------------
+
+- Fixed issues with listings.
+- Code cosmetics.
+
+
+------------------------
 Much Movies HD v1.6.3 (5-Sep-14)
 ------------------------
 

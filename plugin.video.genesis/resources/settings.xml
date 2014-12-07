@@ -4,14 +4,14 @@
 		<setting id="appearance" type="select" label="30001" values="-|4orbs|Clean|Embossed|GOne|Metro" default="GOne"/>
 		<setting id="fanart" type="bool" label="30002" default="true"/>
 		<setting type="lsep" label="30003"/>
-		<setting id="root_movies" type="enum" label="30004" lvalues="30005|30006|30007" default="1"/>
+		<setting id="root_movies" type="enum" label="30004" lvalues="30005|30006|30007|30008" default="1"/>
 		<setting id="trakt_user" type="text" default="" visible="false"/>
 		<setting id="trakt_password" type="text" default="" visible="false"/>
-		<setting id="root_episodes_trakt" type="enum" label="30008" lvalues="30009|30010|30011|30012" default="2" visible="!eq(-1,)+!eq(-2,)"/>
-		<setting id="root_episodes" type="enum" label="30008" lvalues="30009|30010" default="1" visible="eq(-2,)|eq(-3,)"/>
-		<setting id="root_calendar" type="enum" label="30013" lvalues="30014|30015" default="0"/>
-		<setting type="lsep" label="30016"/>
-		<setting id="downloads" type="folder" label="30017" default=""/>
+		<setting id="root_episodes_trakt" type="enum" label="30009" lvalues="30010|30011|30012|30013" default="2" visible="!eq(-1,)+!eq(-2,)"/>
+		<setting id="root_episodes" type="enum" label="30009" lvalues="30010|30011" default="1" visible="eq(-2,)|eq(-3,)"/>
+		<setting id="root_calendar" type="enum" label="30014" lvalues="30015|30016" default="0"/>
+		<setting type="lsep" label="30017"/>
+		<setting id="downloads" type="folder" label="30018" default=""/>
 
 		<setting id="settings_version" type="text" default="1.0.0" visible="false"/>
 	</category>
@@ -30,6 +30,8 @@
 		<setting id="trakt_user" type="text" default="" visible="false"/>
 		<setting id="trakt_password" type="text" default="" visible="false"/>
 		<setting id="watched_trakt" type="bool" label="30033" visible="!eq(-1,)+!eq(-2,)" default="true"/>
+		<setting id="service_trakt" type="text" default="1970-01-01 23:59:00.000000" visible="false"/>
+		<setting id="service_trakt_tv" type="text" default="1970-01-01 23:59:00.000000" visible="false"/>
 	</category>
 
 	<category label="30040">
