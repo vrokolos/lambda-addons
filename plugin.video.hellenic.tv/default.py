@@ -1716,8 +1716,7 @@ class gm:
             if url.startswith(self.movies_link):
                 result = getUrl(url).result
                 result = common.parseDOM(result, "DIV", attrs = { "class": "maincontent" })[0]
-                result = common.parseDOM(result, "tr",)[-1]
-                result = common.parseDOM(result, "p")
+                result = re.compile('(<a.+?</a>)').findall(result)
                 result = uniqueList(result).list
             else:
                 u = url.split('?')
