@@ -491,9 +491,7 @@ class watchseries:
                 base_link = self.proxy_link + self.base_link
                 result = getUrl(base_link + query, mobile=True).result
 
-            result = json.loads(result)
-            result = json.dumps(result['results'])
-            result = re.compile('".+?".+?({".+?".+?})').findall(result)
+            result = re.compile('"\d*":\s({.+?})').findall(result)
             result = [json.loads(i) for i in result]
 
             shows = [cleantitle().tv(show), cleantitle().tv(show_alt)]
@@ -506,15 +504,14 @@ class watchseries:
             for i in match[:5]:
                 try:
                     result = getUrl(base_link + i, mobile=True).result
-                    result = json.loads(result)
-                    result = json.dumps(result['results'])
-                    result = result.replace('\\"', '')
-                    if str('tt' + imdb) in result:
-                        match2 = i
-                        break
+
                     t = re.compile('"tvName".+?"(.+?)"').findall(result)[0]
                     if any(x == cleantitle().tv(t) for x in shows):
                         match2 = i
+
+                    if str('tt' + imdb) in result:
+                        match2 = i
+                        break
                 except:
                     pass
 
@@ -542,8 +539,8 @@ class watchseries:
                 base_link = self.proxy_link + self.base_link
                 result = getUrl(base_link + url, mobile=True).result
 
+            result = re.compile('"links":(\[.+?\])').findall(result)[0]
             result = json.loads(result)
-            result = result['results']['0']['links']
             links = [i for i in result if i['lang'] == 'English' and i['host'].lower() in hostDict]
 
             for i in links:
@@ -881,8 +878,10 @@ class moviezone:
             post = common.parseDOM(result, "div", ret="file", attrs = { "id": "mediainfo" })[0]
             post = urllib.urlencode({'url': post})
 
+
             def get_php(url, post):
                 request = urllib2.Request(url, post)
+                request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0) Gecko/20100101 Firefox/6.0')
                 request.add_header('Origin', self.base_link)
                 response = urllib2.urlopen(request, timeout=5)
                 result = response.read()
@@ -1256,7 +1255,14 @@ class movietv:
                 query = urllib.quote_plus(title)
                 query = self.base_link + self.moviesearch_link % query
 
-                result = getUrl(query, referer=self.base_link).result
+                request = urllib2.Request(query)
+                request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0) Gecko/20100101 Firefox/6.0')
+                request.add_header('X-Requested-With', 'XMLHttpRequest')
+                request.add_header('Referer', self.base_link)
+                response = urllib2.urlopen(request, timeout=5)
+                result = response.read()
+                response.close()
+
                 result = json.loads(result)
                 result = result['items']
 
@@ -1276,7 +1282,14 @@ class movietv:
                 query = urllib.quote_plus(title)
                 query = self.base_link + self.tvsearch_link % query
 
-                result = getUrl(query, referer=self.base_link).result
+                request = urllib2.Request(query)
+                request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0) Gecko/20100101 Firefox/6.0')
+                request.add_header('X-Requested-With', 'XMLHttpRequest')
+                request.add_header('Referer', self.base_link)
+                response = urllib2.urlopen(request, timeout=5)
+                result = response.read()
+                response.close()
+
                 result = json.loads(result)
                 result = result['items']
 

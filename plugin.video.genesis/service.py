@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import os,datetime,xbmc,xbmcaddon
+import datetime,xbmc,xbmcaddon
 
 class main:
     def __init__(self):
@@ -57,6 +57,6 @@ class main:
                 except:
                     pass
 
-            xbmc.sleep(1000)
+            xbmc.sleep(10000)
 
 main()

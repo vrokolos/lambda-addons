@@ -3313,6 +3313,10 @@ class shows:
         if not (self.query == None or self.query == ''):
             self.query = link().imdb_tv_search % urllib.quote_plus(self.query)
             self.list = self.imdb_list(self.query)
+            try:
+                for i in range(0, len(self.list)): del self.list[i]['next']
+            except:
+                pass
             index().showList(self.list)
 
     def favourites(self):
@@ -3433,6 +3437,8 @@ class shows:
         for i in range(0, len(self.list)): threads.append(Thread(self.tvdb_info, i))
         [i.start() for i in threads]
         [i.join() for i in threads]
+
+        self.list = [i for i in self.list if not i['tvdb'] == '0']
 
         return self.list
 
@@ -3641,30 +3647,36 @@ class shows:
 
     def tvdb_info(self, i):
         try:
-            url = link().tvdb_search % self.list[i]['imdb']
-            result = getUrl(url, timeout='10').result
+            try: sid = self.list[i]['tvdb']
+            except: sid = '0'
 
-            dupe = common.parseDOM(result, "SeriesName")[0]
-            dupe = re.compile('[***]Duplicate (\d*)[***]').findall(dupe)
-
-            year = self.list[i]['year']
-            years = [str(year), str(int(year)+1), str(int(year)-1)]
-
-            if len(dupe) > 0:
-                pass
-            elif not any(x in common.parseDOM(result, "FirstAired")[0] for x in years):
-                show = self.list[i]['title']
-                title = self.cleantitle_tv(show)
-                url = link().tvdb_search2 % urllib.quote_plus(show)
+            if sid == '0':
+                url = link().tvdb_search % self.list[i]['imdb']
                 result = getUrl(url, timeout='10').result
-                result = common.replaceHTMLCodes(result)
-                result = common.parseDOM(result, "Series")
-                result = [x for x in result if title == self.cleantitle_tv(common.parseDOM(x, "SeriesName")[0])]
-                result = [x for x in result if any(y in common.parseDOM(x, "FirstAired")[0] for y in years)][0]
 
-            url = common.parseDOM(result, "seriesid")[0]
-            if len(dupe) > 0: url = str(dupe[0])
-            url = link().tvdb_info2 % (link().tvdb_key, url)
+                try: name = common.parseDOM(result, "SeriesName")[0]
+                except: name = '0'
+                dupe = re.compile('[***]Duplicate (\d*)[***]').findall(name)
+
+                year = self.list[i]['year']
+                years = [str(year), str(int(year)+1), str(int(year)-1)]
+
+                if len(dupe) > 0:
+                    sid = str(dupe[0])
+                elif name == '0':
+                    show = self.list[i]['title']
+                    title = self.cleantitle_tv(show)
+                    url = link().tvdb_search2 % urllib.quote_plus(show)
+                    result = getUrl(url, timeout='10').result
+                    result = common.replaceHTMLCodes(result)
+                    result = common.parseDOM(result, "Series")
+                    result = [x for x in result if title == self.cleantitle_tv(common.parseDOM(x, "SeriesName")[0])]
+                    result = [x for x in result if any(y in common.parseDOM(x, "FirstAired")[0] for y in years)][0]
+
+                sid = common.parseDOM(result, "seriesid")[0]
+
+
+            url = link().tvdb_info2 % (link().tvdb_key, sid)
             result = getUrl(url, timeout='10').result
 
             tvdb = common.parseDOM(result, "id")[0]
@@ -3673,28 +3685,38 @@ class shows:
             tvdb = tvdb.encode('utf-8')
             if not tvdb == '0': self.list[i].update({'tvdb': tvdb})
 
-            poster = common.parseDOM(result, "poster")[0]
+            try: poster = common.parseDOM(result, "poster")[0]
+            except: poster = ''
             if not poster == '': poster = link().tvdb_image + poster
             else: poster = '0'
             poster = common.replaceHTMLCodes(poster)
             poster = poster.encode('utf-8')
-            if not poster == '0': self.list[i].update({'poster': poster})
 
-            banner = common.parseDOM(result, "banner")[0]
+            try: banner = common.parseDOM(result, "banner")[0]
+            except: banner = ''
             if not banner == '': banner = link().tvdb_image + banner
-            else: banner = poster
+            else: banner = '0'
             banner = common.replaceHTMLCodes(banner)
             banner = banner.encode('utf-8')
-            if not banner == '0': self.list[i].update({'banner': banner})
 
-            fanart = common.parseDOM(result, "fanart")[0]
+            try: fanart = common.parseDOM(result, "fanart")[0]
+            except: fanart = ''
             if not fanart == '': fanart = link().tvdb_image + fanart
             else: fanart = '0'
             fanart = common.replaceHTMLCodes(fanart)
             fanart = fanart.encode('utf-8')
             if not fanart == '0': self.list[i].update({'fanart': fanart})
 
-            genre = common.parseDOM(result, "Genre")[0]
+            if not poster == '0': self.list[i].update({'poster': poster})
+            elif not fanart == '0': self.list[i].update({'poster': fanart})
+            elif not banner == '0': self.list[i].update({'poster': banner})
+
+            if not banner == '0': self.list[i].update({'banner': banner})
+            elif not fanart == '0': self.list[i].update({'banner': fanart})
+            elif not poster == '0': self.list[i].update({'banner': poster})
+
+            try: genre = common.parseDOM(result, "Genre")[0]
+            except: genre = ''
             genre = [x for x in genre.split('|') if not x == '']
             genre = " / ".join(genre)
             if genre == '': genre = '0'
@@ -3702,37 +3724,43 @@ class shows:
             genre = genre.encode('utf-8')
             if not genre == '0': self.list[i].update({'genre': genre})
 
-            studio = common.parseDOM(result, "Network")[0]
+            try: studio = common.parseDOM(result, "Network")[0]
+            except: studio = ''
             if studio == '': studio = '0'
             studio = common.replaceHTMLCodes(studio)
             studio = studio.encode('utf-8')
             if not studio == '0': self.list[i].update({'studio': studio})
 
-            premiered = common.parseDOM(result, "FirstAired")[0]
+            try: premiered = common.parseDOM(result, "FirstAired")[0]
+            except: premiered = ''
             if premiered == '': premiered = '0'
             premiered = common.replaceHTMLCodes(premiered)
             premiered = premiered.encode('utf-8')
             if not premiered == '0': self.list[i].update({'premiered': premiered})
 
-            duration = common.parseDOM(result, "Runtime")[0]
+            try: duration = common.parseDOM(result, "Runtime")[0]
+            except: duration = ''
             if duration == '': duration = '0'
             duration = common.replaceHTMLCodes(duration)
             duration = duration.encode('utf-8')
             if not duration == '0': self.list[i].update({'duration': duration})
 
-            rating = common.parseDOM(result, "Rating")[0]
+            try: rating = common.parseDOM(result, "Rating")[0]
+            except: rating = ''
             if rating == '' or not self.list[i]['rating'] == '0': rating = '0'
             rating = common.replaceHTMLCodes(rating)
             rating = rating.encode('utf-8')
             if not rating == '0': self.list[i].update({'rating': rating})
 
-            mpaa = common.parseDOM(result, "ContentRating")[0]
+            try: mpaa = common.parseDOM(result, "ContentRating")[0]
+            except: mpaa = ''
             if mpaa == '': mpaa = '0'
             mpaa = common.replaceHTMLCodes(mpaa)
             mpaa = mpaa.encode('utf-8')
             if not mpaa == '0': self.list[i].update({'mpaa': mpaa})
 
-            plot = common.parseDOM(result, "Overview")[0]
+            try: plot = common.parseDOM(result, "Overview")[0]
+            except: plot = ''
             if plot == '': plot = '0'
             plot = common.replaceHTMLCodes(plot)
             plot = plot.encode('utf-8')
@@ -3841,56 +3869,76 @@ class seasons:
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
 
-            poster = common.parseDOM(result, "poster")[0]
-            poster = link().tvdb_image + poster
+            try: poster = common.parseDOM(result, "poster")[0]
+            except: poster = ''
+            if not poster == '': poster = link().tvdb_image + poster
+            else: poster = '0'
             poster = common.replaceHTMLCodes(poster)
             poster = poster.encode('utf-8')
 
-            banner = common.parseDOM(result, "banner")[0]
+            try: banner = common.parseDOM(result, "banner")[0]
+            except: banner = ''
             if not banner == '': banner = link().tvdb_image + banner
-            else: banner = poster
+            else: banner = '0'
             banner = common.replaceHTMLCodes(banner)
             banner = banner.encode('utf-8')
 
-            fanart = common.parseDOM(result, "fanart")[0]
+            try: fanart = common.parseDOM(result, "fanart")[0]
+            except: fanart = ''
             if not fanart == '': fanart = link().tvdb_image + fanart
             else: fanart = '0'
             fanart = common.replaceHTMLCodes(fanart)
             fanart = fanart.encode('utf-8')
 
-            genre = common.parseDOM(result, "Genre")[0]
+            if not poster == '0': pass
+            elif not fanart == '0': poster = fanart
+            elif not banner == '0': poster = banner
+            else: poster = link().imdb_tv_image
+
+            if not banner == '0': pass
+            elif not fanart == '0': banner = fanart
+            elif not poster == '0': banner = poster
+
+            try: genre = common.parseDOM(result, "Genre")[0]
+            except: genre = ''
             genre = [i for i in genre.split('|') if not i == '']
             genre = " / ".join(genre)
             if genre == '': genre = '0'
             genre = common.replaceHTMLCodes(genre)
             genre = genre.encode('utf-8')
 
-            studio = common.parseDOM(result, "Network")[0]
+            try: studio = common.parseDOM(result, "Network")[0]
+            except: studio = ''
             if studio == '': studio = '0'
             studio = common.replaceHTMLCodes(studio)
             studio = studio.encode('utf-8')
 
-            status = common.parseDOM(result, "Status")[0]
+            try: status = common.parseDOM(result, "Status")[0]
+            except: status = ''
             if status == '': status = 'Ended'
             status = common.replaceHTMLCodes(status)
             status = status.encode('utf-8')
 
-            duration = common.parseDOM(result, "Runtime")[0]
+            try: duration = common.parseDOM(result, "Runtime")[0]
+            except: duration = ''
             if duration == '': duration = '0'
             duration = common.replaceHTMLCodes(duration)
             duration = duration.encode('utf-8')
 
-            rating = common.parseDOM(result, "Rating")[0]
+            try: rating = common.parseDOM(result, "Rating")[0]
+            except: rating = ''
             if rating == '': rating = '0'
             rating = common.replaceHTMLCodes(rating)
             rating = rating.encode('utf-8')
 
-            mpaa = common.parseDOM(result, "ContentRating")[0]
+            try: mpaa = common.parseDOM(result, "ContentRating")[0]
+            except: mpaa = ''
             if mpaa == '': mpaa = '0'
             mpaa = common.replaceHTMLCodes(mpaa)
             mpaa = mpaa.encode('utf-8')
 
-            plot = common.parseDOM(result, "Overview")[0]
+            try: plot = common.parseDOM(result, "Overview")[0]
+            except: plot = ''
             if plot == '': plot = '0'
             plot = common.replaceHTMLCodes(plot)
             plot = plot.encode('utf-8')
@@ -3915,21 +3963,28 @@ class seasons:
         for season in seasons:
             try:
                 date = common.parseDOM(season, "FirstAired")[0]
+                if date == '' or '-00' in date: date = '0'
                 date = common.replaceHTMLCodes(date)
                 date = date.encode('utf-8')
-
-                if date == '' or '-00' in date: raise Exception()
-                if int(re.sub('[^0-9]', '', str(date))) > int(dt.strftime("%Y%m%d")): raise Exception()
 
                 num = common.parseDOM(season, "SeasonNumber")[0]
                 num = '%01d' % int(num)
                 num = num.encode('utf-8')
 
+                if status == 'Ended': pass
+                elif date == '0': raise Exception()
+                elif int(re.sub('[^0-9]', '', str(date))) > int(dt.strftime("%Y%m%d")): raise Exception()
+
                 thumb = [i for i in art if common.parseDOM(i, "Season")[0] == num]
-                try: thumb = link().tvdb_image + common.parseDOM(thumb[0], "BannerPath")[0]
-                except: thumb = poster
+
+                try: thumb = common.parseDOM(thumb[0], "BannerPath")[0]
+                except: thumb = ''
+                if not thumb == '': thumb = link().tvdb_image + thumb
+                else: thumb = '0'
                 thumb = common.replaceHTMLCodes(thumb)
                 thumb = thumb.encode('utf-8')
+
+                if thumb == '0': thumb = poster
 
                 self.list[0]['seasons'].append({'title': num, 'year': year, 'imdb': imdb, 'tvdb': tvdb, 'season': num, 'show': show, 'show_alt': show_alt, 'genre': genre, 'url': url, 'poster': poster, 'banner': banner, 'thumb': thumb, 'fanart': fanart, 'studio': studio, 'status': status, 'date': date, 'duration': duration, 'rating': rating, 'mpaa': mpaa, 'plot': plot})
             except:
@@ -3950,15 +4005,17 @@ class seasons:
         for episode in episodes:
             try:
                 date = common.parseDOM(episode, "FirstAired")[0]
+                if date == '' or '-00' in date: date = '0'
                 date = common.replaceHTMLCodes(date)
                 date = date.encode('utf-8')
-
-                if date == '' or '-00' in date: raise Exception()
-                if int(re.sub('[^0-9]', '', str(date))) > int(dt.strftime("%Y%m%d")): raise Exception()
 
                 season = common.parseDOM(episode, "SeasonNumber")[0]
                 season = '%01d' % int(season)
                 season = season.encode('utf-8')
+
+                if status == 'Ended': pass
+                elif date == '0': raise Exception()
+                elif int(re.sub('[^0-9]', '', str(date))) > int(dt.strftime("%Y%m%d")): raise Exception()
 
                 num = common.parseDOM(episode, "EpisodeNumber")[0]
                 num = re.sub('[^0-9]', '', '%01d' % int(num))
@@ -3968,30 +4025,41 @@ class seasons:
                 title = common.replaceHTMLCodes(title)
                 title = title.encode('utf-8')
 
+                t = 'Episode ' + '%01d' % int(num)
+                t = t.encode('utf-8')
+                if title == '': title = t
+
                 name = show_alt + ' S' + '%02d' % int(season) + 'E' + '%02d' % int(num)
                 try: name = name.encode('utf-8')
                 except: pass
 
-                thumb = common.parseDOM(episode, "filename")[0]
+                try: thumb = common.parseDOM(episode, "filename")[0]
+                except: thumb = ''
                 if not thumb == '': thumb = link().tvdb_image + thumb
-                elif not fanart == '0': thumb = fanart.replace(link().tvdb_image, link().tvdb_image2)
-                else: thumb = poster
+                else: thumb = '0'
                 thumb = common.replaceHTMLCodes(thumb)
                 thumb = thumb.encode('utf-8')
 
-                rating = common.parseDOM(episode, "Rating")[0]
+                if not thumb == '0': pass
+                elif not fanart == '0': thumb = fanart.replace(link().tvdb_image, link().tvdb_image2)
+                elif not poster == '0': thumb = poster
+
+                try: rating = common.parseDOM(episode, "Rating")[0]
+                except: rating = ''
                 if rating == '': rating = '0'
                 rating = common.replaceHTMLCodes(rating)
                 rating = rating.encode('utf-8')
 
-                director = common.parseDOM(episode, "Director")[0]
+                try: director = common.parseDOM(episode, "Director")[0]
+                except: director = ''
                 director = [i for i in director.split('|') if not i == '']
                 director = " / ".join(director)
                 if director == '': director = '0'
                 director = common.replaceHTMLCodes(director)
                 director = director.encode('utf-8')
 
-                writer = common.parseDOM(episode, "Writer")[0]
+                try: writer = common.parseDOM(episode, "Writer")[0]
+                except: writer = ''
                 writer = [i for i in writer.split('|') if not i == '']
                 writer = " / ".join(writer)
                 if writer == '': writer = '0'
@@ -3999,10 +4067,12 @@ class seasons:
                 writer = writer.encode('utf-8')
 
                 try: desc = common.parseDOM(episode, "Overview")[0]
-                except: desc = plot
-                if desc == '': desc = plot
+                except: desc = ''
+                if desc == '': desc = '0'
                 desc = common.replaceHTMLCodes(desc)
                 desc = desc.encode('utf-8')
+
+                if desc == '0': desc = plot
 
                 self.list[1]['episodes'].append({'name': name, 'title': title, 'year': year, 'imdb': imdb, 'tvdb': tvdb, 'season': season, 'episode': num, 'show': show, 'show_alt': show_alt, 'genre': genre, 'url': url, 'poster': poster, 'banner': banner, 'thumb': thumb, 'fanart': fanart, 'studio': studio, 'status': status, 'date': date, 'duration': duration, 'rating': rating, 'mpaa': mpaa, 'director': director, 'writer': writer, 'plot': desc})
             except:
@@ -4108,8 +4178,8 @@ class episodes:
             result = getUrl(url, timeout='10').result
             search = re.compile('\d+?,(\d+?),(\d+?),.+?,(\d+?/.+?/\d+?),"(.+?)",.+?,".+?"').findall(result)
             d = '%02d/%s/%s' % (int(date.split('-')[2]), {'01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'May', '06':'Jun', '07':'Jul', '08':'Aug', '09':'Sep', '10':'Oct', '11':'Nov', '12':'Dec'}[date.split('-')[1]], date.split('-')[0][-2:])
-            match = [i for i in search if d == i[2]]
-            match += [i for i in search if cleantitle_tv(title) == cleantitle_tv(i[3])]
+            match = [i for i in search if cleantitle_tv(title) == cleantitle_tv(i[3])]
+            match += [i for i in search if d == i[2]]
             season = str('%01d' % int(match[0][0]))
             episode = str('%01d' % int(match[0][1]))
             return (season, episode)
@@ -4122,8 +4192,8 @@ class episodes:
             result = getUrl(url, timeout='10').result
             search = re.compile('<td.+?><a.+?title=.+?season.+?episode.+?>(\d+?)x(\d+?)<.+?<td.+?>(\d+?/.+?/\d+?)<.+?<td.+?>.+?href=.+?>(.+?)<').findall(result.replace('\n',''))
             d = '%02d/%s/%s' % (int(date.split('-')[2]), {'01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'May', '06':'Jun', '07':'Jul', '08':'Aug', '09':'Sep', '10':'Oct', '11':'Nov', '12':'Dec'}[date.split('-')[1]], date.split('-')[0])
-            match = [i for i in search if d == i[2]]
-            match += [i for i in search if cleantitle_tv(title) == cleantitle_tv(i[3])]
+            match = [i for i in search if cleantitle_tv(title) == cleantitle_tv(i[3])]
+            match += [i for i in search if d == i[2]]
             season = str('%01d' % int(match[0][0]))
             episode = str('%01d' % int(match[0][1]))
             return (season, episode)

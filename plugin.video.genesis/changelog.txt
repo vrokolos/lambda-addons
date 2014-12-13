@@ -1,4 +1,17 @@
 ------------------------
+Genesis v3.2.2 (13-Dec-14)
+------------------------
+
+- Fixed issues with tv show listings.
+- Fixed issues with season listings.
+- Fixed issues with episode listings.
+- Fixed issues with available resolvers.
+- Fixed issues with available sources.
+- Re-work of tv show search.
+- Code cosmetics.
+
+
+------------------------
 Genesis v3.2.1 (7-Dec-14)
 ------------------------
 
