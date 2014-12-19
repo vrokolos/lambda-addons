@@ -681,14 +681,17 @@ def grifthost(url):
 
         result = getUrl(url).result
 
-        post = {}
-        f = common.parseDOM(result, "Form", attrs = { "method": "POST" })[0]
-        f = f.replace('"submit"', '"hidden"')
-        k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
-        for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-        post = urllib.urlencode(post)
+        try:
+            post = {}
+            f = common.parseDOM(result, "Form", attrs = { "method": "POST" })[0]
+            f = f.replace('"submit"', '"hidden"')
+            k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
+            for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
+            post = urllib.urlencode(post)
+            result = getUrl(url, post=post).result
+        except:
+            pass
 
-        result = getUrl(url, post=post).result
         result = re.compile('(eval.*?\)\)\))').findall(result)[0]
         result = jsunpack(result)
 

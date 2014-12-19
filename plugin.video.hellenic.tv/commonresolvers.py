@@ -676,30 +676,27 @@ def streamin(url):
 def grifthost(url):
     try:
         url = url.replace('/embed-', '/').split('-')[0]
+        url = re.compile('//.+?/([\w]+)').findall(url)[0]
+        url = 'http://grifthost.com/embed-%s.html' % url
 
-        result = getUrl(url, close=False).result
+        result = getUrl(url).result
 
-        post = {}
-        f = common.parseDOM(result, "Form", attrs = { "name": "F1" })[-1]
-        k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
-        for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-        post.update({'method_free': '', 'method_premium': ''})
-        post = urllib.urlencode(post)
+        try:
+            post = {}
+            f = common.parseDOM(result, "Form", attrs = { "method": "POST" })[0]
+            f = f.replace('"submit"', '"hidden"')
+            k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
+            for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
+            post = urllib.urlencode(post)
+            result = getUrl(url, post=post).result
+        except:
+            pass
 
-        import time
-        request = urllib2.Request(url, post)
+        result = re.compile('(eval.*?\)\)\))').findall(result)[0]
+        result = jsunpack(result)
 
-        for i in range(0, 4):
-            try:
-                response = urllib2.urlopen(request, timeout=5)
-                result = response.read()
-                response.close()
-                url = re.compile('(<a .+?</a>)').findall(result)
-                url = [i for i in url if '/download.png' in i][-1]
-                url = common.parseDOM(url, "a", ret="href")[0]
-                return url
-            except:
-                time.sleep(1)
+        url = re.compile("file:'(.+?)'").findall(result)[0]
+        return url
     except:
         return
 
@@ -730,8 +727,8 @@ def cloudyvideos(url):
                 response = urllib2.urlopen(request, timeout=5)
                 result = response.read()
                 response.close()
-                btn = common.parseDOM(result, "input", ret="value", attrs = { "class": "graybtn" })[0]
-                url = re.compile('href=[\'|\"](.+?)[\'|\"]><input.+?class=[\'|\"]graybtn[\'|\"]').findall(result)[0]
+                btn = common.parseDOM(result, "input", ret="value", attrs = { "class": "graybt.+?" })[0]
+                url = re.compile('href=[\'|\"](.+?)[\'|\"]><input.+?class=[\'|\"]graybt.+?[\'|\"]').findall(result)[0]
                 return url
             except:
                 time.sleep(1)
@@ -751,7 +748,8 @@ def mrfile(url):
 
         result = getUrl(url, post=post).result
 
-        url = re.compile("file:\s+'(.+?)'").findall(result)[0]
+        url = re.compile('(<a\s+href=.+?>Download\s+.+?</a>)').findall(result)[-1]
+        url = common.parseDOM(url, "a", ret="href")[0]
         return url
     except:
         return

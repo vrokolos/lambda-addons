@@ -96,6 +96,14 @@ class main:
         except:     plot = None
 
 
+        try: type = urllib.unquote_plus(params["content_type"])
+        except: type = None
+        # dirty code for the music addon (content_type doesn't work for shortcuts)
+        fp = xbmc.getInfoLabel('Container.FolderPath')
+        if any(i in fp for i in ['content_type=audio', 'action=radios_alt']): type = 'audio'
+        if type == 'audio' and action == None: action = 'root_radios_alt'
+
+
         if action == None:                            root().get()
         elif action == 'container_refresh':           index().container_refresh()
         elif action == 'cache_clear_list':            index().cache_clear_list()
@@ -105,11 +113,13 @@ class main:
         elif action == 'playlist_open':               contextMenu().playlist_open()
         elif action == 'settings_open':               contextMenu().settings_open()
         elif action == 'view_livetv':                 contextMenu().view('livetv')
+        elif action == 'view_radios':                 contextMenu().view('radios')
         elif action == 'view_movies':                 contextMenu().view('movies')
         elif action == 'view_tvshows':                contextMenu().view('tvshows')
         elif action == 'view_episodes':               contextMenu().view('episodes')
         elif action == 'view_cartoons':               contextMenu().view('cartoons')
         elif action == 'favourite_livetv_add':        contextMenu().favourite_add('Live TV', channel, channel, '', '', '', '', '', refresh=True)
+        elif action == 'favourite_radio_add':         contextMenu().favourite_add('Radio', url, name, '', '', image, '', '', refresh=True)
         elif action == 'favourite_movie_add':         contextMenu().favourite_add('Movie', url, name, title, year, image, genre, plot, refresh=True)
         elif action == 'favourite_movie_from_search': contextMenu().favourite_add('Movie', url, name, title, year, image, genre, plot)
         elif action == 'favourite_tv_add':            contextMenu().favourite_add('TV Show', url, name, '', '', image, genre, plot, refresh=True)
@@ -118,6 +128,8 @@ class main:
         elif action == 'favourite_delete':            contextMenu().favourite_delete(name, url)
         elif action == 'epg_menu':                    contextMenu().epg(channel)
         elif action == 'root_livetv':                 channels().get()
+        elif action == 'root_radios':                 root().radios()
+        elif action == 'root_radios_alt':             root().radios_alt()
         elif action == 'root_networks':               root().networks()
         elif action == 'root_shows':                  root().shows()
         elif action == 'root_movies':                 root().movies()
@@ -127,9 +139,21 @@ class main:
         elif action == 'root_sports':                 root().sports()
         elif action == 'root_music':                  root().music()
         elif action == 'livetv_favourites':           favourites().livetv()
+        elif action == 'radios_favourites':           favourites().radios()
+        elif action == 'radios_alt_favourites':       favourites().radios()
         elif action == 'movies_favourites':           favourites().movies()
         elif action == 'shows_favourites':            favourites().shows()
         elif action == 'cartoons_favourites':         favourites().cartoons()
+        elif action == 'radios':                      eradio().radios(url)
+        elif action == 'radios_all':                  eradio().radios('radios_link')
+        elif action == 'radios_trending':             eradio().radios('trending_link')
+        elif action == 'radios_top20':                eradio().radios('top20_link')
+        elif action == 'radios_new':                  eradio().radios('new_link')
+        elif action == 'radios_alt':                  eradio().radios(url)
+        elif action == 'radios_alt_all':              eradio().radios('radios_link')
+        elif action == 'radios_alt_trending':         eradio().radios('trending_link')
+        elif action == 'radios_alt_top20':            eradio().radios('top20_link')
+        elif action == 'radios_alt_new':              eradio().radios('new_link')
         elif action == 'movies_search':               gm().search(url)
         elif action == 'movies':                      gm().movies(url)
         elif action == 'shows_search':                gm().search_tv(url)
@@ -154,6 +178,8 @@ class main:
         elif action == 'shows_art':                   gm().network('art')
         elif action == 'shows_mtv':                   gm().network('mtvgreece')
         elif action == 'shows_madtv':                 youtube().madtv()
+        elif action == 'shows_real_fm':               realfm().podcasts()
+        elif action == 'shows_skai_fm':               skai().podcasts()
         elif action == 'shows_networks':              gm().networks()
         elif action == 'shows_skai_docs':             skai().docs()
         elif action == 'cartoons_collection':         archives().cartoons()
@@ -179,9 +205,11 @@ class main:
         elif action == 'mtvdancefloor':               mtvchart().mtvdancefloor()
         elif action == 'eurotop20':                   mtvchart().eurotop20()
         elif action == 'usatop20':                    mtvchart().usatop20()
+        elif action == 'episodes_stacked':            episodes().stacked(name, url, image, genre, plot, show)
         elif action == 'episodes_reverse':            episodes().get(name, url, image, genre, plot, show, reverse=True)
         elif action == 'episodes':                    episodes().get(name, url, image, genre, plot, show)
         elif action == 'play_live':                   resolver().live(channel)
+        elif action == 'play_radio':                  resolver().radio(url)
         elif action == 'play':                        resolver().run(url)
 
 class getUrl(object):
@@ -261,6 +289,19 @@ class player(xbmc.Player):
         item.setInfo( type="Video", infoLabels = meta )
 
         xbmc.PlayList(xbmc.PLAYLIST_VIDEO).clear()
+        xbmc.Player().play(url, item)
+
+    def radio(self, name, url, image):
+        if image == '0': image = '%s/na_radio.png' % addonLogos
+
+        meta = {'title': name, 'album': name, 'artist': name, 'genre': 'Greek', 'duration': '1440', 'comment': name}
+
+        item = xbmcgui.ListItem(path=url, iconImage=image, thumbnailImage=image)
+        item.setInfo( type="Video", infoLabels = { "title": "" } )
+        item.setInfo( type="Music", infoLabels = meta )
+
+        xbmc.PlayList(xbmc.PLAYLIST_VIDEO).clear()
+        xbmc.PlayList(xbmc.PLAYLIST_MUSIC).clear()
         xbmc.Player().play(url, item)
 
     def onPlayBackStarted(self):
@@ -446,6 +487,9 @@ class index:
             try:
                 name, epg = i['name'], i['epg']
 
+                image = '%s/%s.png' % (addonLogos, re.sub('\s[(]\d{1}[)]$','', name))
+                if not xbmcvfs.exists(image): image = '%s/na.png' % addonLogos
+
                 fanart = addonFanart
 
                 meta = {'title': name, 'tvshowtitle': name, 'studio': name, 'premiered': date, 'director': name, 'writer': name, 'plot': epg, 'genre': 'Live TV', 'duration': '1440'}
@@ -457,11 +501,11 @@ class index:
                 cm = []
                 cm.append((language(30405).encode("utf-8"), 'RunPlugin(%s?action=epg_menu&channel=%s)' % (sys.argv[0], sysname)))
                 cm.append((language(30406).encode("utf-8"), 'RunPlugin(%s?action=container_refresh)' % (sys.argv[0])))
-                cm.append((language(30412).encode("utf-8"), 'RunPlugin(%s?action=view_livetv)' % (sys.argv[0])))
+                cm.append((language(30414).encode("utf-8"), 'RunPlugin(%s?action=view_livetv)' % (sys.argv[0])))
                 if not name in favourites: cm.append((language(30410).encode("utf-8"), 'RunPlugin(%s?action=favourite_livetv_add&channel=%s)' % (sys.argv[0], sysname)))
                 else: cm.append((language(30411).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysname)))
 
-                item = xbmcgui.ListItem(name, iconImage=fanart, thumbnailImage=fanart)
+                item = xbmcgui.ListItem(name, iconImage=image, thumbnailImage=image)
                 item.setProperty("Fanart_Image", fanart)
                 item.setInfo(type="Video", infoLabels = meta)
                 item.setProperty("Video", "true")
@@ -475,6 +519,58 @@ class index:
         for i in range(0, 200):
             if xbmc.getCondVisibility('Container.Content(episodes)'):
                 return index().container_view('livetv', {'skin.confluence' : 504})
+            xbmc.sleep(100)
+
+    def radioList(self, radioList):
+        if radioList == None or len(radioList) == 0: return
+     
+        if action.startswith('radios_alt'): type = 'audio'
+        else: type = 'video'
+
+        try:
+            favourites = []
+            dbcon = database.connect(addonSettings)
+            dbcur = dbcon.cursor()
+            dbcur.execute("SELECT * FROM favourites WHERE video_type ='Radio'")
+            favourites = dbcur.fetchall()
+            favourites = [i[0].encode("utf-8") for i in favourites]
+        except:
+            pass
+
+        total = len(radioList)
+        for i in radioList:
+            try:
+                name, url, image = i['name'], i['url'], i['image']
+                if image == '0': image = '%s/na_radio.png' % addonLogos
+
+                meta = {'title': name, 'album': name, 'artist': name, 'genre': 'Greek', 'duration': '1440', 'comment': name}
+
+                sysname, sysurl, sysimage = urllib.quote_plus(name), urllib.quote_plus(url), urllib.quote_plus(image)
+
+                u = '%s?action=play_radio&url=%s' % (sys.argv[0], sysurl)
+
+                cm = []
+                if type == 'video': cm.append((language(30415).encode("utf-8"), 'RunPlugin(%s?action=view_radios)' % (sys.argv[0])))
+                if not url in favourites: cm.append((language(30412).encode("utf-8"), 'RunPlugin(%s?action=favourite_radio_add&name=%s&url=%s&image=%s)' % (sys.argv[0], sysname, sysurl, sysimage)))
+                else: cm.append((language(30413).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
+
+                item = xbmcgui.ListItem(name, iconImage=image, thumbnailImage=image)
+                item.setProperty("Fanart_Image", addonFanart)
+                item.setInfo(type="Music", infoLabels = meta)
+                item.setProperty("Video", "true")
+                item.addContextMenuItems(cm, replaceItems=False)
+                xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=item,totalItems=total,isFolder=False)
+            except:
+                pass
+
+        xbmcplugin.setContent(int(sys.argv[1]), 'albums')
+        xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=True)
+
+        if type == 'audio': return
+
+        for i in range(0, 200):
+            if xbmc.getCondVisibility('Container.Content(albums)'):
+                return index().container_view('radios', {'skin.confluence' : 500})
             xbmc.sleep(100)
 
     def movieList(self, movieList):
@@ -520,7 +616,7 @@ class index:
                     if not url in favourites: cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=favourite_movie_add&name=%s&url=%s&image=%s&title=%s&year=%s&genre=%s&plot=%s)' % (sys.argv[0], sysname, sysurl, sysimage, systitle, sysyear, sysgenre, sysplot)))
                     else: cm.append((language(30409).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
                 if not action == 'movies':
-                    cm.append((language(30413).encode("utf-8"), 'RunPlugin(%s?action=view_movies)' % (sys.argv[0])))
+                    cm.append((language(30416).encode("utf-8"), 'RunPlugin(%s?action=view_movies)' % (sys.argv[0])))
                 cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
 
                 item = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=image)
@@ -587,7 +683,7 @@ class index:
                     if not url in favourites: cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=favourite_cartoons_add&name=%s&url=%s&image=%s&title=%s&year=%s&genre=%s&plot=%s)' % (sys.argv[0], sysname, sysurl, sysimage, systitle, sysyear, sysgenre, sysplot)))
                     else: cm.append((language(30409).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
                 if not action == 'movies':
-                    cm.append((language(30416).encode("utf-8"), 'RunPlugin(%s?action=view_cartoons)' % (sys.argv[0])))
+                    cm.append((language(30419).encode("utf-8"), 'RunPlugin(%s?action=view_cartoons)' % (sys.argv[0])))
                 cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
 
                 item = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=image)
@@ -655,7 +751,7 @@ class index:
                     if not url in favourites: cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=favourite_tv_add&name=%s&url=%s&image=%s&genre=%s&plot=%s)' % (sys.argv[0], sysname, sysurl, sysimage, sysgenre, sysplot)))
                     else: cm.append((language(30409).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
 
-                cm.append((language(30414).encode("utf-8"), 'RunPlugin(%s?action=view_tvshows)' % (sys.argv[0])))
+                cm.append((language(30417).encode("utf-8"), 'RunPlugin(%s?action=view_tvshows)' % (sys.argv[0])))
                 cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
 
                 item = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=image)
@@ -686,7 +782,7 @@ class index:
 
                 meta = {'title': title, 'studio': show, 'premiered': date, 'genre': genre, 'plot': plot}
 
-                sysurl = urllib.quote_plus(url)
+                sysname, sysurl, sysimage, sysgenre, sysplot, sysshow = urllib.quote_plus(name), urllib.quote_plus(url), urllib.quote_plus(image), urllib.quote_plus(genre), urllib.quote_plus(plot), urllib.quote_plus(show)
 
                 if fanart == '0': fanart = addonFanart
                 if image == '0': image = episodeImage
@@ -694,12 +790,20 @@ class index:
                 if plot == '0': meta.update({'plot': addonDesc})
                 meta = dict((k,v) for k, v in meta.iteritems() if not v == '0')
 
-                u = '%s?action=play&url=%s' % (sys.argv[0], sysurl)
+                try: stacked = i['stacked']
+                except: stacked = '0'
+                if stacked == '0':
+                    u = '%s?action=play&url=%s' % (sys.argv[0], sysurl)
+                    isFolder = False
+                else:
+                    u = '%s?action=episodes_stacked&name=%s&url=%s&image=%s&genre=%s&plot=%s&show=%s' % (sys.argv[0], sysname, sysurl, sysimage, sysgenre, sysplot, sysshow)
+                    isFolder = True
 
                 cm = []
+                cm.append((language(30401).encode("utf-8"), 'RunPlugin(%s?action=item_play)' % (sys.argv[0])))
                 cm.append((language(30403).encode("utf-8"), 'RunPlugin(%s?action=item_queue)' % (sys.argv[0])))
                 cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=playlist_open)' % (sys.argv[0])))
-                cm.append((language(30415).encode("utf-8"), 'RunPlugin(%s?action=view_episodes)' % (sys.argv[0])))
+                cm.append((language(30418).encode("utf-8"), 'RunPlugin(%s?action=view_episodes)' % (sys.argv[0])))
                 cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
 
                 item = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=image)
@@ -708,7 +812,7 @@ class index:
                 item.setProperty("Video", "true")
                 item.setProperty("IsPlayable", "true")
                 item.addContextMenuItems(cm, replaceItems=True)
-                xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=item,totalItems=total,isFolder=False)
+                xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=item,totalItems=total,isFolder=isFolder)
             except:
                 pass
 
@@ -846,15 +950,64 @@ class root:
     def get(self):
         rootList = []
         rootList.append({'name': 30501, 'image': 'root_livetv.jpg', 'action': 'root_livetv'})
-        rootList.append({'name': 30502, 'image': 'root_networks.jpg', 'action': 'root_networks'})
-        rootList.append({'name': 30503, 'image': 'root_shows.jpg', 'action': 'root_shows'})
-        rootList.append({'name': 30504, 'image': 'root_movies.jpg', 'action': 'root_movies'})
-        rootList.append({'name': 30505, 'image': 'root_cartoons.jpg', 'action': 'root_cartoons'})
-        rootList.append({'name': 30506, 'image': 'root_docs.jpg', 'action': 'shows_skai_docs'})
-        rootList.append({'name': 30507, 'image': 'root_favourites.jpg', 'action': 'root_favourites'})
-        rootList.append({'name': 30508, 'image': 'root_news.jpg', 'action': 'root_news'})
-        rootList.append({'name': 30509, 'image': 'root_sports.jpg', 'action': 'root_sports'})
-        rootList.append({'name': 30510, 'image': 'root_music.jpg', 'action': 'root_music'})
+        rootList.append({'name': 30502, 'image': 'root_radios.jpg', 'action': 'root_radios'})
+        rootList.append({'name': 30503, 'image': 'root_networks.jpg', 'action': 'root_networks'})
+        rootList.append({'name': 30504, 'image': 'root_shows.jpg', 'action': 'root_shows'})
+        rootList.append({'name': 30505, 'image': 'root_movies.jpg', 'action': 'root_movies'})
+        rootList.append({'name': 30506, 'image': 'root_cartoons.jpg', 'action': 'root_cartoons'})
+        rootList.append({'name': 30507, 'image': 'root_docs.jpg', 'action': 'shows_skai_docs'})
+        rootList.append({'name': 30508, 'image': 'root_favourites.jpg', 'action': 'root_favourites'})
+        rootList.append({'name': 30509, 'image': 'root_news.jpg', 'action': 'root_news'})
+        rootList.append({'name': 30510, 'image': 'root_sports.jpg', 'action': 'root_sports'})
+        rootList.append({'name': 30511, 'image': 'root_music.jpg', 'action': 'root_music'})
+        index().rootList(rootList)
+
+    def radios(self):
+        import random
+        img = ['radios_random1.jpg', 'radios_random2.jpg', 'radios_random3.jpg', 'radios_random4.jpg', 'radios_random5.jpg', 'radios_random6.jpg', 'radios_random7.jpg', 'radios_random8.jpg']
+
+        rootList = []
+        rootList.append({'name': 30521, 'image': 'radios_all.jpg', 'action': 'radios_all'})
+        rootList.append({'name': 30522, 'image': 'radios_favourites.jpg', 'action': 'radios_favourites'})
+        rootList.append({'name': 30523, 'image': 'radios_trending.jpg', 'action': 'radios_trending'})
+        rootList.append({'name': 30524, 'image': 'radios_top20.jpg', 'action': 'radios_top20'})
+        rootList.append({'name': 30525, 'image': 'radios_new.jpg', 'action': 'radios_new'})
+        try:
+            genres = eradio().genres()
+            for i in range(0, len(genres)): genres[i].update({'image': random.choice(img), 'action': 'radios'})
+            rootList += genres
+        except:
+            pass
+        try:
+            regions = eradio().regions()
+            for i in range(0, len(regions)): regions[i].update({'image': random.choice(img), 'action': 'radios'})
+            rootList += regions
+        except:
+            pass
+        index().rootList(rootList)
+
+    def radios_alt(self):
+        import random
+        img = ['radios_random1.jpg', 'radios_random2.jpg', 'radios_random3.jpg', 'radios_random4.jpg', 'radios_random5.jpg', 'radios_random6.jpg', 'radios_random7.jpg', 'radios_random8.jpg']
+
+        rootList = []
+        rootList.append({'name': 30521, 'image': 'radios_all.jpg', 'action': 'radios_alt_all'})
+        rootList.append({'name': 30522, 'image': 'radios_favourites.jpg', 'action': 'radios_alt_favourites'})
+        rootList.append({'name': 30523, 'image': 'radios_trending.jpg', 'action': 'radios_alt_trending'})
+        rootList.append({'name': 30524, 'image': 'radios_top20.jpg', 'action': 'radios_alt_top20'})
+        rootList.append({'name': 30525, 'image': 'radios_new.jpg', 'action': 'radios_alt_new'})
+        try:
+            genres = eradio().genres()
+            for i in range(0, len(genres)): genres[i].update({'image': random.choice(img), 'action': 'radios_alt'})
+            rootList += genres
+        except:
+            pass
+        try:
+            regions = eradio().regions()
+            for i in range(0, len(regions)): regions[i].update({'image': random.choice(img), 'action': 'radios_alt'})
+            rootList += regions
+        except:
+            pass
         index().rootList(rootList)
 
     def networks(self):
@@ -890,13 +1043,15 @@ class root:
         rootList.append({'name': 'ART TV', 'image': 'logos_art.jpg', 'action': 'shows_art'})
         rootList.append({'name': 'MTV', 'image': 'logos_mtv.jpg', 'action': 'shows_mtv'})
         rootList.append({'name': 'MAD TV', 'image': 'logos_madtv.jpg', 'action': 'shows_madtv'})
-        rootList.append({'name': 30521, 'image': 'shows_networks.jpg', 'action': 'shows_networks'})
+        rootList.append({'name': 'REAL FM', 'image': 'logos_real_fm.jpg', 'action': 'shows_real_fm'})
+        rootList.append({'name': 'SKAI 100,3', 'image': 'logos_skai_fm.jpg', 'action': 'shows_skai_fm'})
+        rootList.append({'name': 30531, 'image': 'shows_networks.jpg', 'action': 'shows_networks'})
         index().rootList(rootList)
 
     def shows(self):
         rootList = []
-        rootList.append({'name': 30531, 'image': 'shows_search.jpg', 'action': 'shows_search'})
-        rootList.append({'name': 30532, 'image': 'shows_favourites.jpg', 'action': 'shows_favourites'})
+        rootList.append({'name': 30541, 'image': 'shows_search.jpg', 'action': 'shows_search'})
+        rootList.append({'name': 30542, 'image': 'shows_favourites.jpg', 'action': 'shows_favourites'})
         try:
             titles = gm().showtitles()
             for i in range(0, len(titles)): titles[i].update({'image': 'titles_shows.jpg', 'action': 'shows'})
@@ -907,8 +1062,8 @@ class root:
 
     def movies(self):
         rootList = []
-        rootList.append({'name': 30541, 'image': 'movies_search.jpg', 'action': 'movies_search'})
-        rootList.append({'name': 30542, 'image': 'movies_favourites.jpg', 'action': 'movies_favourites'})
+        rootList.append({'name': 30551, 'image': 'movies_search.jpg', 'action': 'movies_search'})
+        rootList.append({'name': 30552, 'image': 'movies_favourites.jpg', 'action': 'movies_favourites'})
         try:
             years = gm().movieyears()
             for i in range(0, len(years)): years[i].update({'image': 'years_movies.jpg', 'action': 'movies'})
@@ -919,19 +1074,20 @@ class root:
 
     def cartoons(self):
         rootList = []
-        rootList.append({'name': 30551, 'image': 'cartoons_favourites.jpg', 'action': 'cartoons_favourites'})
-        rootList.append({'name': 30552, 'image': 'cartoons_collection.jpg', 'action': 'cartoons_collection'})
-        rootList.append({'name': 30553, 'image': 'cartoons_collection_gr.jpg', 'action': 'cartoons_collection_gr'})
-        rootList.append({'name': 30554, 'image': 'cartoons_classics.jpg', 'action': 'youtube_cartoons_classics'})
-        rootList.append({'name': 30555, 'image': 'cartoons_songs.jpg', 'action': 'youtube_cartoons_songs'})
+        rootList.append({'name': 30561, 'image': 'cartoons_favourites.jpg', 'action': 'cartoons_favourites'})
+        rootList.append({'name': 30562, 'image': 'cartoons_collection.jpg', 'action': 'cartoons_collection'})
+        rootList.append({'name': 30563, 'image': 'cartoons_collection_gr.jpg', 'action': 'cartoons_collection_gr'})
+        rootList.append({'name': 30564, 'image': 'cartoons_classics.jpg', 'action': 'youtube_cartoons_classics'})
+        rootList.append({'name': 30565, 'image': 'cartoons_songs.jpg', 'action': 'youtube_cartoons_songs'})
         index().rootList(rootList)
 
     def favourites(self):
         rootList = []
-        rootList.append({'name': 30561, 'image': 'livetv_favourites.jpg', 'action': 'livetv_favourites'})
-        rootList.append({'name': 30562, 'image': 'shows_favourites.jpg', 'action': 'shows_favourites'})
-        rootList.append({'name': 30563, 'image': 'movies_favourites.jpg', 'action': 'movies_favourites'})
-        rootList.append({'name': 30564, 'image': 'cartoons_favourites.jpg', 'action': 'cartoons_favourites'})
+        rootList.append({'name': 30571, 'image': 'livetv_favourites.jpg', 'action': 'livetv_favourites'})
+        rootList.append({'name': 30572, 'image': 'radios_favourites.jpg', 'action': 'radios_favourites'})
+        rootList.append({'name': 30573, 'image': 'shows_favourites.jpg', 'action': 'shows_favourites'})
+        rootList.append({'name': 30574, 'image': 'movies_favourites.jpg', 'action': 'movies_favourites'})
+        rootList.append({'name': 30575, 'image': 'cartoons_favourites.jpg', 'action': 'cartoons_favourites'})
         index().rootList(rootList)
 
     def news(self):
@@ -983,6 +1139,27 @@ class favourites:
             self.list = sorted(self.list, key=itemgetter('name'))
 
             index().channelList(self.list)
+        except:
+            return
+
+    def radios(self):
+        try:
+            dbcon = database.connect(addonSettings)
+            dbcur = dbcon.cursor()
+            dbcur.execute("SELECT * FROM favourites WHERE video_type ='Radio'")
+            match = dbcur.fetchall()
+            match = [(i[0], i[2], i[5]) for i in match]
+
+            for url, name, image in match:
+                try:
+                    name, image = eval(name.encode('utf-8')), eval(image.encode('utf-8'))
+
+                    self.list.append({'name': name, 'url': url, 'image': image})
+                except:
+                    pass
+
+            self.list = sorted(self.list, key=itemgetter('name'))
+            index().radioList(self.list)
         except:
             return
 
@@ -1317,6 +1494,8 @@ class episodes:
             self.list = skai().episodes_list(name, url, image, genre, plot, show)
         elif url.startswith(sigma().base_link):
             self.list = sigma().episodes_list(name, url, image, genre, plot, show)
+        elif url.startswith(realfm().base_link):
+            self.list = realfm().episodes_list(name, url, image, genre, plot, show)
         elif url.startswith(novasports().base_link):
             self.list = novasports().episodes_list(name, url, image, genre, plot, show)
         elif url.startswith(mtvchart().base_link):
@@ -1333,6 +1512,12 @@ class episodes:
             except: pass
         index().episodeList(self.list)
 
+    def stacked(self, name, url, image, genre, plot, show):
+        # stacked mp3 files from real fm fail after 10 seconds of playback, parse them to a folder.
+        if url.startswith(realfm().base_link):
+            self.list = realfm().stacked_list(name, url, image, genre, plot, show)
+        index().episodeList(self.list)
+
 class resolver:
     def run(self, url):
         try:
@@ -1340,6 +1525,17 @@ class resolver:
             if url is None: raise Exception()
 
             player().run(url)
+            return url
+        except:
+            index().infoDialog(language(30307).encode("utf-8"))
+            return
+
+    def radio(self, url):
+        try:
+            name, url, image = eradio().resolve(url)
+            if url is None: raise Exception()
+
+            player().radio(name, url, image)
             return url
         except:
             index().infoDialog(language(30307).encode("utf-8"))
@@ -1384,6 +1580,7 @@ class resolver:
             elif url.startswith(ant1cy().base_link): url = ant1cy().resolve(url)
             elif url.startswith(ant1cy().old_link): url = ant1cy().resolve(url)
             elif url.startswith(megacy().base_link): url = megacy().resolve(url)
+            elif url.startswith(realfm().base_link): url = realfm().resolve(url)
             elif url.startswith(novasports().base_link): url = novasports().resolve(url)
             elif url.startswith(dailymotion().base_link): url = dailymotion().resolve(url)
             elif url.startswith(youtube().search_link): url = youtube().resolve_search(url)
@@ -2257,13 +2454,18 @@ class skai:
         self.list = []
         self.base_link = 'http://www.skai.gr'
         self.show_link = 'http://www.skai.gr/player/TV/?mmid=%s'
-        self.shows_link = 'http://www.skai.gr/Ajax.aspx?m=Skai.TV.ProgramListView&la=0&Type=TV&Day=%s'
-        self.episodes_link = 'http://www.skai.gr/Ajax.aspx?m=Skai.Player.ItemView&type=TV&cid=6&alid=%s'
+        self.shows_link = 'http://www.skai.gr/Ajax.aspx?m=Skai.TV.ProgramListView&la=0&Type=TV&Day='
+        self.podcasts_link = 'http://www.skai.gr/Ajax.aspx?m=Skai.TV.ProgramListView&la=0&Type=Radio&Day='
+        self.episodes_link = 'http://www.skai.gr/Ajax.aspx?m=Skai.Player.ItemView&cid=6&alid=%s'
         self.docs_link = 'http://www.skai.gr/mobile/tv/category?cid=6'
         self.news_link = 'http://www.skai.gr/player/TV/?mmid=243980'
 
     def shows(self):
-        self.list = index().cache(self.shows_list, 24)
+        self.list = index().cache(self.shows_list, 24, self.shows_link)
+        index().showList(self.list)
+
+    def podcasts(self):
+        self.list = index().cache(self.shows_list, 24, self.podcasts_link)
         index().showList(self.list)
 
     def docs(self):
@@ -2326,14 +2528,14 @@ class skai:
         except:
             pass
 
-    def shows_list(self):
+    def shows_list(self, url):
         try:
-            url = []
+            u = []
             d = datetime.datetime.utcnow()
             for i in range(0, 7):
-                url.append(self.shows_link % d.strftime("%d.%m.%Y"))
+                u.append(url + d.strftime("%d.%m.%Y"))
                 d = d - datetime.timedelta(hours=24)
-            url = url[::-1]
+            u = u[::-1]
 
             self.result = []
 
@@ -2342,7 +2544,7 @@ class skai:
                 except: pass
 
             threads = []
-            for i in range(0, 7): threads.append(Thread(thread, url[i]))
+            for i in range(0, 7): threads.append(Thread(thread, u[i]))
             [i.start() for i in threads]
             [i.join() for i in threads]
 
@@ -2617,6 +2819,137 @@ class megacy:
         except:
             return
 
+class realfm:
+    def __init__(self):
+        self.list = []
+        self.br_link = 'http://www.real.gr'
+        self.base_link = 'http://www.realmobile.gr'
+        self.image_link = 'http://www.real.gr/Files/Articles/Photo/320_182_115547.jpg'
+        self.episodes_link = 'http://www.realmobile.gr/msimple/article_details.php?ID=%s&catID=%s'
+        self.podcasts_link = 'http://www.real.gr/default.aspx?page=radioathens&catID=50'
+        self.added_link = 'http://www.realmobile.gr/msimple/articles.php?categoryID=50'
+        self.show_link = 'http://www.realmobile.gr/msimple/articles.php?categoryID=%s'
+
+    def podcasts(self):
+        self.list = index().cache(self.shows_list, 24)
+        index().showList(self.list)
+
+    def shows_list(self):
+        try:
+            result = getUrl(self.podcasts_link).result
+            result = common.parseDOM(result, "div", attrs = { "class": "middle-container" })[0]
+            result = common.parseDOM(result, "tbody")[0]
+
+            shows = re.compile('(<a.+?</a>)').findall(result)
+        except:
+            return
+
+        for show in shows:
+            try:
+                u = common.parseDOM(show, "a", ret="href")[0]
+                if not 'catID=' in u: raise Exception()
+                u = '%s/%s' % (self.br_link, u)
+                u = common.replaceHTMLCodes(u)
+                u = u.encode('utf-8')
+
+                url = re.compile('catID=(\d*)').findall(u)[0]
+                url = self.show_link % url
+                url = common.replaceHTMLCodes(url)
+                url = url.encode('utf-8')
+
+                image = common.parseDOM(show, "img", ret="src")[0]
+                image = '%s/%s' % (self.br_link, image)
+                image = common.replaceHTMLCodes(image)
+                image = image.encode('utf-8')
+
+                self.list.append({'name': '0', 'url': url, 'u': u, 'image': image, 'genre': 'Greek', 'plot': '0'})
+            except:
+                pass
+
+        threads = []
+        for i in range(0, len(self.list)): threads.append(Thread(self.shows_info, i))
+        [i.start() for i in threads]
+        [i.join() for i in threads]
+
+        self.list = [i for i in self.list if not i['name'] == '0']
+        self.list = [{'name': 'realfm97.8', 'url': self.added_link, 'image': self.image_link, 'genre': 'Greek', 'plot': '0'}] + self.list
+
+        return self.list
+
+    def shows_info(self, i):
+        try:
+            result = getUrl(self.list[i]['u']).result
+
+            name = common.parseDOM(result, "title")[0]
+            name = name.split(' - ', 1)[-1]
+            name = common.replaceHTMLCodes(name)
+            name = name.encode('utf-8')
+            self.list[i].update({'name': name})
+        except:
+            pass
+
+    def episodes_list(self, name, url, image, genre, plot, show):
+        try:
+            result = getUrl(url).result
+            result = common.parseDOM(result, "script", attrs = { "type": "text/javascript" })
+            result = [i for i in result if 'title = ' in i][0]
+
+            cat = re.compile('categoryID=(\d*)').findall(url)[0]
+            episode = result.replace('\n','')
+        except:
+        	return
+
+        for i in range(0, 51):
+            try:
+                name = episode.split('title = ', 1)[-1]
+                name = re.compile("'%s'.+?'(.+?)'" % str(i)).findall(name)[0]
+                name = common.replaceHTMLCodes(name)
+                name = name.encode('utf-8')
+
+                url = episode.split('id = ', 1)[-1].replace(' ', '')
+                url = re.compile("'%s':(\d*)" % str(i)).findall(url)[0]
+                url = self.episodes_link % (url, cat)
+                url = common.replaceHTMLCodes(url)
+                url = url.encode('utf-8')
+
+                image = episode.split('thumbnail = ', 1)[-1]
+                image = re.compile("'%s'.+?'(.+?)'" % str(i)).findall(image)[0]
+                image = common.replaceHTMLCodes(image)
+                image = image.encode('utf-8')
+
+                if cat == '50': stacked = '0'
+                else: stacked = '1'
+
+                self.list.append({'name': name, 'url': url, 'image': image, 'date': '0', 'genre': genre, 'plot': plot, 'title': name, 'show': show, 'stacked': stacked})
+            except:
+                pass
+
+        return self.list
+
+    def stacked_list(self, name, url, image, genre, plot, show):
+        try:
+            result = getUrl(url).result
+            result = common.parseDOM(result, "ul", attrs = { "class": "pageitem" })[0]
+
+            url = common.parseDOM(result, "a", ret="href", attrs = { "target": "_blank" })
+
+            for i in range(0, len(url)):
+                self.list.append({'name': '%s (%s)' % (name, str(i+1)), 'url': url[i], 'image': image, 'date': '0', 'genre': genre, 'plot': plot, 'title': name, 'show': show})
+        except:
+        	pass
+
+        return self.list
+
+    def resolve(self, url):
+        try:
+            result = getUrl(url).result
+            result = common.parseDOM(result, "ul", attrs = { "class": "pageitem" })[0]
+
+            url = common.parseDOM(result, "a", ret="href", attrs = { "target": "_blank" })[0]
+            return url
+        except:
+            return
+
 class novasports:
     def __init__(self):
         self.list = []
@@ -2679,6 +3012,132 @@ class novasports:
             result = getUrl(url).result
             url = re.compile("type: 'html5'.+?'file': '(.+?)'").findall(result)[0]
             return url
+        except:
+            return
+
+class eradio:
+    def __init__(self):
+        self.list = []
+        self.base_link = 'http://eradio.mobi'
+        self.radios_link = 'http://eradio.mobi/cache/1/1/medialist.json'
+        self.trending_link = 'http://eradio.mobi/cache/1/1/medialistTop_trending.json'
+        self.top20_link = 'http://eradio.mobi/cache/1/1/medialist_top20.json'
+        self.new_link = 'http://eradio.mobi/cache/1/1/medialist_new.json'
+        self.genres_link = 'http://eradio.mobi/cache/1/1/categories.json'
+        self.regions_link = 'http://eradio.mobi/cache/1/1/regions.json'
+        self.genre_link = 'http://eradio.mobi/cache/1/1/medialist_categoryID%s.json'
+        self.region_link = 'http://eradio.mobi/cache/1/1/medialist_regionID%s.json'
+        self.resolve_link = 'http://eradio.mobi/cache/1/1/media/%s.json'
+        self.image_link = 'http://cdn.e-radio.gr/logos/%s'
+
+    def genres(self):
+        try:
+            self.list = index().cache(self.categories_list, 24, self.genres_link)
+            return self.list
+        except:
+            pass
+
+    def regions(self):
+        try:
+            self.list = index().cache(self.categories_list, 24, self.regions_link)
+            return self.list
+        except:
+            pass
+
+    def radios(self, url):
+        try: url = getattr(self, url)
+        except: pass
+        self.list = index().cache(self.radios_list, 24, url)
+        index().radioList(self.list)
+
+    def categories_list(self, url):
+        try:
+            result = getUrl(url, mobile=True).result
+            result = json.loads(result)
+
+            try: categories = result['categories']
+            except: categories = result['countries']
+        except:
+            return
+
+        for cat in categories:
+            try:
+                try: name = cat['categoryName']
+                except: name = cat['regionName']
+                name = common.replaceHTMLCodes(name)
+                name = name.encode('utf-8')
+
+                try: url = self.genre_link % str(cat['categoryID'])
+                except: url = self.region_link % str(cat['regionID'])
+                url = common.replaceHTMLCodes(url)
+                url = url.encode('utf-8')
+
+                self.list.append({'name': name, 'url': url})
+            except:
+                pass
+
+        return self.list
+
+    def radios_list(self, url):
+        try:
+            result = getUrl(url, mobile=True).result
+            result = json.loads(result)
+
+            radios = result['media']
+        except:
+            return
+
+        for radio in radios:
+            try:
+                name = radio['name'].strip()
+                name = common.replaceHTMLCodes(name)
+                name = name.encode('utf-8')
+
+                url = str(radio['stationID'])
+                url = common.replaceHTMLCodes(url)
+                url = url.encode('utf-8')
+
+                image = radio['logo']
+                image = self.image_link % image
+                image = image.replace('/promo/', '/500/')
+                if image.endswith('/nologo.png'): image = '0'
+                image = common.replaceHTMLCodes(image)
+                image = image.encode('utf-8')
+
+                self.list.append({'name': name, 'url': url, 'image': image})
+            except:
+                pass
+
+        return self.list
+
+    def resolve(self, url):
+        try:
+            url = self.resolve_link % url
+
+            result = getUrl(url, mobile=True).result
+            result = json.loads(result)
+
+            radio = result['media'][0]
+
+            name = radio['name'].strip()
+            name = common.replaceHTMLCodes(name)
+            name = name.encode('utf-8')
+
+            url = radio['mediaUrl'][0]['liveURL']
+            if not url.startswith('http://'): url = '%s%s' % ('http://', url)
+            url = common.replaceHTMLCodes(url)
+            url = url.encode('utf-8')
+
+            url = getUrl(url, output='geturl').result
+
+            image = radio['logo']
+            image = self.image_link % image
+            image = image.replace('/promo/', '/500/')
+            if image.endswith('/nologo.png'): image = '0'
+            image = common.replaceHTMLCodes(image)
+            image = image.encode('utf-8')
+
+            return (name, url, image)
         except:
             return
 
@@ -3115,8 +3574,12 @@ class livestream:
     def viiideo(self, url):
         try:
             result = getUrl(url).result
-            url = re.compile("ipadUrl.+?'http://(.+?)/playlist[.]m3u8'").findall(result)[0]
-            url = 'rtmp://%s live=1 timeout=10' % url
+            result = result.replace('\n','')
+
+            rtmp = re.compile("netConnectionUrl:\s+'(.+?)'").findall(result)[0]
+            playpath = re.compile("clip:\s.+?url:\s+'(.+?)'").findall(result)[0]
+
+            url = '%s playpath=%s live=1 timeout=10' % (rtmp, playpath)
             return url
         except:
             return

@@ -1,4 +1,17 @@
 ------------------------
+Hellenic TV v3.1.0 (19-Dec-14)
+------------------------
+
+- Added Radio section.
+- Added REAL FM and SKAI 100,3 podcasts.
+- Added Hellenic TV in music add-ons (Radios).
+- Tweaked all available resolvers.
+- Tweaked live tv listings.
+- Updated live tv channels.
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.0.2 (8-Dec-14)
 ------------------------
 

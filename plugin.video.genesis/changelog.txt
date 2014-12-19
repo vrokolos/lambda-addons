@@ -1,4 +1,15 @@
 ------------------------
+Genesis v3.2.3 (19-Dec-14)
+------------------------
+
+- Fixed issues with service in low-end devices.
+- Fixed issues with available resolvers.
+- Fixed issues with available sources.
+- Tweaked detection of new episodes.
+- Code cosmetics.
+
+
+------------------------
 Genesis v3.2.2 (13-Dec-14)
 ------------------------
 

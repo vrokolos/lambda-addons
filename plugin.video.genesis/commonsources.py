@@ -872,6 +872,8 @@ class moviezone:
 
             result = getUrl(self.base_link + url).result
 
+            referer = self.base_link + url
+
             url = re.compile('server_php\s+=\s+"(.+?)"').findall(result)
             url = [i for i in url if i.endswith('.php')][::-1][:2]
 
@@ -879,18 +881,27 @@ class moviezone:
             post = urllib.urlencode({'url': post})
 
 
-            def get_php(url, post):
+            def get_php(url, referer, post):
+                import urlparse
                 request = urllib2.Request(url, post)
+
+                request.add_header('Connection', 'keep-alive')
+                request.add_header('Accept', 'text/html, */*; q=0.01')
+                request.add_header('Content-Length', '200')
+                request.add_header('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
                 request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0) Gecko/20100101 Firefox/6.0')
+                request.add_header('Host', urlparse.urlparse(url).netloc.replace('www.', ''))
                 request.add_header('Origin', self.base_link)
+                request.add_header('Referer', referer)
+
                 response = urllib2.urlopen(request, timeout=5)
                 result = response.read()
                 response.close()
                 result = json.loads(result)
                 return result
 
-            try: result = get_php(url[0], post)
-            except: result = get_php(url[1], post)
+            try: result = get_php(url[0], referer, post)
+            except: result = get_php(url[1], referer, post)
             result = result['content']
 
             links = [i['url'] for i in result]
@@ -1256,8 +1267,11 @@ class movietv:
                 query = self.base_link + self.moviesearch_link % query
 
                 request = urllib2.Request(query)
-                request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0) Gecko/20100101 Firefox/6.0')
+                request.add_header('Host', 'movietv.to')
+                request.add_header('Connection', 'keep-alive')
+                request.add_header('Accept', 'application/json, text/javascript, */*; q=0.01')
                 request.add_header('X-Requested-With', 'XMLHttpRequest')
+                request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36')
                 request.add_header('Referer', self.base_link)
                 response = urllib2.urlopen(request, timeout=5)
                 result = response.read()
@@ -1283,8 +1297,11 @@ class movietv:
                 query = self.base_link + self.tvsearch_link % query
 
                 request = urllib2.Request(query)
-                request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0) Gecko/20100101 Firefox/6.0')
+                request.add_header('Host', 'movietv.to')
+                request.add_header('Connection', 'keep-alive')
+                request.add_header('Accept', 'application/json, text/javascript, */*; q=0.01')
                 request.add_header('X-Requested-With', 'XMLHttpRequest')
+                request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36')
                 request.add_header('Referer', self.base_link)
                 response = urllib2.urlopen(request, timeout=5)
                 result = response.read()
@@ -1724,7 +1741,7 @@ class einthusan:
 
 class myvideolinks:
     def __init__(self):
-        self.base_link = 'http://myvideolinks.xyz'
+        self.base_link = 'http://movies.myvideolinks.eu'
         self.search_link = '/?s=%s'
 
     def get_movie(self, imdb, title, year):

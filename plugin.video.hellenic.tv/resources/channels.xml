@@ -61,7 +61,7 @@
 		<channel active="True">
 			<name>EURONEWS</name>
 			<type>hls</type>
-			<url>http://ewns-hls-b-cdn.hexaglobe.net/d781becd138a3b331584790268f23d14/5480b5ec/euronews_gre.smil/playlist.m3u8</url>
+			<url>http://ewns-hls-b-cdn.hexaglobe.net/18d4aae58438972c8afb7c87898a4a05/5492b832/euronews_gre.smil/playlist.m3u8</url>
 			<base>http://gr.euronews.com/news/streaming-live/</base>
 		</channel>
 	</area>
@@ -155,7 +155,7 @@
 		<channel active="True">
 			<name>BLUE SKY</name>
 			<type>hls</type>
-			<url>http://46.4.73.93:1935/bluesky/bluesky.stream/playlist.m3u8</url>
+			<url>http://176.9.52.185:1935/bluesky/bluesky.stream/playlist.m3u8</url>
 			<base>http://www.blueskytv.gr/live-tv/</base>
 		</channel>
 		<channel active="True">
@@ -562,7 +562,7 @@
 			<name>FLASH TV</name>
 			<type>ustream</type>
 			<url>http://www.ustream.tv/channel/flash-tv-ch</url>
-			<base>http://www.flash-tv.gr/</base>
+			<base>http://www.westgroup.gr/</base>
 		</channel>
 		<channel active="False">
 			<name>SUPER 28</name>
