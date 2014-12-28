@@ -2129,10 +2129,10 @@ class link:
         self.tvrage_info = 'http://www.tvrage.com/shows/id-%s/episode_list/all'
         self.epguides_info = 'http://epguides.com/common/exportToCSV.asp?rage=%s'
 
-        self.scn_base = 'https://ipv6.icefilms.info'
-        self.scn_added = 'https://ipv6.icefilms.info/movies/release/1?start=0'
-        self.scn_added_hd = 'https://ipv6.icefilms.info/movies/release/hd?start=0'
-        self.scn_tv_added = 'https://ipv6.icefilms.info'
+        self.scn_base = 'http://www.vcdq.com'
+        self.scn_added = 'http://www.vcdq.com/all-movies'
+        self.scn_added_hd = 'http://www.vcdq.com/hd-movies'
+        self.scn_tv_added = 'http://m2v.ru/?Part=11&func=part&page='
 
 class people:
     def __init__(self):
@@ -3092,59 +3092,49 @@ class movies:
             result = getUrl(url, timeout='10').result
             result = result.decode('iso-8859-1').encode('utf-8')
 
-            movies = common.parseDOM(result, "span", attrs = { "class": "list" })[0]
-            movies = movies.split('<br>')
+            movies = common.parseDOM(result, "a", ret="href", attrs = { "title": "IMDB" })
+            movies = [re.sub('[^0-9]', '', i) for i in movies]
+            movies = uniqueList(movies).list
         except:
             return
 
         try:
-            next, start = re.compile('(.+?)(\d*)$').findall(url)[0]
-            start = int(start)
-            end = start + 25
-            if start >= 125: raise Exception()
-            next = next + str(end)
+            next = common.parseDOM(result, "a", ret="href", attrs = { "id": "pag-next" })[0]
+            next = '%s%s' % (link().scn_base, next)
+            next = common.replaceHTMLCodes(next)
             next = next.encode('utf-8')
         except:
             next = ''
 
         for movie in movies:
             try:
-                title = common.parseDOM(movie, "a")[-1]
-                title = re.compile('(.+?) [(]\d{4}[)]$').findall(title)[0]
-                title = common.replaceHTMLCodes(title)
-                title = title.encode('utf-8')
+                poster = link().imdb_image
 
-                year = common.parseDOM(movie, "a")[-1]
-                year = re.compile('.+? [(](\d{4})[)]$').findall(year)[0]
-                year = year.encode('utf-8')
-
-                name = '%s (%s)' % (title, year)
-                try: name = name.encode('utf-8')
-                except: pass
-
-                try: imdb = common.parseDOM(movie, "a", ret="id")[0]
-                except: imdb = '0000000'
-                imdb = re.sub('[^0-9]', '', str(imdb))
+                imdb = re.sub('[^0-9]', '', str(movie))
                 imdb = imdb.encode('utf-8')
 
                 url = link().imdb_title % imdb
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
-                self.list.append({'name': name, 'title': title, 'year': year, 'imdb': imdb, 'tvdb': '0', 'season': '0', 'episode': '0', 'show': '0', 'show_alt': '0', 'date': '0', 'genre': '0', 'url': url, 'poster': '0', 'fanart': '0', 'studio': '0', 'duration': '0', 'rating': '0', 'votes': '0', 'mpaa': '0', 'director': '0', 'plot': '0', 'plotoutline': '0', 'tagline': '0', 'next': next})
+                self.list.append({'name': '0', 'title': '0', 'year': '0', 'imdb': imdb, 'tvdb': '0', 'season': '0', 'episode': '0', 'show': '0', 'show_alt': '0', 'date': '0', 'genre': '0', 'url': url, 'poster': poster, 'fanart': '0', 'studio': '0', 'duration': '0', 'rating': '0', 'votes': '0', 'mpaa': '0', 'director': '0', 'plot': '0', 'plotoutline': '0', 'tagline': '0', 'next': next})
             except:
                 pass
-
-        self.list = [i for i in self.list if start <= self.list.index(i) < end]
-
-        self.list = [i for i in self.list if not i['imdb'] == '0000000']
 
         threads = []
         for i in range(0, len(self.list)): threads.append(Thread(self.tmdb_info, i))
         [i.start() for i in threads]
         [i.join() for i in threads]
 
-        self.list = [i for i in self.list if not i['poster'] == '0']
+        self.list = [i for i in self.list if not i['title'] == '0']
+
+        for i in range(0, len(self.list)):
+            try:
+                name = '%s (%s)' % (self.list[i]['title'], self.list[i]['year'])
+                name = name.encode('utf-8')
+                self.list[i].update({'name': name})
+            except:
+                pass
 
         return self.list
 
@@ -3153,6 +3143,18 @@ class movies:
             url = link().tmdb_info % (self.list[i]['imdb'], link().tmdb_key)
             result = getUrl(url, timeout='10').result
             result = json.loads(result)
+
+            title = result['title']
+            if title == '' or title == None: title = '0'
+            title = common.replaceHTMLCodes(title)
+            title = title.encode('utf-8')
+            if not title == '0': self.list[i].update({'title': title})
+
+            try: year = str(result['release_date'])
+            except: year = '0000'
+            year = re.compile('(\d{4})').findall(year)[0]
+            year = year.encode('utf-8')
+            if not year == '0000': self.list[i].update({'year': year})
 
             poster = result['poster_path']
             if poster == '' or poster == None: poster = '0'
@@ -4159,6 +4161,10 @@ class episodes:
         title = re.sub('\n|\s(|[(])(UK|US|AU|\d{4})(|[)])$|\s(vs|v[.])\s|(:|;|-|"|,|\'|\.|\?)|\s', '', title).lower()
         return title
 
+    def cleantitle_tv_2(self, title):
+        title = re.sub('\n|\.(UK|US|AU|\d{4})$|\s(vs|v[.])\s|(:|;|-|"|,|\'|\.|\?)|\s', '', title).lower()
+        return title
+
     def tvrage_redirect(self, title, year, tvdb, season, episode, show, date, genre):
         try:
             exception = True
@@ -4182,16 +4188,12 @@ class episodes:
         except:
             pass
 
-        def cleantitle_tv(title):
-            title = re.sub('\n|\s(|[(])(UK|US|AU|\d{4})(|[)])$|\s(vs|v[.])\s|(:|;|-|"|,|\'|\.|\?)|\s', '', title).lower()
-            return title
-
         try:
             if not tvrage == '0': raise Exception()
             url = link().tvrage_search % urllib.quote_plus(show)
             result = getUrl(url, timeout='10').result
             result = common.parseDOM(result, "show")
-            result = [i for i in result if cleantitle_tv(show) == cleantitle_tv(common.replaceHTMLCodes(common.parseDOM(i, "name")[0])) and any(x in common.parseDOM(i, "started")[0] for x in [str(year), str(int(year)+1), str(int(year)-1)])][0]
+            result = [i for i in result if self.cleantitle_tv(show) == self.cleantitle_tv(common.replaceHTMLCodes(common.parseDOM(i, "name")[0])) and any(x in common.parseDOM(i, "started")[0] for x in [str(year), str(int(year)+1), str(int(year)-1)])][0]
             tvrage = common.parseDOM(result, "showid")[0]
             tvrage = str(tvrage)
         except:
@@ -4199,29 +4201,27 @@ class episodes:
 
         try:
             if tvrage == '0': raise Exception()
-            url = link().epguides_info % tvrage
-            result = getUrl(url, timeout='10').result
-            search = re.compile('\d+?,(\d+?),(\d+?),.+?,(\d+?/.+?/\d+?),"(.+?)",.+?,".+?"').findall(result)
-            d = '%02d/%s/%s' % (int(date.split('-')[2]), {'01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'May', '06':'Jun', '07':'Jul', '08':'Aug', '09':'Sep', '10':'Oct', '11':'Nov', '12':'Dec'}[date.split('-')[1]], date.split('-')[0][-2:])
-            match = [i for i in search if cleantitle_tv(title) == cleantitle_tv(i[3])]
-            match += [i for i in search if d == i[2]]
-            season = str('%01d' % int(match[0][0]))
-            episode = str('%01d' % int(match[0][1]))
-            return (season, episode)
+            url = link().tvrage_info % tvrage
+            result = getUrl(url, timeout='5').result
+            search = re.compile('<td.+?><a.+?title=.+?season.+?episode.+?>(\d+?)x(\d+?)<.+?<td.+?>(\d+?/.+?/\d+?)<.+?<td.+?>.+?href=.+?>(.+?)<').findall(result.replace('\n',''))
+            d = '%02d/%s/%s' % (int(date.split('-')[2]), {'01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'May', '06':'Jun', '07':'Jul', '08':'Aug', '09':'Sep', '10':'Oct', '11':'Nov', '12':'Dec'}[date.split('-')[1]], date.split('-')[0])
+            match = [i for i in search if d == i[2]]
+            if len(match) == 1: return (str('%01d' % int(match[0][0])), str('%01d' % int(match[0][1])))
+            match = [i for i in search if self.cleantitle_tv(title) == self.cleantitle_tv(i[3])]
+            if len(match) == 1: return (str('%01d' % int(match[0][0])), str('%01d' % int(match[0][1])))
         except:
             pass
 
         try:
             if tvrage == '0': raise Exception()
-            url = link().tvrage_info % tvrage
-            result = getUrl(url, timeout='10').result
-            search = re.compile('<td.+?><a.+?title=.+?season.+?episode.+?>(\d+?)x(\d+?)<.+?<td.+?>(\d+?/.+?/\d+?)<.+?<td.+?>.+?href=.+?>(.+?)<').findall(result.replace('\n',''))
-            d = '%02d/%s/%s' % (int(date.split('-')[2]), {'01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'May', '06':'Jun', '07':'Jul', '08':'Aug', '09':'Sep', '10':'Oct', '11':'Nov', '12':'Dec'}[date.split('-')[1]], date.split('-')[0])
-            match = [i for i in search if cleantitle_tv(title) == cleantitle_tv(i[3])]
-            match += [i for i in search if d == i[2]]
-            season = str('%01d' % int(match[0][0]))
-            episode = str('%01d' % int(match[0][1]))
-            return (season, episode)
+            url = link().epguides_info % tvrage
+            result = getUrl(url, timeout='5').result
+            search = re.compile('\d+?,(\d+?),(\d+?),.+?,(\d+?/.+?/\d+?),"(.+?)",.+?,".+?"').findall(result)
+            d = '%02d/%s/%s' % (int(date.split('-')[2]), {'01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'May', '06':'Jun', '07':'Jul', '08':'Aug', '09':'Sep', '10':'Oct', '11':'Nov', '12':'Dec'}[date.split('-')[1]], date.split('-')[0][-2:])
+            match = [i for i in search if d == i[2]]
+            if len(match) == 1: return (str('%01d' % int(match[0][0])), str('%01d' % int(match[0][1])))
+            match = [i for i in search if self.cleantitle_tv(title) == self.cleantitle_tv(i[3])]
+            if len(match) == 1: return (str('%01d' % int(match[0][0])), str('%01d' % int(match[0][1])))
         except:
             pass
 
@@ -4481,19 +4481,27 @@ class episodes:
 
     def scn_list(self):
         try:
-            result = getUrl(link().scn_tv_added, timeout='10').result
+            result = getUrl(link().scn_tv_added + '1', timeout='10').result
+            result += getUrl(link().scn_tv_added + '2', timeout='10').result
             result = result.decode('iso-8859-1').encode('utf-8')
 
-            shows = common.parseDOM(result, "div", attrs = { "id": "fp_articles" })[0]
-            shows = common.parseDOM(shows, "img", ret="alt")
+            dates = common.parseDOM(result, "tr", attrs = { "class": "MainTable" })
+            dates = [re.compile('(\d{4}-\d{2}-\d{2})').findall(i) for i in dates]
+            dates = [i[0] for i in dates if not len(i) == 0]
+            dates = [i.encode('utf-8') for i in dates]
+            dates = uniqueList(dates).list
+            dates = dates[:7]
+
+            shows = common.parseDOM(result, "tr", attrs = { "class": "MainTable" })
+            shows = [common.parseDOM(i, "a")[0] for i in shows]
+            shows = [re.compile('(.*)[.]S\d+?E\d+?[.]').findall(i) for i in shows]
+            shows = [i[0] for i in shows if not len(i) == 0]
+            shows = [self.cleantitle_tv_2(i) for i in shows]
+            shows = [i.encode('utf-8') for i in shows]
             shows = uniqueList(shows).list
-            shows = [common.replaceHTMLCodes(i) for i in shows]
-            shows = [self.cleantitle_tv(i) for i in shows]
 
-            now = datetime.datetime.utcnow() - datetime.timedelta(hours = 29)
-            date = datetime.date(now.year, now.month, now.day) - datetime.timedelta(days=4)
-            url = link().trakt_tv_calendar % (link().trakt_key, re.sub('[^0-9]', '', str(date)), '5')
-
+            date = datetime.date(int(dates[-1].split('-')[0]), int(dates[-1].split('-')[1]), int(dates[-1].split('-')[2]))
+            url = link().trakt_tv_calendar % (link().trakt_key, re.sub('[^0-9]', '', str(date)), str(len(dates)))
             self.list = self.trakt_list(url)
             self.list = [i for i in self.list if self.cleantitle_tv(i['show']) in shows]
             self.list = self.list[::-1]
@@ -4839,16 +4847,38 @@ class resolver:
             return
 
     def sources_filter(self):
-        hd_rank = ['noobroom', 'uploaded', 'rapidgator', 'filefactory', 'bitshare', 'uploadable']
+        pz_hosts = []
+        if (getSetting("premiumize_user") == '' or getSetting("premiumize_password") == ''): pz_mode = False
+        else: pz_mode = True
+
+        rd_hosts = []
+        if (getSetting("realdedrid_user") == '' or getSetting("realdedrid_password") == ''): rd_mode = False
+        else: rd_mode = True
+
+        if pz_mode == True:
+            import commonresolvers
+            pz_hosts = index().cache(commonresolvers.premiumize_hosts, 24)
+            if pz_hosts == None: pz_hosts = []
+
+        if rd_mode == True:
+            import commonresolvers
+            rd_hosts = index().cache(commonresolvers.realdebrid_hosts, 24)
+            if rd_hosts == None: rd_hosts = []
+
+        hd_rank = pz_hosts + rd_hosts + ['noobroom', 'furk']
         #hd_rank += ['VK', 'Movietube', 'Moviezone', 'Muchmovies', 'Sweflix', 'Videomega', 'Niter', 'YIFY', 'Einthusan', 'Movreel', 'Billionuploads', 'V-vids', 'Vidbull', '180upload', 'Hugefiles', 'Filecloud', 'Uploadrocket', 'Kingfiles']
         hd_rank += [getSetting("hosthd1"), getSetting("hosthd2"), getSetting("hosthd3"), getSetting("hosthd4"), getSetting("hosthd5"), getSetting("hosthd6"), getSetting("hosthd7"), getSetting("hosthd8"), getSetting("hosthd9"), getSetting("hosthd10"), getSetting("hosthd11"), getSetting("hosthd12"), getSetting("hosthd13"), getSetting("hosthd14"), getSetting("hosthd15"), getSetting("hosthd16"), getSetting("hosthd17"), getSetting("hosthd18")]
-        hd_rank += ['furk']
 
-        sd_rank = ['noobroom', 'furk', 'uploaded', 'rapidgator', 'filefactory', 'bitshare', 'uploadable']
+        hd_rank = [i.lower() for i in hd_rank]
+        hd_rank = uniqueList(hd_rank).list
+
+        sd_rank = ['noobroom', 'furk']
         #sd_rank += ['Movreel', 'Billionuploads', 'MovieTV', 'Ororo', 'Streamin', 'Grifthost', 'iShared', 'Cloudyvideos', 'Mrfile', 'Vidbull', 'Mightyupload', 'VK', 'Movshare', 'Promptfile', 'Vodlocker', 'Played', 'Gorillavid', 'Bestreams', 'Daclips', 'Divxstage']
         sd_rank += [getSetting("host1"), getSetting("host2"), getSetting("host3"), getSetting("host4"), getSetting("host5"), getSetting("host6"), getSetting("host7"), getSetting("host8"), getSetting("host9"), getSetting("host10"), getSetting("host11"), getSetting("host12"), getSetting("host13"), getSetting("host14"), getSetting("host15"), getSetting("host16"), getSetting("host17"), getSetting("host18"), getSetting("host19"), getSetting("host20")]
+        sd_rank += pz_hosts + rd_hosts
+        sd_rank += self.hostDict
 
-        hd_rank = uniqueList(hd_rank).list
+        sd_rank = [i.lower() for i in sd_rank]
         sd_rank = uniqueList(sd_rank).list
 
         for i in range(len(self.sources)): self.sources[i]['source'] = self.sources[i]['source'].lower()
@@ -4858,7 +4888,6 @@ class resolver:
         for host in hd_rank: filter += [i for i in self.sources if i['quality'] == '1080p' and i['source'].lower() == host.lower()]
         for host in hd_rank: filter += [i for i in self.sources if i['quality'] == 'HD' and i['source'].lower() == host.lower()]
         for host in sd_rank: filter += [i for i in self.sources if not i['quality'] in ['1080p', 'HD'] and i['source'].lower() == host.lower()]
-        filter += [i for i in self.sources if not i['quality'] in ['1080p', 'HD'] and not any(x == i['source'].lower() for x in [r.lower() for r in sd_rank])]
         self.sources = filter
 
         filter = []
@@ -4869,19 +4898,25 @@ class resolver:
         if len(filter) < 10: filter += [i for i in self.sources if i['quality'] == 'CAM']
         self.sources = filter
 
-        if (getSetting("realdedrid_user") == '' or getSetting("realdedrid_password") == ''):
-            self.sources = [i for i in self.sources if not i['source'] in ['uploaded', 'rapidgator', 'filefactory', 'bitshare', 'uploadable']]
-
         if getSetting("play_hd") == 'false':
             self.sources = [i for i in self.sources if not i['quality'] in ['1080p', 'HD']]
 
         count = 1
         for i in range(len(self.sources)):
-            source = '%02d | [B]%s[/B] | ' % (count, self.sources[i]['provider'])
-            try: source += '%s' % (self.sources[i]['info'])
-            except: source += '%s | %s' % (self.sources[i]['source'], self.sources[i]['quality'])
+            source = self.sources[i]['source'].lower()
+
+            if source in pz_hosts: label = '%02d | [B]premiumize[/B] | ' % count
+            elif source in rd_hosts: label = '%02d | [B]realdebrid[/B] | ' % count
+            else: label = '%02d | [B]%s[/B] | ' % (count, self.sources[i]['provider'])
+
+            try: label += '%s' % (self.sources[i]['info'])
+            except: label += '%s | %s' % (self.sources[i]['source'], self.sources[i]['quality'])
+
+            if 'premiumize' in label: self.sources[i]['source'] = 'premiumize'
+            if 'realdebrid' in label: self.sources[i]['source'] = 'realdebrid'
+
             self.sources[i]['host'] = self.sources[i]['source']
-            self.sources[i]['source'] = source.upper()
+            self.sources[i]['source'] = label.upper()
             count = count + 1
 
         return self.sources
@@ -4905,27 +4940,12 @@ class resolver:
             return
 
     def sources_direct(self):
-        hd_access = ['noobroom', 'vk', 'movietube', 'moviezone', 'sweflix', 'videomega', 'niter', 'yify', 'einthusan']
+        hd_access = ['premiumize', 'realdebrid', 'noobroom', 'vk', 'movietube', 'moviezone', 'sweflix', 'videomega', 'niter', 'yify', 'einthusan']
         blocks = ['furk']
 
         self.sources = [i for i in self.sources if not i['host'] in blocks]
 
-        if not (getSetting("realdedrid_user") == '' or getSetting("realdedrid_password") == ''):
-            try:
-                filter = []
-                rd_hosts = getUrl('https://real-debrid.com/api/hosters.php').result
-                rd_hosts = json.loads('[%s]' % rd_hosts)
-                rd_hosts = [i.rsplit('.' ,1)[0].lower() for i in rd_hosts]
-                #filter += [i for i in self.sources if i['quality'] == '1080p' and i['host'] in rd_hosts]
-                filter += [i for i in self.sources if i['quality'] == 'HD' and i['host'] in rd_hosts]
-                filter += [i for i in self.sources if i['quality'] == 'HD' and not i['host'] in rd_hosts and i['host'] in hd_access]
-                filter += [i for i in self.sources if i['quality'] in ['SD', 'SCR', 'CAM'] and i['host'] in rd_hosts]
-                filter += [i for i in self.sources if i['quality'] in ['SD', 'SCR', 'CAM'] and not i['host'] in rd_hosts]
-                self.sources = filter
-            except:
-                pass
-        else:
-            self.sources = [i for i in self.sources if not (i['quality'] in ['1080p', 'HD'] and not i['host'] in hd_access)]
+        self.sources = [i for i in self.sources if not (i['quality'] in ['1080p', 'HD'] and not i['host'] in hd_access)]
 
         if getSetting("autoplay_hd") == 'false':
             self.sources = [i for i in self.sources if not i['quality'] in ['1080p', 'HD']]

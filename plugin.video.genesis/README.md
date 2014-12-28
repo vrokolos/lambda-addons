@@ -17,6 +17,7 @@ Attributions
 - GOne theme by jokster | http://tvaddons.ag
 - Metro theme by rayw1986 | http://tvaddons.ag
 - Dutch translation by dynamic2 | http://tvaddons.ag
+- French translation by regisma | http://tvaddons.ag
 - Greek translation by mezger | http://tvaddons.ag
 - Hebrew translation by finalmakerr | http://tvaddons.ag
 - Polish translation by kodishu | http://tvaddons.ag

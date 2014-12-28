@@ -31,8 +31,10 @@ except:
 
 
 def get(url):
-    debrid = realdebrid(url)
-    if not debrid == None: return debrid
+    pz = premiumize(url)
+    if not pz == None: return pz
+    rd = realdebrid(url)
+    if not rd == None: return rd
 
     try:
         u = None
@@ -326,6 +328,35 @@ def youtube(url):
     except:
         return
 
+def premiumize(url):
+    try:
+        user = xbmcaddon.Addon().getSetting("premiumize_user")
+        password = xbmcaddon.Addon().getSetting("premiumize_password")
+
+        if (user == '' or password == ''): raise Exception()
+
+        url = 'https://api.premiumize.me/pm-api/v1.php?method=directdownloadlink&params[login]=%s&params[pass]=%s&params[link]=%s' % (user, password, url)
+
+        result = getUrl(url, close=False).result
+        url = json.loads(result)['result']['location']
+        return url
+    except:
+        return
+
+def premiumize_hosts():
+    try:
+        user = xbmcaddon.Addon().getSetting("premiumize_user")
+        password = xbmcaddon.Addon().getSetting("premiumize_password")
+
+        if (user == '' or password == ''): raise Exception()
+
+        pz = getUrl('https://api.premiumize.me/pm-api/v1.php?method=hosterlist&params[login]=%s&params[pass]=%s' % (user, password)).result
+        pz = json.loads(pz)['result']['hosterlist']
+        pz = [i.rsplit('.' ,1)[0].lower() for i in pz]
+        return pz
+    except:
+        return
+
 def realdebrid(url):
     try:
         user = xbmcaddon.Addon().getSetting("realdedrid_user")
@@ -346,6 +377,15 @@ def realdebrid(url):
         result = json.loads(result)
         url = result['generated_links'][0][-1]
         return url
+    except:
+        return
+
+def realdebrid_hosts():
+    try:
+        rd = getUrl('https://real-debrid.com/api/hosters.php').result
+        rd = json.loads('[%s]' % rd)
+        rd = [i.rsplit('.' ,1)[0].lower() for i in rd]
+        return rd
     except:
         return
 

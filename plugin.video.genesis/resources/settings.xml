@@ -134,6 +134,9 @@
 		<setting id="trakt_password" type="text" option="hidden" label="30122" default=""/>
 		<setting type="lsep" label="IMDb"/>
 		<setting id="imdb_user" type="text" label="30121" default=""/>
+		<setting type="lsep" label="Premiumize"/>
+		<setting id="premiumize_user" type="text" label="ID" default=""/>
+		<setting id="premiumize_password" type="text" option="hidden" label="PIN" default=""/>
 		<setting type="lsep" label="RealDebrid"/>
 		<setting id="realdedrid_user" type="text" label="30121" default=""/>
 		<setting id="realdedrid_password" type="text" option="hidden" label="30122" default=""/>

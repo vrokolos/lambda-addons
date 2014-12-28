@@ -1,4 +1,21 @@
 ------------------------
+Genesis v3.2.4 (28-Dec-14)
+------------------------
+
+- Re-work of RealDebrid mode.
+- Added Premiumize mode.
+- Fixed issues with episode mismatches.
+- Fixed issues with available resolvers.
+- Fixed issues with available sources.
+- Re-work of blocked sources (3-pass proxy).
+- Re-work of Latest HD Movies.
+- Re-work of Latest Movies.
+- Re-work of Latest Episodes.
+- Added French translation.
+- Code cosmetics.
+
+
+------------------------
 Genesis v3.2.3 (19-Dec-14)
 ------------------------
 
