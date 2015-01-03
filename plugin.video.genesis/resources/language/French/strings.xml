@@ -93,6 +93,9 @@
 	<string id="30313">Pas de Sous-Titre Disponible</string>
 	<string id="30314">Pas de Source Disponible</string>
 	<string id="30315">Déjà Chargé</string>
+	<!-- OK -->
+	<string id="30321">No episodes available.</string>
+	<string id="30322">Mark it as watched to remove it from Trakt Progress.</string>
 	<!-- YesNo -->
 	<string id="30341">Vous n'avez pas Configuré le Dossier de Téléchargement.</string>
 	<string id="30342">Voulez-vous le Configurer Maintenant?</string>

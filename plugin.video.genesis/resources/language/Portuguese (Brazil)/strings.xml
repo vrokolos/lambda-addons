@@ -93,6 +93,9 @@
 	<string id="30313">Não existem legendas disponíveis</string>
 	<string id="30314">Não existe fonte disponível</string>
 	<string id="30315">Carregado em</string>
+	<!-- OK -->
+	<string id="30321">No episodes available.</string>
+	<string id="30322">Mark it as watched to remove it from Trakt Progress.</string>
 	<!-- YesNo -->
 	<string id="30341">Não configurou a pasta de transferências.</string>
 	<string id="30342">Quer configurar agora?</string>

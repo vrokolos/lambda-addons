@@ -93,6 +93,9 @@
 	<string id="30313">תרגום לא זמין</string>
 	<string id="30314">לא נמצאו מקורות לניגון</string>
 	<string id="30315">נטען ב</string>
+	<!-- OK -->
+	<string id="30321">No episodes available.</string>
+	<string id="30322">Mark it as watched to remove it from Trakt Progress.</string>
 	<!-- YesNo -->
 	<string id="30341">לא הגדרת תיקיה להורדות.</string>
 	<string id="30342">בא לך להגדיר אותה עכשיו?</string>

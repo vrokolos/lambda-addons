@@ -93,6 +93,9 @@
 	<string id="30313">No subtitles available</string>
 	<string id="30314">No stream available</string>
 	<string id="30315">Loaded in</string>
+	<!-- OK -->
+	<string id="30321">No episodes available.</string>
+	<string id="30322">Mark it as watched to remove it from Trakt Progress.</string>
 	<!-- YesNo -->
 	<string id="30341">You have not set the download folder.</string>
 	<string id="30342">Do you want to set it now?</string>

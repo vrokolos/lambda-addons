@@ -1946,7 +1946,7 @@ class einthusan:
 
 class myvideolinks:
     def __init__(self):
-        self.base_link = 'http://myvideolinks.xyz'
+        self.base_link = 'http://movies.myvideolinks.xyz'
         self.search_link = '/?s=%s'
 
     def get_movie(self, imdb, title, year):

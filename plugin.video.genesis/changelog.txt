@@ -1,4 +1,16 @@
 ------------------------
+Genesis v3.3.0 (3-Jan-15)
+------------------------
+
+- Added support for Trakt v2.
+- NOTE: Trakt Progress is different because of Trakt v2.
+- Fixed issues with available resolvers.
+- Fixed issues with available sources.
+- Updated translations.
+- Code cosmetics.
+
+
+------------------------
 Genesis v3.2.4 (28-Dec-14)
 ------------------------
 
