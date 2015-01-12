@@ -1,4 +1,22 @@
 ------------------------
+Genesis v3.4.0 (12-Jan-15)
+------------------------
+
+- Added Zumvo source.
+- Added View47 source.
+- Added G2G source.
+- Added Onlinemovies source.
+- Added MerDB source.
+- Added Twomovies source.
+- Added WSO source.
+- Added Animeultima source.
+- NOTE: Host priorities are reset because of new sources.
+- Fixed issues with available resolvers.
+- Fixed issues with available sources.
+- Code cosmetics.
+
+
+------------------------
 Genesis v3.3.0 (3-Jan-15)
 ------------------------
 
