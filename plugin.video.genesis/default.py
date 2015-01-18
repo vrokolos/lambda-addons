@@ -40,6 +40,7 @@ action              = None
 language            = xbmcaddon.Addon().getLocalizedString
 setSetting          = xbmcaddon.Addon().setSetting
 getSetting          = xbmcaddon.Addon().getSetting
+SettingsVersion     = xbmcaddon.Addon().getSetting("settings_version")
 addonName           = xbmcaddon.Addon().getAddonInfo("name")
 addonVersion        = xbmcaddon.Addon().getAddonInfo("version")
 addonId             = xbmcaddon.Addon().getAddonInfo("id")
@@ -138,7 +139,6 @@ class main:
         elif action == 'unwatched_shows':             contextMenu().playcount_shows(name, year, imdb, tvdb, '', 6)
         elif action == 'watched_seasons':             contextMenu().playcount_shows(name, year, imdb, tvdb, season, 7)
         elif action == 'unwatched_seasons':           contextMenu().playcount_shows(name, year, imdb, tvdb, season, 6)
-        elif action == 'watched_trakt_progress':      contextMenu().playcount_shows(name, year, imdb, tvdb, '', 7, metahandler=False)
         elif action == 'library_movie_add':           contextMenu().library_movie_add(name, title, year, imdb, url)
         elif action == 'library_movie_list':          contextMenu().library_movie_list(url)
         elif action == 'library_tv_add':              contextMenu().library_tv_add(name, year, imdb, tvdb)
@@ -273,6 +273,44 @@ class getTrakt:
         except:
             return
 
+    def sync(self, content=''):
+        try:
+            if content == 'shows': raise Exception()
+
+            url = link().trakt_watched % link().trakt_user
+            result = self.result(url)
+            r = json.loads(result)
+            updated = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+            record = ('movies', link().trakt_user, repr(result), updated)
+
+            dbcon = database.connect(addonCache)
+            dbcur = dbcon.cursor()
+            dbcur.execute("CREATE TABLE IF NOT EXISTS rel_trakt (""info TEXT, ""user TEXT, ""result TEXT, ""updated TEXT, ""UNIQUE(info, user)"");")
+            dbcur.execute("DELETE FROM rel_trakt WHERE info = '%s' AND user = '%s'" % (record[0], record[1]))
+            dbcur.execute("INSERT INTO rel_trakt Values (?, ?, ?, ?)", record)
+            dbcon.commit()
+        except:
+            pass
+
+        try:
+            if content == 'movies': raise Exception()
+
+            url = link().trakt_tv_watched % link().trakt_user
+            url += '?extended=full'
+            result = self.result(url)
+            r = json.loads(result)
+            updated = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+            record = ('shows', link().trakt_user, repr(result), updated)
+
+            dbcon = database.connect(addonCache)
+            dbcur = dbcon.cursor()
+            dbcur.execute("CREATE TABLE IF NOT EXISTS rel_trakt (""info TEXT, ""user TEXT, ""result TEXT, ""updated TEXT, ""UNIQUE(info, user)"");")
+            dbcur.execute("DELETE FROM rel_trakt WHERE info = '%s' AND user = '%s'" % (record[0], record[1]))
+            dbcur.execute("INSERT INTO rel_trakt Values (?, ?, ?, ?)", record)
+            dbcon.commit()
+        except:
+            pass
+
 class uniqueList(object):
     def __init__(self, list):
         uniqueSet = set()
@@ -406,45 +444,41 @@ class player(xbmc.Player):
     def change_watched(self):
         if self.content == 'movie':
             try:
+                if self.folderPath.startswith(sys.argv[0]): raise Exception()
+                xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "playcount" : 1 }, "id": 1 }' % str(self.meta['movieid']))
+            except:
+                pass
+
+            try:
+                if not self.folderPath.startswith(sys.argv[0]): raise Exception()
                 from metahandler import metahandlers
                 metaget = metahandlers.MetaData(preparezip=False)
-
                 metaget.get_meta('movie', self.title ,year=self.year)
                 metaget.change_watched(self.content, '', self.imdb, season='', episode='', year='', watched=7)
             except:
                 pass
 
             try:
-                if not getSetting("watched_trakt") == 'true': raise Exception()
+                if not self.folderPath.startswith(sys.argv[0]): raise Exception()
                 if (link().trakt_user == '' or link().trakt_password == ''): raise Exception()
                 imdb = self.imdb
                 if not imdb.startswith('tt'): imdb = 'tt' + imdb
                 getTrakt().result(link().trakt_history, post={"movies": [{"ids": {"imdb": imdb}}]})
-            except:
-                pass
-
-            try:
-                if not getSetting("watched_library") == 'true': raise Exception()
-                try: movieid = self.meta['movieid']
-                except: movieid = ''
-
-                if movieid == '':
-                    movieid = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["file"]}, "id": 1}' % (self.year, str(int(self.year)+1), str(int(self.year)-1)))
-                    movieid = unicode(movieid, 'utf-8', errors='ignore')
-                    movieid = json.loads(movieid)['result']['movies']
-                    movieid = [i for i in movieid if i['file'].endswith(self.file)][0]
-                    movieid = movieid['movieid']
-
-                while xbmc.getInfoLabel('Container.FolderPath').startswith(sys.argv[0]) or xbmc.getInfoLabel('Container.FolderPath') == '': xbmc.sleep(1000)
-                xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "playcount" : 1 }, "id": 1 }' % str(movieid))
+                getTrakt().sync('movies')
             except:
                 pass
 
         elif self.content == 'episode':
             try:
+                if self.folderPath.startswith(sys.argv[0]): raise Exception()
+                xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % str(self.meta['episodeid']))
+            except:
+                pass
+
+            try:
+                if not self.folderPath.startswith(sys.argv[0]): raise Exception()
                 from metahandler import metahandlers
                 metaget = metahandlers.MetaData(preparezip=False)
-
                 metaget.get_meta('tvshow', self.show, imdb_id=self.imdb)
                 metaget.get_episode_meta(self.show, self.imdb, self.season, self.episode)
                 metaget.change_watched(self.content, '', self.imdb, season=self.season, episode=self.episode, year='', watched=7)
@@ -452,27 +486,11 @@ class player(xbmc.Player):
                 pass
 
             try:
-                if not getSetting("watched_trakt") == 'true': raise Exception()
+                if not self.folderPath.startswith(sys.argv[0]): raise Exception()
                 if (link().trakt_user == '' or link().trakt_password == ''): raise Exception()
                 season, episode = int('%01d' % int(self.season)), int('%01d' % int(self.episode))
                 getTrakt().result(link().trakt_history, post={"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": self.tvdb}}]})
-            except:
-                pass
-
-            try:
-                if not getSetting("watched_library") == 'true': raise Exception()
-                try: episodeid = self.meta['episodeid']
-                except: episodeid = ''
-
-                if episodeid == '':
-                    episodeid = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "season", "operator": "is", "value": "%s"}, {"field": "episode", "operator": "is", "value": "%s"}]}, "properties": ["file"]}, "id": 1}' % (self.season, self.episode))
-                    episodeid = unicode(episodeid, 'utf-8', errors='ignore')
-                    episodeid = json.loads(episodeid)['result']['episodes']
-                    episodeid = [i for i in episodeid if i['file'].endswith(self.file)][0]
-                    episodeid = episodeid['episodeid']
-
-                while xbmc.getInfoLabel('Container.FolderPath').startswith(sys.argv[0]) or xbmc.getInfoLabel('Container.FolderPath') == '': xbmc.sleep(1000)
-                xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % str(episodeid))
+                getTrakt().sync('shows')
             except:
                 pass
 
@@ -670,7 +688,7 @@ class index:
 
     def settings_reset(self):
         try:
-            if getSetting("settings_version") == '3.4.0': return
+            if SettingsVersion == '3.4.0': return
             settings = os.path.join(dataPath,'settings.xml')
             file = xbmcvfs.File(settings)
             read = file.read()
@@ -903,6 +921,9 @@ class index:
         playbackMenu = language(30409).encode("utf-8")
         if getSetting("autoplay") == 'true': playbackMenu = language(30410).encode("utf-8")
 
+        if (getSetting("trakt_user") == '' or getSetting("trakt_password") == ''): traktMode = False
+        else: traktMode = True
+
         cacheToDisc = False
         if action == 'movies_search': cacheToDisc = True
 
@@ -918,12 +939,14 @@ class index:
             pass
 
         try:
+            if traktMode == True: raise Exception()
             from metahandler import metahandlers
             metaget = metahandlers.MetaData(preparezip=False)
         except:
             pass
 
         try:
+            if traktMode == False: raise Exception()
             record = ('movies', getSetting("trakt_user"))
             dbcon = database.connect(addonCache)
             dbcur = dbcon.cursor()
@@ -958,12 +981,14 @@ class index:
                     isFolder = True
 
                 try:
+                    if traktMode == True: raise Exception()
                     playcount = metaget._get_watched('movie', 'tt' + imdb, '', '')
                     if playcount == 7: meta.update({'playcount': 1, 'overlay': 7})
                     else: meta.update({'playcount': 0, 'overlay': 6})
                 except:
                     pass
                 try:
+                    if traktMode == False: raise Exception()
                     playcount = [i for i in indicators if str(i['movie']['ids']['imdb']) == 'tt' + imdb][0]
                     meta.update({'playcount': 1, 'overlay': 7})
                 except:
@@ -1031,6 +1056,9 @@ class index:
         if getSetting("autoplay") == 'false' and getSetting("host_select") == '1': video_type = 'false'
         if PseudoTV == 'True': video_type = 'true'
 
+        if (getSetting("trakt_user") == '' or getSetting("trakt_password") == ''): traktMode = False
+        else: traktMode = True
+
         try:
             favourites = []
             dbcon = database.connect(addonSettings)
@@ -1039,6 +1067,19 @@ class index:
             favourites = dbcur.fetchall()
             favourites = [i[0] for i in favourites]
             favourites = [re.sub('[^0-9]', '', i) for i in favourites]
+        except:
+            pass
+
+        try:
+            if traktMode == False: raise Exception()
+            record = ('shows', getSetting("trakt_user"))
+            dbcon = database.connect(addonCache)
+            dbcur = dbcon.cursor()
+            dbcur.execute("SELECT * FROM rel_trakt WHERE info = '%s' AND user = '%s'" % (record[0], record[1]))
+            indicators = dbcur.fetchone()
+            indicators = indicators[2]
+            indicators = eval(indicators.encode('utf-8'))
+            indicators = json.loads(indicators)
         except:
             pass
 
@@ -1060,6 +1101,16 @@ class index:
                 else:
                     u = '%s?action=seasons&show=%s&year=%s&imdb=%s&tvdb=%s' % (sys.argv[0], systitle, sysyear, sysimdb, systvdb)
 
+                try:
+                    if traktMode == False: raise Exception()
+                    match = [i for i in indicators if str(i['show']['ids']['tvdb']) == tvdb][0]
+                    num_1 = 0
+                    for i in range(0, len(match['seasons'])): num_1 += len(match['seasons'][i]['episodes'])
+                    num_2 = int(match['show']['aired_episodes'])
+                    if num_1 >= num_2: meta.update({'playcount': 1, 'overlay': 7})
+                except:
+                    pass
+
                 cm = []
                 if video_type == 'true':
                     cm.append((language(30401).encode("utf-8"), 'RunPlugin(%s?action=item_queue)' % (sys.argv[0])))
@@ -1076,7 +1127,7 @@ class index:
                 cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_tv_add&name=%s&year=%s&imdb=%s&tvdb=%s)' % (sys.argv[0], systitle, sysyear, sysimdb, systvdb)))
                 cm.append((language(30414).encode("utf-8"), 'Action(Info)'))
                 if action == 'shows_trakt_progress':
-                    cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=watched_trakt_progress&name=%s&year=%s&imdb=%s&tvdb=%s)' % (sys.argv[0], systitle, sysyear, sysimdb, systvdb)))
+                    cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=watched_shows&name=%s&year=%s&imdb=%s&tvdb=%s)' % (sys.argv[0], systitle, sysyear, sysimdb, systvdb)))
                 elif not imdb == '0000000' and not action == 'shows_search':
                     cm.append((language(30403).encode("utf-8"), 'RunPlugin(%s?action=unwatched_shows&name=%s&year=%s&imdb=%s&tvdb=%s)' % (sys.argv[0], systitle, sysyear, sysimdb, systvdb)))
                     cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=watched_shows&name=%s&year=%s&imdb=%s&tvdb=%s)' % (sys.argv[0], systitle, sysyear, sysimdb, systvdb)))
@@ -1195,6 +1246,9 @@ class index:
         playbackMenu = language(30409).encode("utf-8")
         if getSetting("autoplay") == 'true': playbackMenu = language(30410).encode("utf-8")
 
+        if (getSetting("trakt_user") == '' or getSetting("trakt_password") == ''): traktMode = False
+        else: traktMode = True
+
         try:
             favourites = []
             dbcon = database.connect(addonSettings)
@@ -1207,12 +1261,14 @@ class index:
             pass
 
         try:
+            if traktMode == True: raise Exception()
             from metahandler import metahandlers
             metaget = metahandlers.MetaData(preparezip=False)
         except:
             pass
 
         try:
+            if traktMode == False: raise Exception()
             record = ('shows', getSetting("trakt_user"))
             dbcon = database.connect(addonCache)
             dbcur = dbcon.cursor()
@@ -1250,12 +1306,14 @@ class index:
                     isFolder = True
 
                 try:
+                    if traktMode == True: raise Exception()
                     playcount = metaget._get_watched_episode({'imdb_id' : 'tt' + imdb, 'season' : season, 'episode': episode, 'premiered' : ''})
                     if playcount == 7: meta.update({'playcount': 1, 'overlay': 7})
                     else: meta.update({'playcount': 0, 'overlay': 6})
                 except:
                     pass
                 try:
+                    if traktMode == False: raise Exception()
                     playcount = [i for i in indicators if str(i['show']['ids']['tvdb']) == tvdb][0]['seasons']
                     playcount = [i for i in playcount if int(i['number']) == int(season)][0]['episodes']
                     playcount = [i for i in playcount if int(i['number']) == int(episode)][0]
@@ -1500,58 +1558,29 @@ class contextMenu:
         except:
             return
 
-    def trakt_indicator(self, content=''):
-        try:
-            if content == 'shows': raise Exception()
-
-            url = link().trakt_watched % link().trakt_user
-            result = getTrakt().result(url)
-            updated = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-            record = ('movies', link().trakt_user, repr(result), updated)
-
-            dbcon = database.connect(addonCache)
-            dbcur = dbcon.cursor()
-            dbcur.execute("CREATE TABLE IF NOT EXISTS rel_trakt (""info TEXT, ""user TEXT, ""result TEXT, ""updated TEXT, ""UNIQUE(info, user)"");")
-            dbcur.execute("DELETE FROM rel_trakt WHERE info = '%s' AND user = '%s'" % (record[0], record[1]))
-            dbcur.execute("INSERT INTO rel_trakt Values (?, ?, ?, ?)", record)
-            dbcon.commit()
-        except:
-            pass
-
-        try:
-            if content == 'movies': raise Exception()
-
-            url = link().trakt_tv_watched % link().trakt_user
-            result = getTrakt().result(url)
-            updated = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-            record = ('shows', link().trakt_user, repr(result), updated)
-
-            dbcon = database.connect(addonCache)
-            dbcur = dbcon.cursor()
-            dbcur.execute("CREATE TABLE IF NOT EXISTS rel_trakt (""info TEXT, ""user TEXT, ""result TEXT, ""updated TEXT, ""UNIQUE(info, user)"");")
-            dbcur.execute("DELETE FROM rel_trakt WHERE info = '%s' AND user = '%s'" % (record[0], record[1]))
-            dbcur.execute("INSERT INTO rel_trakt Values (?, ?, ?, ?)", record)
-            dbcon.commit()
-        except:
-            pass
-
     def playcount_movies(self, title, year, imdb, watched):
         try:
+            if (getSetting("trakt_user") == '' or getSetting("trakt_password") == ''): traktMode = False
+            else: traktMode = True
+        except:
+            pass
+
+        try:
+            if traktMode == True: raise Exception()
             from metahandler import metahandlers
             metaget = metahandlers.MetaData(preparezip=False)
-
             metaget.get_meta('movie', title ,year=year)
             metaget.change_watched('movie', '', imdb, season='', episode='', year='', watched=watched)
         except:
             pass
 
         try:
-            if (link().trakt_user == '' or link().trakt_password == ''): raise Exception()
+            if traktMode == False: raise Exception()
             if not imdb.startswith('tt'): imdb = 'tt' + imdb
             if watched == 7: url = link().trakt_history
             else: url = link().trakt_history_remove
             getTrakt().result(url, post={"movies": [{"ids": {"imdb": imdb}}]})
-            self.trakt_indicator('movies')
+            getTrakt().sync('movies')
         except:
             pass
 
@@ -1559,9 +1588,15 @@ class contextMenu:
 
     def playcount_episodes(self, imdb, tvdb, season, episode, watched):
         try:
+            if (getSetting("trakt_user") == '' or getSetting("trakt_password") == ''): traktMode = False
+            else: traktMode = True
+        except:
+            pass
+
+        try:
+            if traktMode == True: raise Exception()
             from metahandler import metahandlers
             metaget = metahandlers.MetaData(preparezip=False)
-
             metaget.get_meta('tvshow', '', imdb_id=imdb)
             metaget.get_episode_meta('', imdb, season, episode)
             metaget.change_watched('episode', '', imdb, season=season, episode=episode, year='', watched=watched)
@@ -1569,23 +1604,22 @@ class contextMenu:
             pass
 
         try:
-            if (link().trakt_user == '' or link().trakt_password == ''): raise Exception()
+            if traktMode == False: raise Exception()
             season, episode = int('%01d' % int(season)), int('%01d' % int(episode))
             if watched == 7: url = link().trakt_history
             else: url = link().trakt_history_remove
             getTrakt().result(url, post={"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": tvdb}}]})
-            self.trakt_indicator('shows')
+            getTrakt().sync('shows')
         except:
             pass
 
         index().container_refresh()
 
     def playcount_shows(self, name, year, imdb, tvdb, season, watched, metahandler=True):
-        dialog = xbmcgui.DialogProgress()
-        dialog.create(addonName.encode("utf-8"), str(name))
-        dialog.update(0, str(name), language(30361).encode("utf-8") + '...')
-
         try:
+            if (getSetting("trakt_user") == '' or getSetting("trakt_password") == ''): traktMode = False
+            else: traktMode = True
+
             match = episodes().get(name, year, imdb, tvdb, season, idx=False)
             match = match[1]['episodes']
             match = [{'name': i['name'], 'season': int('%01d' % int(i['season'])), 'episode': int('%01d' % int(i['episode']))} for i in match]
@@ -1593,9 +1627,13 @@ class contextMenu:
             pass
 
         try:
-            if metahandler == False: raise Exception()
+            if traktMode == True: raise Exception()
             from metahandler import metahandlers
             metaget = metahandlers.MetaData(preparezip=False)
+
+            dialog = xbmcgui.DialogProgress()
+            dialog.create(addonName.encode("utf-8"), str(name))
+            dialog.update(0, str(name), language(30361).encode("utf-8") + '...')
 
             metaget.get_meta('tvshow', '', imdb_id=imdb)
 
@@ -1608,11 +1646,15 @@ class contextMenu:
                 season, episode = match[i]['season'], match[i]['episode']
                 metaget.get_episode_meta('', imdb, season, episode)
                 metaget.change_watched('episode', '', imdb, season=season, episode=episode, year='', watched=watched)
+
+            try: dialog.close()
+            except: pass
         except:
-            pass
+            try: dialog.close()
+            except: pass
 
         try:
-            if (link().trakt_user == '' or link().trakt_password == ''): raise Exception()
+            if traktMode == False: raise Exception()
             seasons = []
             for i in range(len(match)): seasons.append(match[i]['season'])
             seasons = uniqueList(seasons).list
@@ -1620,10 +1662,11 @@ class contextMenu:
             if watched == 7: url = link().trakt_history
             else: url = link().trakt_history_remove
             getTrakt().result(url, post={"shows": [{"seasons": seasons, "ids": {"tvdb": tvdb}}]})
+            getTrakt().sync('shows')
         except:
             pass
 
-        dialog.close()
+        index().container_refresh()
 
     def library_movie_add(self, name, title, year, imdb, url):
         self.library_movie_processor(name, title, year, imdb, url)
@@ -1649,7 +1692,7 @@ class contextMenu:
             dialog.create(addonName.encode("utf-8"), language(30408).encode("utf-8"))
             dialog.update(0, language(30408).encode("utf-8"), language(30361).encode("utf-8") + '...')
 
-            match = movies().get(url, idx=False)
+            match = index().cache(movies().get, 0, url, False)
             if match == None: return dialog.close()
 
             dialog.update(50, language(30408).encode("utf-8"), str(len(match)) + ' ' + language(30362).encode("utf-8"))
@@ -1719,7 +1762,7 @@ class contextMenu:
             dialog.create(addonName.encode("utf-8"), language(30408).encode("utf-8"))
             dialog.update(0, language(30408).encode("utf-8"), language(30361).encode("utf-8") + '...')
 
-            match = shows().get(url, idx=False)
+            match = index().cache(shows().get, 0, url, False)
             if match == None: return dialog.close()
 
             dialog.update(0, language(30408).encode("utf-8"), str(len(match)) + ' ' + language(30362).encode("utf-8"))
@@ -1873,7 +1916,7 @@ class contextMenu:
                     index().setProperty(property, service_run)
                     setSetting('service_run', service_run)
 
-                    self.trakt_indicator()
+                    getTrakt().sync()
 
                     if not getSetting("service_update") == 'true': raise Exception()
                     self.library_update(silent=True)
@@ -3714,10 +3757,10 @@ class shows:
 
         for show in shows:
             try:
-                watched = 0
-                for i in range(0, len(show['seasons'])): watched += len(show['seasons'][i]['episodes'])
-                total = int(show['show']['aired_episodes'])
-                if total == watched: raise Exception()
+                num_1 = 0
+                for i in range(0, len(show['seasons'])): num_1 += len(show['seasons'][i]['episodes'])
+                num_2 = int(show['show']['aired_episodes'])
+                if num_1 >= num_2: raise Exception()
 
                 title = show['show']['title']
                 title = re.sub('\s(|[(])(UK|US|AU|\d{4})(|[)])$', '', title)
@@ -4266,19 +4309,37 @@ class episodes:
         try:
             self.list = index().cache(seasons().tvdb_list, 1, show, year, imdb, tvdb)
             self.list = self.list[1]['episodes']
+        except:
+            pass
 
-            url = link().trakt_tv_watched % link().trakt_user
-            result = index().cache(getTrakt().result, 0, url)
+        try:
+            record = ('shows', getSetting("trakt_user"))
+            dbcon = database.connect(addonCache)
+            dbcur = dbcon.cursor()
+            dbcur.execute("CREATE TABLE IF NOT EXISTS rel_trakt (""info TEXT, ""user TEXT, ""result TEXT, ""updated TEXT, ""UNIQUE(info, user)"");")
 
+            dbcur.execute("SELECT * FROM rel_trakt WHERE info = '%s' AND user = '%s'" % (record[0], record[1]))
+            result = dbcur.fetchone()
+            if result == None:
+                getTrakt().sync('shows')
+                dbcur.execute("SELECT * FROM rel_trakt WHERE info = '%s' AND user = '%s'" % (record[0], record[1]))
+                result = dbcur.fetchone()
+
+            result = result[2]
+            result = eval(result.encode('utf-8'))
             result = json.loads(result)
+        except:
+            pass
+
+        try:
             result = [i for i in result if str(i['show']['ids']['tvdb']) == tvdb][0]
             season = result['seasons'][-1]['number']
             episode = result['seasons'][-1]['episodes'][-1]['number']
-
             num = [i for i,x in enumerate(self.list) if x['season'] == str(season) and  x['episode'] == str(episode)][-1]
             self.list = [x for i,x in enumerate(self.list) if i > num]
 
-            if len(self.list) == 0: index().okDialog(language(30321).encode("utf-8"), language(30322).encode("utf-8"))
+            if len(self.list) == 0 and 'shows_trakt_progress' in xbmc.getInfoLabel('Container.FolderPath'):
+                index().okDialog(language(30321).encode("utf-8"), language(30322).encode("utf-8"))
 
             index().episodeList(self.list)
         except:

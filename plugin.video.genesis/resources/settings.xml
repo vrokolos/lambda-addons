@@ -25,11 +25,6 @@
 		<setting type="lsep" label="30028"/>
 		<setting id="resume_playback" type="bool" label="30029" default="true"/>
 		<setting id="playback_info" type="bool" label="30030" default="false"/>
-		<setting type="lsep" label="30031"/>
-		<setting id="watched_library" type="bool" label="30032" default="true"/>
-		<setting id="trakt_user" type="text" default="" visible="false"/>
-		<setting id="trakt_password" type="text" default="" visible="false"/>
-		<setting id="watched_trakt" type="bool" label="30033" visible="!eq(-1,)+!eq(-2,)" default="true"/>
 	</category>
 
 	<category label="30040">

@@ -1,4 +1,17 @@
 ------------------------
+Hellenic TV v3.2.0 (18-Jan-15)
+------------------------
+
+- Updated live tv channels.
+- Tweaked KONTRA network.
+- Removed NERIT network.
+- Added various cartoons section.
+- Fixed issues with available resolvers.
+- Added EURONEWS GR resolver.
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.1.0 (19-Dec-14)
 ------------------------
 

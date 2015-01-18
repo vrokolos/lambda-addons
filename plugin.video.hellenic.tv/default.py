@@ -2,7 +2,7 @@
 
 '''
     Hellenic TV Add-on
-    Copyright (C) 2014 lambda
+    Copyright (C) 2015 lambda
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -175,7 +175,7 @@ class main:
         elif action == 'shows_kontra':                youtube().kontra()
         elif action == 'shows_bluesky':               gm().network('bluesky')
         elif action == 'shows_action24':              gm().network('action24')
-        elif action == 'shows_art':                   gm().network('art')
+        elif action == 'shows_art':                   youtube().art()
         elif action == 'shows_mtv':                   gm().network('mtvgreece')
         elif action == 'shows_madtv':                 youtube().madtv()
         elif action == 'shows_real_fm':               realfm().podcasts()
@@ -184,6 +184,7 @@ class main:
         elif action == 'shows_skai_docs':             skai().docs()
         elif action == 'cartoons_collection':         archives().cartoons()
         elif action == 'cartoons_collection_gr':      archives().cartoons_gr()
+        elif action == 'cartoons_various':            gm().cartoons()
         elif action == 'youtube_cartoons_classics':   youtube().cartoons_classics()
         elif action == 'youtube_cartoons_songs':      youtube().cartoons_songs()
         elif action == 'mega_news':                   mega().news()
@@ -1034,7 +1035,7 @@ class root:
         rootList.append({'name': 'SKAI', 'image': 'logos_skai.jpg', 'action': root})
 
         rootList.append({'name': 'E TV', 'image': 'logos_etv.jpg', 'action': 'shows_etv'})
-        rootList.append({'name': 'NERIT', 'image': 'logos_nerit.jpg', 'action': 'shows_nerit'})
+        #rootList.append({'name': 'NERIT', 'image': 'logos_nerit.jpg', 'action': 'shows_nerit'})
         rootList.append({'name': 'SIGMA', 'image': 'logos_sigma.jpg', 'action': 'shows_sigma'})
         rootList.append({'name': 'ANT1 CY', 'image': 'logos_ant1cy.jpg', 'action': 'shows_ant1cy'})
         rootList.append({'name': 'KONTRA', 'image': 'logos_kontra.jpg', 'action': 'shows_kontra'})
@@ -1077,8 +1078,9 @@ class root:
         rootList.append({'name': 30561, 'image': 'cartoons_favourites.jpg', 'action': 'cartoons_favourites'})
         rootList.append({'name': 30562, 'image': 'cartoons_collection.jpg', 'action': 'cartoons_collection'})
         rootList.append({'name': 30563, 'image': 'cartoons_collection_gr.jpg', 'action': 'cartoons_collection_gr'})
-        rootList.append({'name': 30564, 'image': 'cartoons_classics.jpg', 'action': 'youtube_cartoons_classics'})
-        rootList.append({'name': 30565, 'image': 'cartoons_songs.jpg', 'action': 'youtube_cartoons_songs'})
+        rootList.append({'name': 30564, 'image': 'cartoons_various.jpg', 'action': 'cartoons_various'})
+        rootList.append({'name': 30565, 'image': 'cartoons_classics.jpg', 'action': 'youtube_cartoons_classics'})
+        rootList.append({'name': 30566, 'image': 'cartoons_songs.jpg', 'action': 'youtube_cartoons_songs'})
         index().rootList(rootList)
 
     def favourites(self):
@@ -1224,7 +1226,10 @@ class favourites:
                 try:
                     name, title, year, image, genre, plot = eval(name.encode('utf-8')), eval(title.encode('utf-8')), eval(year.encode('utf-8')), eval(image.encode('utf-8')), eval(genre.encode('utf-8')), eval(plot.encode('utf-8'))
 
-                    self.list.append({'name': name, 'url': url, 'image': image, 'fanart': '0', 'title': title, 'year': year, 'genre': genre, 'plot': plot, 'lang': 'el', 'type': 'tvshow'})
+                    if 'youtube' in url: type = 'tvshow'
+                    else: type = 'movie'
+
+                    self.list.append({'name': name, 'url': url, 'image': image, 'fanart': '0', 'title': title, 'year': year, 'genre': genre, 'plot': plot, 'lang': 'el', 'type': type})
                 except:
                     pass
 
@@ -1643,6 +1648,20 @@ class gm:
         self.list = index().cache(self.movies_list, 24, url)
         index().movieList(self.list)
 
+    def cartoons(self):
+        try:
+            c1 = index().cache(self.movies_list, 24, 'g=8&y=1&l=&p=')
+            c2 = index().cache(self.movies_list, 24, 'g=8&y=2&l=&p=')
+
+            self.list = c1 + c2
+            for i in range(0, len(self.list)): self.list[i].update({'type': 'movie'})
+            self.list = [i for n, i in enumerate(self.list) if i not in self.list[n + 1:]]
+            self.list = sorted(self.list, key=itemgetter('name'))
+
+            index().cartoonList(self.list)
+        except:
+            pass
+
     def shows(self, url):
         self.list = index().cache(self.shows_list, 24, url)
         index().showList(self.list)
@@ -1926,6 +1945,8 @@ class gm:
                 try:
                     host = common.parseDOM(i, "a")[0]
                     host = host.split(' ')[-1].split('>', 1)[-1].rsplit('<', 1)[0]
+                    host = host.lower()
+
                     url = common.parseDOM(i, "a", ret="href")[0]
                     url = '%s/%s' % (self.base_link, url)
                     sources.append({'host': host, 'url': url})
@@ -3345,6 +3366,11 @@ class youtube:
         self.list = index().cache(self.shows_list, 24, channel, [], [])
         index().showList(self.list)
 
+    def art(self):
+        channel = 'artTileorasi'
+        self.list = index().cache(self.shows_list, 24, channel, [], [])
+        index().showList(self.list)
+
     def madtv(self):
         channel = 'MADTVGREECE'
         exclude = ["PL1RY_6CEqdtnxJYgudDydiG4fKVoQouHf", "PL1RY_6CEqdtlu30q6SyuNe6Tk5IYjAiks", "PLE4B3F6B7F753D97C", "PL85C952EA930B9E90", "PL04B2C2D8B304BA48", "PL46B9D152167BA727"]
@@ -3548,6 +3574,21 @@ class livestream:
             result = getUrl(url).result
             url = re.compile('"hlsvp": "(.+?)"').findall(result)[0]
             url = urllib.unquote(url).replace('\\/', '/')
+            return url
+        except:
+            return
+
+    def euronews(self, url):
+        try:
+            url = 'http://gr.euronews.com'
+            post = urllib.urlencode({'action': 'getHexaglobeUrl'})
+
+            url = getUrl(url, post=post).result
+
+            result = getUrl(url).result
+            result = json.loads(result)
+
+            url = result['primary']['gr']['hls']
             return url
         except:
             return

@@ -2,7 +2,7 @@
 
 '''
     Genesis Add-on
-    Copyright (C) 2014 lambda
+    Copyright (C) 2015 lambda
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,19 +31,22 @@ except:
 
 
 def get(url):
-    debrid = realdebrid(url)
-    if not debrid == None: return debrid
+    pz = premiumize(url)
+    if not pz == None: return pz
+    rd = realdebrid(url)
+    if not rd == None: return rd
 
     try:
         u = None
         import urlparse
         u = urlparse.urlparse(url).netloc
-        u = u.replace('www.', '')
+        u = u.replace('www.', '').lower()
     except:
         pass
 
     if u == 'vk.com': url = vk(url)
     elif u == 'docs.google.com': url = googledocs(url)
+    elif u == 'plus.google.com': url = googleplus(url)
     elif u == 'youtube.com': url = youtube(url)
     elif u == 'videomega.tv': url = videomega(url)
     elif u == 'movreel.com': url = movreel(url)
@@ -98,7 +101,7 @@ class getUrl(object):
         if mobile == True:
             request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; CPU; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7')
         else:
-            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0) Gecko/20100101 Firefox/6.0')
+            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0')
         if not referer == None:
             request.add_header('Referer', referer)
         if not cookie == None:
@@ -130,7 +133,7 @@ def cloudflare(url):
             except:
                 pass
 
-        agent = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0) Gecko/20100101 Firefox/6.0'
+        agent = 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0'
         cj = cookielib.CookieJar()
 
         opener = urllib2.build_opener(NoRedirection, urllib2.HTTPCookieProcessor(cj))
@@ -309,6 +312,29 @@ def googledocs(url):
     except:
         return
 
+def googleplus(url):
+    try:
+        result = getUrl(url).result
+
+        u = re.compile('"(http.+?videoplayback[?].+?)"').findall(result)
+        u = [i.replace('\\u003d','=').replace('\\u0026','&') for i in u]
+
+        d = []
+        try: d += [[{'quality': '1080p', 'url': i} for i in u if any(x in i for x in ['&itag=37&', '&itag=137&', '&itag=299&', '&itag=96&', '&itag=248&', '&itag=303&', '&itag=46&'])][0]]
+        except: pass
+        try: d += [[{'quality': 'HD', 'url': i} for i in u if any(x in i for x in ['&itag=22&', '&itag=84&', '&itag=136&', '&itag=298&', '&itag=120&', '&itag=95&', '&itag=247&', '&itag=302&', '&itag=45&', '&itag=102&'])][0]]
+        except: pass
+
+        url = []
+        for i in d:
+            try: url.append({'quality': i['quality'], 'url': getUrl(i['url'], output='geturl').result})
+            except: pass
+
+        if url == []: return
+        return url
+    except:
+        return
+
 def youtube(url):
     try:
         id = url.split("?v=")[-1].split("/")[-1].split("?")[0].split("&")[0]
@@ -323,6 +349,35 @@ def youtube(url):
 
         url = 'plugin://plugin.video.youtube/?action=play_video&videoid=%s' % id
         return url
+    except:
+        return
+
+def premiumize(url):
+    try:
+        user = xbmcaddon.Addon().getSetting("premiumize_user")
+        password = xbmcaddon.Addon().getSetting("premiumize_password")
+
+        if (user == '' or password == ''): raise Exception()
+
+        url = 'https://api.premiumize.me/pm-api/v1.php?method=directdownloadlink&params[login]=%s&params[pass]=%s&params[link]=%s' % (user, password, url)
+
+        result = getUrl(url, close=False).result
+        url = json.loads(result)['result']['location']
+        return url
+    except:
+        return
+
+def premiumize_hosts():
+    try:
+        user = xbmcaddon.Addon().getSetting("premiumize_user")
+        password = xbmcaddon.Addon().getSetting("premiumize_password")
+
+        if (user == '' or password == ''): raise Exception()
+
+        pz = getUrl('https://api.premiumize.me/pm-api/v1.php?method=hosterlist&params[login]=%s&params[pass]=%s' % (user, password)).result
+        pz = json.loads(pz)['result']['hosterlist']
+        pz = [i.rsplit('.' ,1)[0].lower() for i in pz]
+        return pz
     except:
         return
 
@@ -349,10 +404,21 @@ def realdebrid(url):
     except:
         return
 
+def realdebrid_hosts():
+    try:
+        rd = getUrl('https://real-debrid.com/api/hosters.php').result
+        rd = json.loads('[%s]' % rd)
+        rd = [i.rsplit('.' ,1)[0].lower() for i in rd]
+        return rd
+    except:
+        return
+
 def videomega(url):
     try:
+        referer = url
         url = url.replace('/?ref=', '/iframe.php?ref=')
-        result = getUrl(url).result
+
+        result = getUrl(url, referer=referer).result
         url = re.compile('document.write.unescape."(.+?)"').findall(result)[0]
         url = urllib.unquote_plus(url)
         url = re.compile('file: "(.+?)"').findall(url)[0]
@@ -392,7 +458,7 @@ def billionuploads(url):
         import cookielib
         cj = cookielib.CookieJar()
 
-        agent = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0) Gecko/20100101 Firefox/6.0'
+        agent = 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0'
         base = 'http://billionuploads.com'
 
         class NoRedirection(urllib2.HTTPErrorProcessor):
@@ -418,75 +484,18 @@ def billionuploads(url):
         result = response.read()
 
         post = {}
-        f = common.parseDOM(result, "Form", attrs = { "name": "F1" })[0]
-
-        enc_input = re.compile('decodeURIComponent\("(.+?)"\)').findall(result)
-        if enc_input: f += urllib2.unquote(enc_input[0])
-
-        extra = re.compile("append\(\$\(document.createElement\('input'\)\).attr\('type','hidden'\).attr\('name','(.*?)'\).val\((.*?)\)").findall(result)
-        for i, k in extra:
-            try:
-                k = re.compile('<textarea[^>]*?source="self"[^>]*?>([^<]*?)<').findall(result)[0].strip("'")
-                post.update({i: k})
-            except:
-                pass
-
+        f = common.parseDOM(result, "form", attrs = { "method": "post" })[-1]
         k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
         for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-
-        post.update({'submit_btn': ''})
-
-        k = re.findall('\'input\[name="([^"]+?)"\]\'\)\.remove\(\)', result)
-        for i in k: del post[i]
-
+        post.update({'method_free': 'Download or watch'})
         post = urllib.urlencode(post)
 
         response = opener.open(url, post)
         result = response.read()
         response.close()
 
-        def custom_range(start, end, step):
-            while start <= end:
-                yield start
-                start += step
-
-        def checkwmv(e):
-            s = ""
-            i=[]
-            u=[[65,91],[97,123],[48,58],[43,44],[47,48]]
-            for z in range(0, len(u)):
-                for n in range(u[z][0],u[z][1]):
-                    i.append(chr(n))
-            t = {}
-            for n in range(0, 64): t[i[n]]=n
-            for n in custom_range(0, len(e), 72):
-                a=0
-                h=e[n:n+72]
-                c=0
-                for l in range(0, len(h)):            
-                    f = t.get(h[l], 'undefined')
-                    if f == 'undefined': continue
-                    a = (a<<6) + f
-                    c = c + 6
-                    while c >= 8:
-                        c = c - 8
-                        s = s + chr( (a >> c) % 256 )
-            return s
-
-        try:
-            url = common.parseDOM(result, "input", ret="value", attrs = { "id": "dl" })[0]
-            url = url.split('GvaZu')[1]
-            url = checkwmv(url)
-            url = checkwmv(url)
-            return url
-        except:
-            pass
-
-        try:
-            url = common.parseDOM(result, "source", ret="src")[0]
-            return url
-        except:
-            pass
+        url = common.parseDOM(result, "a", ret="href", attrs = { "class": "ctrl download" })[0]
+        return url
     except:
         return
 

@@ -1548,7 +1548,7 @@ class onlinemovies:
 class niter:
     def __init__(self):
         self.base_link = 'http://niter.tv'
-        self.search_link = '/typeahead/%s'
+        self.search_link = '/search?q=%s'
         self.movie_link = '/movies/%s'
         self.pk_link = '/player/pk/pk/plugins/player_p2.php?url=%s'
 
@@ -1556,19 +1556,14 @@ class niter:
         try:
             query = self.base_link + self.search_link % (urllib.quote_plus(title))
 
-            headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0',
-            'X-Requested-With': 'XMLHttpRequest' }
-
-            request = urllib2.Request(query, headers=headers)
-            response = urllib2.urlopen(request, timeout=5)
-            result = response.read()
-            response.close()
+            result = getUrl(query).result
+            result = common.parseDOM(result, "div", attrs = { "id": "movies" })[0]
+            result = common.parseDOM(result, "figure")
 
             title = cleantitle().movie(title)
             years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
-            result = json.loads(result)
-            url = [i['id'] for i in result if title == cleantitle().movie(i['title'])][0]
-            url = self.base_link + self.movie_link % str(url)
+            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "figcaption", ret="title")[0]) for i in result]
+            url = [i[0] for i in result if title == cleantitle().movie(i[1])][0]
 
             result = getUrl(url).result
             result = common.parseDOM(result, "a", attrs = { "class": "title-title" })[0]
@@ -1688,8 +1683,8 @@ class yify:
 class movietv:
     def __init__(self):
         self.base_link = 'http://movietv.to'
-        self.moviesearch_link = '/titles/paginate?query=%s&type=movie'
-        self.tvsearch_link = '/titles/paginate?query=%s&type=series'
+        self.moviesearch_link = '/titles/paginate?_token=&query=%s&type=movie'
+        self.tvsearch_link = '/titles/paginate?_token=&query=%s&type=series'
 
     def get_movie(self, imdb, title, year):
         try:
@@ -1724,7 +1719,11 @@ class movietv:
 
             content = re.compile('(.+?)S\d*E\d*$').findall(url)
 
-            cookie = getUrl(self.base_link, output='cookie').result
+            import commonresolvers
+            try: cookie = commonresolvers.cloudflare(self.base_link)
+            except: pass
+            try: cookie = getUrl(self.base_link, output='cookie').result
+            except: pass
 
             headers = { 'Host': 'movietv.to',
             'Connection': 'keep-alive',
@@ -1791,9 +1790,16 @@ class movietv:
 
     def resolve(self, url):
         try:
-            cookie = getUrl(self.base_link, output='cookie').result
+            import commonresolvers
+            try: cookie = commonresolvers.cloudflare(self.base_link)
+            except: pass
+            try: cookie = getUrl(self.base_link, output='cookie').result
+            except: pass
 
-            url += "|Cookie=%s" % urllib.quote(cookie + '; aoe=fm')
+            cookie = cookie + '; aoe=fm'
+            referer = self.base_link
+
+            url += "|Cookie=%s&Referer=%s" % (urllib.quote(cookie), urllib.quote(referer))
             return url
         except:
             return
@@ -2301,7 +2307,7 @@ class wso:
             title = url
             hdlr = 'S%02dE%02d' % (int(season), int(episode))
 
-            query = '%s %s' % (title, hdlr)
+            query = '%s "%s"' % (title, hdlr)
             query = self.tvbase_link + self.search_link % (urllib.quote_plus(query))
 
             result = getUrl(query).result
@@ -2364,8 +2370,9 @@ class wso:
 
     def resolve(self, url):
         try:
-            result = getUrl(url).result
-            url = common.parseDOM(result, "a", ret="href", attrs = { "class": "wsoButton" })[0]
+            if url.startswith((self.base_link, self.tvbase_link)):
+                result = getUrl(url).result
+                url = common.parseDOM(result, "a", ret="href", attrs = { "class": "wsoButton" })[0]
 
             import commonresolvers
             url = commonresolvers.get(url)
@@ -2431,7 +2438,7 @@ class twomovies:
         try:
             sources = []
 
-            base = self.base_link + url + '?sort=date.desc'
+            base = self.base_link + url
 
             result = getUrl(base).result
             result = result.decode('iso-8859-1').encode('utf-8')
@@ -2614,6 +2621,7 @@ class einthusan:
 class myvideolinks:
     def __init__(self):
         self.base_link = 'http://myvideolinks.xyz'
+        self.base_link_2 = 'http://movies.myvideolinks.xyz'
         self.search_link = '/?s=%s'
 
     def get_movie(self, imdb, title, year):
@@ -2630,10 +2638,14 @@ class myvideolinks:
             sources = []
 
             query = urllib.quote_plus(url)
-            query = self.base_link + self.search_link % query
+            query = self.search_link % query
 
-            result = getUrl(query).result
+            result = getUrl(self.base_link + query).result
             links = common.parseDOM(result, "div", attrs = { "class": "archive" })
+
+            if len(links) == 0:
+                result = getUrl(self.base_link_2 + query).result
+                links = common.parseDOM(result, "div", attrs = { "class": "archive" })
 
             title, hdlr = re.compile('(.+?) (\d{4})$').findall(url)[0]
             title = cleantitle().movie(title)

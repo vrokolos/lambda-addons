@@ -1,4 +1,19 @@
 ------------------------
+Genesis v3.4.1 (18-Jan-15)
+------------------------
+
+- Re-work of watched indicators.
+- Metahandler, Kodi library and Trakt indicators are seperated.
+- Added Trakt indicators in tv show listings.
+- Re-work of Trakt Progress.
+- Fixed issues with Trakt.
+- Fixed issues with available resolvers.
+- Fixed issues with available sources.
+- Updated translations.
+- Code cosmetics.
+
+
+------------------------
 Genesis v3.4.0 (12-Jan-15)
 ------------------------
 

@@ -36,12 +36,6 @@
 			<base>http://www.epsilontv.gr/</base>
 		</channel>
 		<channel active="True">
-			<name>NERIT</name>
-			<type>hls</type>
-			<url>http://hprt.flashcloud.mediacdn.com/hprt/live/playlist.m3u8</url>
-			<base>http://webtv.nerit.gr/nerit1-live/</base>
-		</channel>
-		<channel active="True">
 			<name>MACEDONIA TV</name>
 			<url>rtmp://213.16.167.55:1935/livepkgr/livestream swfUrl=http://static.ant1.gr/maktvlive.ashx pageUrl=http://www.maktv.gr/Live swfVfy=1 live=1 timeout=10</url>
 			<base>http://www.maktv.gr/Live</base>
@@ -60,9 +54,9 @@
 		</channel>
 		<channel active="True">
 			<name>EURONEWS</name>
-			<type>hls</type>
-			<url>http://ewns-hls-b-cdn.hexaglobe.net/18d4aae58438972c8afb7c87898a4a05/5492b832/euronews_gre.smil/playlist.m3u8</url>
-			<base>http://gr.euronews.com/news/streaming-live/</base>
+			<type>euronews</type>
+			<url>http://gr.euronews.com/news/streaming-live/</url>
+			<base>http://gr.euronews.com</base>
 		</channel>
 	</area>
 	<area name="CYPRUS">
@@ -110,12 +104,6 @@
 			<name>GREEK CINEMA</name>
 			<type>livestream</type>
 			<url>http://www.livestream.com/naturatv1</url>
-		</channel>
-		<channel active="True">
-			<name>ALPHA GATV</name>
-			<type>hls</type>
-			<url>http://player.stream.hostworks.com.au/alpha_dyn.m3u8</url>
-			<base>http://alphagatv.com.au/</base>
 		</channel>
 		<channel active="True">
 			<name>CY SPORTS</name>
@@ -213,8 +201,8 @@
 	<area name="CENTRAL MACEDONIA">
 		<channel active="True">
 			<name>TV 100</name>
-			<url>rtmp://188.226.161.133:1935/TV100/TV100 live=1 timeout=10</url>
-			<base>http://www.fm100.gr/media/index.php</base>
+			<url>rtmp://178.62.176.153:1935/TV100/TV100 live=1 timeout=10</url>
+			<base>http://www.fm100.gr/</base>
 		</channel>
 		<channel active="True">
 			<name>4E TV</name>
@@ -494,7 +482,7 @@
 		<channel active="True">
 			<name>KOSMOS</name>
 			<url>rtmp://edge.vidblee.com/tvkosmos/mp4:tvkosmos.mp4 live=1 timeout=10</url>
-			<base>http://www.tvkosmos.gr/webtv.aspx</base>
+			<base>http://tvkosmos.gr/live-streaming-webtv</base>
 		</channel>
 		<channel active="True">
 			<name>IRIDA TV</name>

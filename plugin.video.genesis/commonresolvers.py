@@ -415,8 +415,10 @@ def realdebrid_hosts():
 
 def videomega(url):
     try:
+        referer = url
         url = url.replace('/?ref=', '/iframe.php?ref=')
-        result = getUrl(url).result
+
+        result = getUrl(url, referer=referer).result
         url = re.compile('document.write.unescape."(.+?)"').findall(result)[0]
         url = urllib.unquote_plus(url)
         url = re.compile('file: "(.+?)"').findall(url)[0]
