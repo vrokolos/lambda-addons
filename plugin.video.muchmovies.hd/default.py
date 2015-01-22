@@ -129,7 +129,7 @@ class main:
 
 class getUrl(object):
     def __init__(self, url, close=True, proxy=None, post=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
-        if not proxy is None:
+        if not proxy == None:
             proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
             opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
             opener = urllib2.install_opener(opener)
@@ -138,17 +138,17 @@ class getUrl(object):
             cookie_handler = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
             opener = urllib2.build_opener(cookie_handler, urllib2.HTTPBasicAuthHandler(), urllib2.HTTPHandler())
             opener = urllib2.install_opener(opener)
-        if not post is None:
+        if not post == None:
             request = urllib2.Request(url, post)
         else:
             request = urllib2.Request(url,None)
         if mobile == True:
             request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; CPU; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7')
         else:
-            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36')
-        if not referer is None:
+            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0')
+        if not referer == None:
             request.add_header('Referer', referer)
-        if not cookie is None:
+        if not cookie == None:
             request.add_header('cookie', cookie)
         response = urllib2.urlopen(request, timeout=int(timeout))
         if output == 'cookie':
@@ -455,7 +455,7 @@ class index:
                 pass
 
     def pageList(self, pageList):
-        if pageList == None: return
+        if pageList == None or len(pageList) == 0: return
 
         total = len(pageList)
         for i in pageList:
@@ -500,7 +500,7 @@ class index:
         xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=item,isFolder=True)
 
     def movieList(self, movieList):
-        if movieList == None: return
+        if movieList == None or len(movieList) == 0: return
 
         getmeta = getSetting("meta")
 
@@ -900,18 +900,18 @@ class root:
 
 class link:
     def __init__(self):
-        self.muchmovies_base = 'http://umovies.me'
-        self.muchmovies_sort = 'http://umovies.me/session/sort'
-        self.muchmovies_title = 'http://umovies.me/movies?sort_by=title'
-        self.muchmovies_release = 'http://umovies.me/movies?sort_by=release'
-        self.muchmovies_added = 'http://umovies.me/movies?sort_by=date_added'
-        self.muchmovies_rating = 'http://umovies.me/movies?sort_by=rating'
-        self.muchmovies_root = 'http://umovies.me/movies'
-        self.muchmovies_search = 'http://umovies.me/search'
-        self.muchmovies_genre = 'http://umovies.me/genres'
+        self.muchmovies_base = 'http://aws.umovies.me'
+        self.muchmovies_sort = 'http://aws.umovies.me/session/sort'
+        self.muchmovies_title = 'http://aws.umovies.me/movies?sort_by=title'
+        self.muchmovies_release = 'http://aws.umovies.me/movies?sort_by=release'
+        self.muchmovies_added = 'http://aws.umovies.me/movies?sort_by=date_added'
+        self.muchmovies_rating = 'http://aws.umovies.me/movies?sort_by=rating'
+        self.muchmovies_root = 'http://aws.umovies.me/movies'
+        self.muchmovies_search = 'http://aws.umovies.me/search'
+        self.muchmovies_genre = 'http://aws.umovies.me/genres'
 
     def fix(self, url):
-        url = re.sub('http://www.muchmovies.org|http://www.buzzfilms.co|http://123movies.me', 'http://umovies.me', url)
+        url = re.sub('http://www.muchmovies.org|http://www.buzzfilms.co|http://123movies.me|http://umovies.me', self.muchmovies_base, url)
         return url
 
 class pages:

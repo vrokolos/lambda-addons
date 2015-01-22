@@ -4,7 +4,7 @@
 	<string id="30000">כללי</string>
 	<string id="30001">מראה</string>
 	<string id="30002">אפשר fanart</string>
-	<string id="30003">Main menu</string>
+	<string id="30003">תפריט ראשי</string>
 	<string id="30004">סרטים אחרונים</string>
 	<string id="30005">מנוטרל</string>
 	<string id="30006">Featured</string>
@@ -91,7 +91,7 @@
 	<string id="30314">לא נמצאו מקורות לניגון</string>
 	<string id="30315">נטען ב</string>
 	<!-- OK -->
-	<string id="30321">No episodes available.</string>
+	<string id="30321">אין פרקים זמינים.</string>
 	<string id="30322">Mark it as watched to remove it from Trakt Progress.</string>
 	<!-- YesNo -->
 	<string id="30341">לא הגדרת תיקיה להורדות.</string>
@@ -117,8 +117,8 @@
 	<string id="30403">סמן כלא נצפה</string>
 	<string id="30404">סמן כנצפה</string>
 	<string id="30405">נגן קדימון</string>
-	<string id="30406">הוסף למעודפים</string>
-	<string id="30407">הסר ממעודפים</string>
+	<string id="30406">הוסף למועדפים</string>
+	<string id="30407">הסר ממועדפים</string>
 	<string id="30408">הוסף לספרייה</string>
 	<string id="30409">הפעלה אוטומטית</string>
 	<string id="30410">נגן באמצעות...</string>
@@ -163,7 +163,7 @@
 	<string id="30530">Latest HD Movies</string>
 	<string id="30531">סרטים אחרונים</string>
 	<string id="30532">מועדפים</string>
-	<string id="30533">People Search</string>
+	<string id="30533">חיפוש שחקנים</string>
 	<string id="30534">חיפוש</string>
 	<string id="30541">לפי סגנון</string>
 	<string id="30542">לפי פופולרי</string>
@@ -186,24 +186,23 @@
 	<string id="30568">[B]IMDB[/B] : רשמ צפיה סדרות</string>
 	<string id="30569">רשימת סרטים</string>
 	<string id="30570">רשימת סדרות</string>
-	<string id="30571">סרטים מעודפים</string>
-	<string id="30572">סדרות מעודפים</string>
+	<string id="30571">סרטים מועדפים</string>
+	<string id="30572">סדרות מועדפות</string>
 	<string id="30573">הורדות</string>
 	<string id="30581">סרטים</string>
 	<string id="30582">סדרות</string>
 	<string id="30583">People (Movies)</string>
 	<string id="30584">People (TV)</string>
 	<string id="30601">Genesis...פתח הגדרות</string>
-	<string id="30602">URLResolver...פתח הגדרות</string>
-	<string id="30603">Genesis...נקה מטמון</string>
-	<string id="30604">Clear Genesis sources...</string>
-	<string id="30605">Genesis...עדכן תיקיות</string>
-	<string id="30606">[B]TRAKT[/B]יבא קולקציית סרטים...</string>
-	<string id="30607">[B]TRAKT[/B]יבא קולקציית סדרות...</string>
-	<string id="30608">[B]TRAKT[/B]יבא רשימת צפיה סרטים...</string>
-	<string id="30609">[B]TRAKT[/B]יבא רשימת צפיה סדרות...</string>
-	<string id="30610">[B]IMDB[/B]יבא רשימת צפיה סרטים...</string>
-	<string id="30611">[B]IMDB[/B]יבא רשימת צפיה סדרות...</string>
-	<string id="30612">Genesis...ספריית סרטים</string>
-	<string id="30613">Genesis...ספריית סדרות</string>
+	<string id="30602">Genesis...נקה מטמון</string>
+	<string id="30603">Clear Genesis sources...</string>
+	<string id="30604">Genesis...עדכן תיקיות</string>
+	<string id="30605">[B]TRAKT[/B]יבא קולקציית סרטים...</string>
+	<string id="30606">[B]TRAKT[/B]יבא קולקציית סדרות...</string>
+	<string id="30607">[B]TRAKT[/B]יבא רשימת צפיה סרטים...</string>
+	<string id="30608">[B]TRAKT[/B]יבא רשימת צפיה סדרות...</string>
+	<string id="30609">[B]IMDB[/B]יבא רשימת צפיה סרטים...</string>
+	<string id="30610">[B]IMDB[/B]יבא רשימת צפיה סדרות...</string>
+	<string id="30611">Genesis...ספריית סרטים</string>
+	<string id="30612">Genesis...ספריית סדרות</string>
 </strings>

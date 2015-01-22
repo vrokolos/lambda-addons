@@ -194,16 +194,15 @@
 	<string id="30583">Personne (Film)</string>
 	<string id="30584">Personne (TV)</string>
 	<string id="30601">Ouvrir la configuration de Genesis...</string>
-	<string id="30602">Ouvrir la Configuration de URLResolver...</string>
-	<string id="30603">Vider la Cache de Genesis...</string>
-	<string id="30604">Vider les sources de Genesis...</string>
-	<string id="30605">Mise à Jour du dossier de Genesis...</string>
-	<string id="30606">[B]TRAKT[/B] : Importer la Collection...</string>
-	<string id="30607">[B]TRAKT[/B] : Importer la Collection TV...</string>
-	<string id="30608">[B]TRAKT[/B] : Importer la Liste de Surveillance...</string>
-	<string id="30609">[B]TRAKT[/B] : Importer la Liste de Surveillance TV...</string>
-	<string id="30610">[B]IMDB[/B] : Importer la Liste de Surveillance...</string>
-	<string id="30611">[B]IMDB[/B] : Importer la Liste de Surveillance TV...</string>
-	<string id="30612">Dossier Film de Genesis...</string>
-	<string id="30613">Dossier TV de Genesis...</string>
+	<string id="30602">Vider la Cache de Genesis...</string>
+	<string id="30603">Vider les sources de Genesis...</string>
+	<string id="30604">Mise à Jour du dossier de Genesis...</string>
+	<string id="30605">[B]TRAKT[/B] : Importer la Collection...</string>
+	<string id="30606">[B]TRAKT[/B] : Importer la Collection TV...</string>
+	<string id="30607">[B]TRAKT[/B] : Importer la Liste de Surveillance...</string>
+	<string id="30608">[B]TRAKT[/B] : Importer la Liste de Surveillance TV...</string>
+	<string id="30609">[B]IMDB[/B] : Importer la Liste de Surveillance...</string>
+	<string id="30610">[B]IMDB[/B] : Importer la Liste de Surveillance TV...</string>
+	<string id="30611">Dossier Film de Genesis...</string>
+	<string id="30612">Dossier TV de Genesis...</string>
 </strings>

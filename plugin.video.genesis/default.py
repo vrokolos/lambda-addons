@@ -123,7 +123,6 @@ class main:
         elif action == 'view_episodes':               contextMenu().view('episodes')
         elif action == 'playlist_open':               contextMenu().playlist_open()
         elif action == 'settings_open':               contextMenu().settings_open()
-        elif action == 'settings_urlresolver':        contextMenu().settings_open('script.module.urlresolver')
         elif action == 'favourite_movie_add':         contextMenu().favourite_add('Movie', imdb, name, year, image, refresh=True)
         elif action == 'favourite_movie_from_search': contextMenu().favourite_add('Movie', imdb, name, year, image)
         elif action == 'favourite_tv_add':            contextMenu().favourite_add('TV Show', imdb, name, year, image, refresh=True)
@@ -2098,20 +2097,19 @@ class root:
     def tools(self):
         rootList = []
         rootList.append({'name': 30601, 'image': 'settings_open.jpg', 'action': 'settings_open'})
-        rootList.append({'name': 30602, 'image': 'settings_urlresolver.jpg', 'action': 'settings_urlresolver'})
-        rootList.append({'name': 30603, 'image': 'cache_clear.jpg', 'action': 'cache_clear_list'})
-        rootList.append({'name': 30604, 'image': 'cache_clear.jpg', 'action': 'cache_clear_src'})
-        rootList.append({'name': 30605, 'image': 'library_update.jpg', 'action': 'library_update'})
+        rootList.append({'name': 30602, 'image': 'cache_clear.jpg', 'action': 'cache_clear_list'})
+        rootList.append({'name': 30603, 'image': 'cache_clear.jpg', 'action': 'cache_clear_src'})
+        rootList.append({'name': 30604, 'image': 'library_update.jpg', 'action': 'library_update'})
         if not (link().trakt_user == '' or link().trakt_password == ''):
-            rootList.append({'name': 30606, 'image': 'movies_trakt_collection.jpg', 'action': 'library_trakt_collection'})
-            rootList.append({'name': 30607, 'image': 'shows_trakt_collection.jpg', 'action': 'library_tv_trakt_collection'})
-            rootList.append({'name': 30608, 'image': 'movies_trakt_watchlist.jpg', 'action': 'library_trakt_watchlist'})
-            rootList.append({'name': 30609, 'image': 'shows_trakt_watchlist.jpg', 'action': 'library_tv_trakt_watchlist'})
+            rootList.append({'name': 30605, 'image': 'movies_trakt_collection.jpg', 'action': 'library_trakt_collection'})
+            rootList.append({'name': 30606, 'image': 'shows_trakt_collection.jpg', 'action': 'library_tv_trakt_collection'})
+            rootList.append({'name': 30607, 'image': 'movies_trakt_watchlist.jpg', 'action': 'library_trakt_watchlist'})
+            rootList.append({'name': 30608, 'image': 'shows_trakt_watchlist.jpg', 'action': 'library_tv_trakt_watchlist'})
         if not (link().imdb_user == ''):
-            rootList.append({'name': 30610, 'image': 'movies_imdb_watchlist.jpg', 'action': 'library_imdb_watchlist'})
-            rootList.append({'name': 30611, 'image': 'shows_imdb_watchlist.jpg', 'action': 'library_tv_imdb_watchlist'})
-        rootList.append({'name': 30612, 'image': 'folder_movie.jpg', 'action': 'folder_movie'})
-        rootList.append({'name': 30613, 'image': 'folder_tv.jpg', 'action': 'folder_tv'})
+            rootList.append({'name': 30609, 'image': 'movies_imdb_watchlist.jpg', 'action': 'library_imdb_watchlist'})
+            rootList.append({'name': 30610, 'image': 'shows_imdb_watchlist.jpg', 'action': 'library_tv_imdb_watchlist'})
+        rootList.append({'name': 30611, 'image': 'folder_movie.jpg', 'action': 'folder_movie'})
+        rootList.append({'name': 30612, 'image': 'folder_tv.jpg', 'action': 'folder_tv'})
         index().rootList(rootList)
 
 
@@ -4788,8 +4786,8 @@ class resolver:
         global global_sources
         global_sources = []
 
-        #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('movie25', 'true'), ('iwatchonline', 'true'), ('movietube', 'true'), ('moviezone', 'true'), ('zumvo', 'true'), ('view47', 'true'), ('g2g', 'true'), ('muchmovies', 'true'), ('sweflix', 'true'), ('movieshd', 'true'), ('onlinemovies', 'true'), ('niter', 'true'), ('yify', 'true'), ('movietv', 'true'), ('vkbox', 'true'), ('moviestorm', 'true'), ('merdb', 'true'), ('wso', 'true'), ('twomovies', 'true'), ('einthusan', 'true'), ('myvideolinks', 'true'), ('noobroom', 'true'), ('furk', 'true')]
-        sourceDict = [('icefilms', getSetting("icefilms")), ('primewire', getSetting("primewire")), ('movie25', getSetting("movie25")), ('iwatchonline', getSetting("iwatchonline")), ('movietube', getSetting("movietube")), ('moviezone', getSetting("moviezone")), ('zumvo', getSetting("zumvo")), ('view47', getSetting("view47")), ('g2g', getSetting("g2g")), ('muchmovies', getSetting("muchmovies")), ('sweflix', getSetting("sweflix")), ('movieshd', getSetting("movieshd")), ('onlinemovies', getSetting("onlinemovies")), ('niter', getSetting("niter")), ('yify', getSetting("yify")), ('movietv', getSetting("movietv")), ('vkbox', getSetting("vkbox")), ('moviestorm', getSetting("moviestorm")), ('merdb', getSetting("merdb")), ('wso', getSetting("wso")), ('twomovies', getSetting("twomovies")), ('einthusan', getSetting("einthusan")), ('myvideolinks', getSetting("myvideolinks")), ('noobroom', getSetting("noobroom")), ('furk', getSetting("furk"))]
+        #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('movie25', 'true'), ('iwatchonline', 'true'), ('movietube', 'true'), ('moviezone', 'true'), ('zumvo', 'true'), ('view47', 'true'), ('g2g', 'true'), ('muchmovies', 'true'), ('sweflix', 'true'), ('movieshd', 'true'), ('onlinemovies', 'true'), ('niter', 'true'), ('yify', 'true'), ('vkbox', 'true'), ('moviestorm', 'true'), ('merdb', 'true'), ('wso', 'true'), ('twomovies', 'true'), ('einthusan', 'true'), ('myvideolinks', 'true'), ('noobroom', 'true'), ('furk', 'true')]
+        sourceDict = [('icefilms', getSetting("icefilms")), ('primewire', getSetting("primewire")), ('movie25', getSetting("movie25")), ('iwatchonline', getSetting("iwatchonline")), ('movietube', getSetting("movietube")), ('moviezone', getSetting("moviezone")), ('zumvo', getSetting("zumvo")), ('view47', getSetting("view47")), ('g2g', getSetting("g2g")), ('muchmovies', getSetting("muchmovies")), ('sweflix', getSetting("sweflix")), ('movieshd', getSetting("movieshd")), ('onlinemovies', getSetting("onlinemovies")), ('niter', getSetting("niter")), ('yify', getSetting("yify")), ('vkbox', getSetting("vkbox")), ('moviestorm', getSetting("moviestorm")), ('merdb', getSetting("merdb")), ('wso', getSetting("wso")), ('twomovies', getSetting("twomovies")), ('einthusan', getSetting("einthusan")), ('myvideolinks', getSetting("myvideolinks")), ('noobroom', getSetting("noobroom")), ('furk', getSetting("furk"))]
 
         threads = []
         sourceDict = [i[0] for i in sourceDict if i[1] == 'true']
@@ -4805,8 +4803,8 @@ class resolver:
         global global_sources
         global_sources = []
 
-        #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('watchseries', 'true'), ('iwatchonline', 'true'), ('movietube', 'true'), ('movietv', 'true'), ('ororo', 'true'), ('vkbox', 'true'), ('clickplay', 'true'), ('moviestorm', 'true'), ('merdb', 'true'), ('wso', 'true'), ('twomovies', 'true'), ('animeultima', 'true'), ('tvrelease', 'true'), ('directdl', 'true'), ('noobroom', 'true'), ('furk', 'true')]
-        sourceDict = [('icefilms', getSetting("icefilms_tv")), ('primewire', getSetting("primewire_tv")), ('watchseries', getSetting("watchseries_tv")), ('iwatchonline', getSetting("iwatchonline_tv")), ('movietube', getSetting("movietube_tv")), ('movietv', getSetting("movietv_tv")), ('ororo', getSetting("ororo_tv")), ('vkbox', getSetting("vkbox_tv")), ('clickplay', getSetting("clickplay_tv")), ('moviestorm', getSetting("moviestorm_tv")), ('merdb', getSetting("merdb_tv")), ('wso', getSetting("wso_tv")), ('twomovies', getSetting("twomovies_tv")), ('animeultima', getSetting("animeultima_tv")), ('tvrelease', getSetting("tvrelease_tv")), ('directdl', getSetting("directdl_tv")), ('noobroom', getSetting("noobroom_tv")), ('furk', getSetting("furk_tv"))]
+        #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('watchseries', 'true'), ('iwatchonline', 'true'), ('movietube', 'true'), ('ororo', 'true'), ('vkbox', 'true'), ('clickplay', 'true'), ('moviestorm', 'true'), ('merdb', 'true'), ('wso', 'true'), ('twomovies', 'true'), ('animeultima', 'true'), ('tvrelease', 'true'), ('directdl', 'true'), ('noobroom', 'true'), ('furk', 'true')]
+        sourceDict = [('icefilms', getSetting("icefilms_tv")), ('primewire', getSetting("primewire_tv")), ('watchseries', getSetting("watchseries_tv")), ('iwatchonline', getSetting("iwatchonline_tv")), ('movietube', getSetting("movietube_tv")), ('ororo', getSetting("ororo_tv")), ('vkbox', getSetting("vkbox_tv")), ('clickplay', getSetting("clickplay_tv")), ('moviestorm', getSetting("moviestorm_tv")), ('merdb', getSetting("merdb_tv")), ('wso', getSetting("wso_tv")), ('twomovies', getSetting("twomovies_tv")), ('animeultima', getSetting("animeultima_tv")), ('tvrelease', getSetting("tvrelease_tv")), ('directdl', getSetting("directdl_tv")), ('noobroom', getSetting("noobroom_tv")), ('furk', getSetting("furk_tv"))]
 
         threads = []
         sourceDict = [i[0] for i in sourceDict if i[1] == 'true']
@@ -4974,7 +4972,7 @@ class resolver:
         hd_rank = uniqueList(hd_rank).list
 
         sd_rank = ['noobroom', 'furk']
-        #sd_rank += ['Movreel', 'Billionuploads', 'MovieTV', 'Ororo', 'Animeultima', 'Streamin', 'Grifthost', 'iShared', 'Cloudyvideos', 'Mrfile', 'Vidbull', 'Mightyupload', 'VK', 'Movshare', 'Promptfile', 'Vodlocker', 'Played', 'Gorillavid', 'Bestreams', 'Divxstage']
+        #sd_rank += ['Movreel', 'Billionuploads', '180upload', 'Ororo', 'Animeultima', 'Streamin', 'Grifthost', 'iShared', 'Cloudyvideos', 'Mrfile', 'Vidbull', 'Mightyupload', 'VK', 'Movshare', 'Promptfile', 'Vodlocker', 'Played', 'Gorillavid', 'Bestreams', 'Divxstage']
         sd_rank += [getSetting("host1"), getSetting("host2"), getSetting("host3"), getSetting("host4"), getSetting("host5"), getSetting("host6"), getSetting("host7"), getSetting("host8"), getSetting("host9"), getSetting("host10"), getSetting("host11"), getSetting("host12"), getSetting("host13"), getSetting("host14"), getSetting("host15"), getSetting("host16"), getSetting("host17"), getSetting("host18"), getSetting("host19"), getSetting("host20")]
         sd_rank += pz_hosts + rd_hosts
         sd_rank += self.hostDict
@@ -5096,69 +5094,60 @@ class resolver:
 
     def sources_dict(self):
         self.hostDict = [
-        '2gb-hosting',
+        '180upload',
         'allmyvideos',
-        #'180upload',
-        'bayfiles',
         'bestreams',
         'billionuploads',
-        'castamp',
         'cloudyvideos',
-        #'clicktoview',
+        'cloudzilla',
         'daclips',
         'divxstage',
-        'donevideo',
-        'ecostream',
+        'fastvideo',
+        #'filecloud',
+        'filehoot',
         'filenuke',
         'gorillavid',
         'grifthost',
         'hostingbulk',
         #'hugefiles',
+        'ipithos',
         'ishared',
-        'jumbofiles',
-        'lemuploads',
-        'limevideo',
-        #'megarelease',
+        #'kingfiles',
         'mightyupload',
+        'mooshare',
         'movdivx',
         'movpod',
         'movreel',
         'movshare',
         'movzap',
         'mrfile',
-        'muchshare',
         'nosvideo',
         'novamov',
         'nowvideo',
         'played',
-        'playwire',
         'primeshare',
         'promptfile',
-        'purevid',
         'sharerepo',
         'sharesix',
         'stagevu',
         'streamcloud',
         'streamin',
         'thefile',
+        'thevideo',
         'uploadc',
+        #'uploadrocket',
         'v-vids',
         'vidbull',
-        'videobb',
+        #'videomega',
         'videoweed',
-        'videozed',
-        #'vidhog',
-        #'vidplay',
+        'vidspot',
         'vidto',
-        'vidx',
-        #'vidxden',
+        'vidzi',
         'vodlocker',
-        #'watchfreeinhd',
         'xvidstage',
         'youtube',
-        'yourupload',
-        'youwatch',
-        'zalaa'
+        'zalaa',
+        'zettahost'
         ]
 
 

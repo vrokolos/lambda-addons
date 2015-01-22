@@ -194,16 +194,15 @@
 	<string id="30583">People (Movies)</string>
 	<string id="30584">People (TV)</string>
 	<string id="30601">Open Genesis settings...</string>
-	<string id="30602">Open URLResolver settings...</string>
-	<string id="30603">Clear Genesis cache...</string>
-	<string id="30604">Clear Genesis sources...</string>
-	<string id="30605">Update Genesis folders...</string>
-	<string id="30606">[B]TRAKT[/B] : Import Collection...</string>
-	<string id="30607">[B]TRAKT[/B] : Import TV Collection...</string>
-	<string id="30608">[B]TRAKT[/B] : Import Watchlist...</string>
-	<string id="30609">[B]TRAKT[/B] : Import TV Watchlist...</string>
-	<string id="30610">[B]IMDB[/B] : Import Watchlist...</string>
-	<string id="30611">[B]IMDB[/B] : Import TV Watchlist...</string>
-	<string id="30612">Genesis movie folder...</string>
-	<string id="30613">Genesis TV folder...</string>
+	<string id="30602">Clear Genesis cache...</string>
+	<string id="30603">Clear Genesis sources...</string>
+	<string id="30604">Update Genesis folders...</string>
+	<string id="30605">[B]TRAKT[/B] : Import Collection...</string>
+	<string id="30606">[B]TRAKT[/B] : Import TV Collection...</string>
+	<string id="30607">[B]TRAKT[/B] : Import Watchlist...</string>
+	<string id="30608">[B]TRAKT[/B] : Import TV Watchlist...</string>
+	<string id="30609">[B]IMDB[/B] : Import Watchlist...</string>
+	<string id="30610">[B]IMDB[/B] : Import TV Watchlist...</string>
+	<string id="30611">Genesis movie folder...</string>
+	<string id="30612">Genesis TV folder...</string>
 </strings>

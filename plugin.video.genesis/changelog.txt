@@ -1,4 +1,64 @@
 ------------------------
+Genesis v3.5.0 (22-Jan-15)
+------------------------
+
+- Fixed issues with Muchmovies source.
+- Fixed issues with MoviesHD source.
+- Fixed serious issue with Twomovies source.
+- Fixed issues with Myvideolinks source.
+- Fixed issues with DirectDL source.
+- Removed MovieTV source.
+- Tweaked available sources.
+- Removed urlresolver from dependencies.
+- Removed resolvers from dead or unwanted hosts.
+- Re-work of 180upload resolver.
+- Fixed issues with Billionuploads resolver.
+- Fixed issues with Movreel resolver.
+- Fixed issues with Videomega resolver.
+- Tweaked available resolvers.
+- Added Allmyvideos internal resolver.
+- Added Bestreams internal resolver.
+- Added Cloudzilla internal resolver.
+- Added Daclips internal resolver.
+- Added Divxstage internal resolver.
+- Added Fastvideo internal resolver.
+- Added Filehoot internal resolver.
+- Added Filenuke internal resolver.
+- Added Gorillavid internal resolver.
+- Added Hostingbulk internal resolver.
+- Added Ipithos internal resolver.
+- Added Mightyupload internal resolver.
+- Added Mooshare internal resolver.
+- Added Movdivx internal resolver.
+- Added Movpod internal resolver.
+- Added Movshare internal resolver.
+- Added Movzap internal resolver.
+- Added Nosvideo internal resolver.
+- Added Novamov internal resolver.
+- Added Nowvideo internal resolver.
+- Added Played internal resolver.
+- Added Primeshare internal resolver.
+- Added Promptfile internal resolver.
+- Added Sharerepo internal resolver.
+- Added Sharesix internal resolver.
+- Added Stagevu internal resolver.
+- Added Streamcloud internal resolver.
+- Added Thefile internal resolver.
+- Added Thevideo internal resolver.
+- Added Uploadc internal resolver.
+- Added Videoweed internal resolver.
+- Added Vidspot internal resolver.
+- Added Vidto internal resolver.
+- Added Vidzi internal resolver.
+- Added Vodlocker internal resolver.
+- Added Xvidstage internal resolver.
+- Added Zalaa internal resolver.
+- Added Zettahost internal resolver.
+- Updated translations.
+- Code cosmetics.
+
+
+------------------------
 Genesis v3.4.1 (18-Jan-15)
 ------------------------
 
