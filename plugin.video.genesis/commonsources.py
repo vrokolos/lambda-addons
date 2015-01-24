@@ -1076,7 +1076,8 @@ class moviezone:
             result = [(common.parseDOM(i, "link")[0], common.parseDOM(i, "span", ret="data-title", attrs = { "class": "imdbRating" })[0]) for i in result]
             result = [i[0] for i in result if imdb in i[1]][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -1170,7 +1171,8 @@ class zumvo:
             result = [i for i in result if title == cleantitle().movie(i[1])]
             result = [i[0] for i in result if any(x in i[1] for x in years)][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -1232,7 +1234,8 @@ class view47:
             result = [i for i in result if title == cleantitle().movie(i[1])]
             result = [i[0] for i in result if any(x in i[2] for x in years)][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -1286,7 +1289,8 @@ class g2g:
             result = [i for i in result if title == cleantitle().movie(i[1])]
             result = [i[0] for i in result if any(x in i[1] for x in years)][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = re.compile('(.+?[?]\d*)').findall(url)[0]
             if not url.startswith('/'): url = '/%s' % url
             if not url.startswith('/forum'): url = '/forum%s' % url
@@ -1360,7 +1364,8 @@ class muchmovies:
             result = [i for i in result if title == cleantitle().movie(i[1])]
             result = [i[0] for i in result if any(x in i[1] for x in years)][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -1404,7 +1409,8 @@ class sweflix:
             result = [i for i in result if title == cleantitle().movie(i[1])]
             result = [i[0] for i in result if any(x in i[2] for x in years)][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -1456,7 +1462,8 @@ class movieshd:
             result = [i for i in result if title == cleantitle().movie(i[1])]
             result = [i[0] for i in result if any(x in i[1] for x in years)][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -1513,7 +1520,8 @@ class onlinemovies:
             result = [i for i in result if title == cleantitle().movie(i[1])]
             result = [i[0] for i in result if any(x in i[2] for x in years)][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -1548,83 +1556,11 @@ class onlinemovies:
     def resolve(self, url):
         return url
 
-class niter:
-    def __init__(self):
-        self.base_link = 'http://niter.tv'
-        self.search_link = '/search?q=%s'
-        self.movie_link = '/movies/%s'
-        self.pk_link = '/player/pk/pk/plugins/player_p2.php?url=%s'
-
-    def get_movie(self, imdb, title, year):
-        try:
-            query = self.base_link + self.search_link % (urllib.quote_plus(title))
-
-            result = getUrl(query).result
-            result = common.parseDOM(result, "div", attrs = { "id": "movies" })[0]
-            result = common.parseDOM(result, "figure")
-
-            title = cleantitle().movie(title)
-            years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
-            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "figcaption", ret="title")[0]) for i in result]
-            url = [i[0] for i in result if title == cleantitle().movie(i[1])][0]
-
-            result = getUrl(url).result
-            result = common.parseDOM(result, "a", attrs = { "class": "title-title" })[0]
-            y = re.compile('(\d{4})').findall(result)[-1]
-            if not any(x == str(y) for x in years): raise Exception()
-
-            url = url.replace(self.base_link, '')
-            url = common.replaceHTMLCodes(url)
-            url = url.encode('utf-8')
-            return url
-        except:
-            return
-
-    def get_sources(self, url, hosthdDict, hostDict):
-        try:
-            sources = []
-
-            base = self.base_link + url
-            result = getUrl(base).result
-            result = common.parseDOM(result, "div", attrs = { "id": "videoParameter" })[0]
-            result = result.replace('pic=', '')
-
-            links = result.split('&')[:3]
-
-            for i in links:
-                try:
-                    url = self.base_link + self.pk_link % i
-                    result = getUrl(url, referer=base).result
-                    result = json.loads(result)
-
-                    url = [i['url'] for i in result if 'x-shockwave-flash' in i['type']]
-                    url += [i['url'] for i in result if 'video/mpeg4' in i['type']]
-                    url = url[-1]
-                    url = common.replaceHTMLCodes(url)
-                    url = url.encode('utf-8')
-
-                    sources.append({'source': 'Niter', 'quality': 'HD', 'provider': 'Niter', 'url': url})
-                except:
-                    pass
-
-            return sources
-        except:
-            return sources
-
-    def resolve(self, url):
-        try:
-            url = getUrl(url, output='geturl').result
-            if 'requiressl=yes' in url: url = url.replace('http://', 'https://')
-            else: url = url.replace('https://', 'http://')
-            return url
-        except:
-            return
-
 class yify:
     def __init__(self):
         self.base_link = 'http://yify.tv'
         self.search_link = '/wp-admin/admin-ajax.php'
-        self.pk_link = '/reproductor2/pk/pk/plugins/player_p2.php?url=%s'
+        self.pk_link = '/player/pk/pk/plugins/player_p2.php'
 
     def get_movie(self, imdb, title, year):
         try:
@@ -1637,12 +1573,13 @@ class yify:
             result = result['post']['all']
 
             title = cleantitle().movie(title)
-            url = [i['post_link'] for i in result if title == cleantitle().movie(i['post_title'])][0]
+            result = [i['post_link'] for i in result if title == cleantitle().movie(i['post_title'])][0]
 
-            result = getUrl(url).result
-            if not str('tt' + imdb) in result: raise Exception()
+            check = getUrl(result).result
+            if not str('tt' + imdb) in check: raise Exception()
 
-            url = url.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -1655,20 +1592,35 @@ class yify:
 
             base = self.base_link + url
             result = getUrl(base).result
+            result = common.parseDOM(result, "script", attrs = { "type": "text/javascript" })
+            result = ''.join(result)
 
-            i = re.compile('showPkPlayer[(]"(.+?)"[)]').findall(result)[0]
+            links = re.compile('pic=([^&]+)').findall(result)
+            links = uniqueList(links).list
 
-            url = self.base_link + self.pk_link % i
-            result = getUrl(url, referer=base).result
-            result = json.loads(result)
+            import commonresolvers
 
-            url = [i['url'] for i in result if 'x-shockwave-flash' in i['type']]
-            url += [i['url'] for i in result if 'video/mpeg4' in i['type']]
-            url = url[-1]
-            url = common.replaceHTMLCodes(url)
-            url = url.encode('utf-8')
+            for i in links:
+                try:
+                    url = self.base_link + self.pk_link
+                    post = urllib.urlencode({'url': i, 'fv': '16'})
+                    result = getUrl(url, post=post, referer=base).result
+                    result = json.loads(result)
 
-            sources.append({'source': 'YIFY', 'quality': 'HD', 'provider': 'YIFY', 'url': url})
+                    try: sources.append({'source': 'YIFY', 'quality': 'HD', 'provider': 'YIFY', 'url': [i['url'] for i in result if i['width'] == 1280][0]})
+                    except: pass
+
+                    url = result[0]['jscode']
+                    url = urllib.unquote_plus(url)
+                    url = re.compile('"(.+?)"').findall(url)[0]
+                    url = [x.split('|')[-1].split('|')[-1] for x in url.split(',')]
+                    url = [x for x in url if 'googlevideo' in x]
+                    url = [commonresolvers.google(x) for x in url]
+                    url = [x[0] for x in url if not x == None]
+
+                    for x in url: sources.append({'source': 'GVideo', 'quality': x['quality'], 'provider': 'YIFY', 'url': x['url']})
+                except:
+                    pass
 
             return sources
         except:
@@ -1704,7 +1656,8 @@ class ororo:
             result = [i for i in result if any(x in i[1] for x in years)]
             result = [i[2] for i in result if any(x == cleantitle().tv(i[0]) for x in shows)][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -1720,9 +1673,10 @@ class ororo:
                 cookie = getUrl(self.sign_link, post=self.key_link, output='cookie').result
                 result = getUrl(url, cookie=cookie).result
 
-            url = common.parseDOM(result, "a", ret="data-href", attrs = { "href": "#%01d-%01d" % (int(season), int(episode)) })[0]
+            result = common.parseDOM(result, "a", ret="data-href", attrs = { "href": "#%01d-%01d" % (int(season), int(episode)) })[0]
 
-            url = url.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -1877,7 +1831,8 @@ class clickplay:
             result = [i for i in result if any(x == cleantitle().tv(i[0]) for x in shows)]
             result = [i[1] for i in result if any(x in i[0] for x in years)][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -1949,7 +1904,8 @@ class moviestorm:
             result = [i for i in result if imdb in i][0]
             result = common.parseDOM(result, "a", ret="href")[0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -1968,7 +1924,8 @@ class moviestorm:
             result = [i for i in result if imdb in i][0]
             result = common.parseDOM(result, "a", ret="href")[0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -2053,7 +2010,8 @@ class merdb:
             result = [i for i in result if title == cleantitle().movie(i[1])]
             result = [i[0] for i in result if any(x in i[1] for x in years)][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -2073,7 +2031,8 @@ class merdb:
             result = [i for i in result if any(x == cleantitle().tv(i[1]) for x in shows)]
             result = [i[0] for i in result if any(x in i[1] for x in years)][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -2090,7 +2049,8 @@ class merdb:
             result = common.parseDOM(result, "a", ret="href")
             result = [i for i in result if ep in i][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -2150,7 +2110,7 @@ class merdb:
 
 class wso:
     def __init__(self):
-        self.base_link = 'http://movies-online.li'
+        self.base_link = 'http://free-movies.li'
         self.tvbase_link = 'http://watchseries-online.ch'
         self.search_link = '/?s=%s'
 
@@ -2168,7 +2128,8 @@ class wso:
             result = [i for i in result if title == cleantitle().movie(i[1])]
             result = [i[0] for i in result if any(x in i[1] for x in years)][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -2252,9 +2213,10 @@ class wso:
 
     def resolve(self, url):
         try:
-            if url.startswith((self.base_link, self.tvbase_link)):
-                result = getUrl(url).result
-                url = common.parseDOM(result, "a", ret="href", attrs = { "class": "wsoButton" })[0]
+            result = getUrl(url).result
+
+            try: url = common.parseDOM(result, "a", ret="href", attrs = { "class": "wsoButton" })[0]
+            except: pass
 
             import commonresolvers
             url = commonresolvers.get(url)
@@ -2265,26 +2227,23 @@ class wso:
 class twomovies:
     def __init__(self):
         self.base_link = 'http://twomovies.us'
-        self.search_link = '/search/?criteria=title&search_query=%s'
+        self.search_link = '/search/?criteria=imdb&search_query=tt%s'
 
     def get_movie(self, imdb, title, year):
         try:
-            query = self.base_link + self.search_link % (urllib.quote_plus(title))
+            query = self.base_link + self.search_link % imdb
 
-            query = getUrl(query, output='geturl').result
-            if not self.base_link in query: raise Exception()
+            check = getUrl(query, output='geturl').result
+            if not self.base_link in check: raise Exception()
 
-            result = getUrl(query).result
-            result = common.parseDOM(result, "div", attrs = { "class": "filmDiv" })
+            cookie = getUrl(query, output='cookie').result
+            cookie = re.compile('(PHPSESSID=[\w]+)').findall(cookie)[0]
 
-            title = cleantitle().movie(title)
-            years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
-            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "a", attrs = { "class": "filmname" })[0], common.parseDOM(i, "a", attrs = { "class": "filmyar" })[0]) for i in result]
-            result = [i for i in result if '/watch_movie/' in i[0]]
-            result = [i for i in result if title == cleantitle().movie(i[1])]
-            result = [i[0] for i in result if any(x in i[2] for x in years)][0]
+            result = getUrl(query, cookie=cookie, referer=self.base_link).result
+            result = common.parseDOM(result, "meta", ret="content", attrs = { "property": "og:url" })[0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -2293,22 +2252,19 @@ class twomovies:
 
     def get_show(self, imdb, tvdb, show, show_alt, year):
         try:
-            query = self.base_link + self.search_link % (urllib.quote_plus(show))
+            query = self.base_link + self.search_link % imdb
 
-            query = getUrl(query, output='geturl').result
-            if not self.base_link in query: raise Exception()
+            check = getUrl(query, output='geturl').result
+            if not self.base_link in check: raise Exception()
 
-            result = getUrl(query).result
-            result = common.parseDOM(result, "div", attrs = { "class": "filmDiv" })
+            cookie = getUrl(query, output='cookie').result
+            cookie = re.compile('(PHPSESSID=[\w]+)').findall(cookie)[0]
 
-            shows = [cleantitle().tv(show), cleantitle().tv(show_alt)]
-            years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
-            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "a", attrs = { "class": "filmname" })[0], common.parseDOM(i, "a", attrs = { "class": "filmyar" })[0]) for i in result]
-            result = [i for i in result if '/watch_tv_show/' in i[0]]
-            result = [i for i in result if any(x == cleantitle().tv(i[1]) for x in shows)]
-            result = [i[0] for i in result if any(x in i[2] for x in years)][0]
+            result = getUrl(query, cookie=cookie, referer=self.base_link).result
+            result = common.parseDOM(result, "meta", ret="content", attrs = { "property": "og:url" })[0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -2329,11 +2285,12 @@ class twomovies:
 
             base = self.base_link + url
 
-            base = getUrl(base, output='geturl').result
-            if not self.base_link in base: raise Exception()
+            check = getUrl(base, output='geturl').result
+            if not self.base_link in check: raise Exception()
 
-            result = getUrl(base).result
-            result = result.decode('iso-8859-1').encode('utf-8')
+            base += '?sort=date.desc#links'
+            result = getUrl(base, referer=self.base_link).result
+
             links = common.parseDOM(result, "tr", attrs = { "id": "link_row_.+?" })
 
             for i in links:
@@ -2365,11 +2322,14 @@ class twomovies:
 
     def resolve(self, url):
         try:
-            url = getUrl(url, output='geturl').result
-            if not self.base_link in url: raise Exception()
+            check = getUrl(url, output='geturl').result
+            if not self.base_link in check: raise Exception()
 
-            cookie = urllib.urlencode({'links_tos': '1'})
-            result = getUrl(url, cookie=cookie).result
+            cookie = getUrl(url, output='cookie').result
+            cookie = re.compile('(PHPSESSID=[\w]+)').findall(cookie)[0]
+            cookie += '; links_tos=1'
+
+            result = getUrl(url, cookie=cookie, referer=self.base_link).result
 
             url = common.parseDOM(result, "iframe", ret="src")
             url += common.parseDOM(result, "IFRAME", ret="SRC")
@@ -2403,7 +2363,8 @@ class animeultima:
             result = [i for i in result if any(x == cleantitle().tv(i[1]) for x in shows)]
             result = result[-1][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -2424,7 +2385,8 @@ class animeultima:
             result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "td", attrs = { "class": "epnum" })[0]) for i in result]
             result = [i[0] for i in result if num == i[1]][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -2488,7 +2450,8 @@ class einthusan:
             if not len(r) == 0: result = r
             result = [i[0] for i in result if title == cleantitle().movie(i[1])][0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = url.replace('../', '/')
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
@@ -2516,9 +2479,7 @@ class einthusan:
 class myvideolinks:
     def __init__(self):
         self.base_link_1 = 'http://myvideolinks.eu'
-        self.base_link_2 = 'http://movies.myvideolinks.eu'
-        self.base_link_3 = 'http://myvideolinks.xyz'
-        self.base_link_4 = 'http://movies.myvideolinks.xyz'
+        self.base_link_2 = 'http://myvideolinks.xyz'
         self.search_link = '/?s=%s'
 
     def get_movie(self, imdb, title, year):
@@ -2534,13 +2495,18 @@ class myvideolinks:
         try:
             sources = []
 
-            query = urllib.quote_plus(url)
-            query = self.search_link % query
+            result = ''
+            domains = [self.base_link_1, self.base_link_2]
+            for domain in domains:
+                try: result += getUrl(domain).result
+                except: pass
+
+            queries = common.parseDOM(result, "iframe", ret="src")
+            queries = [i + self.search_link % urllib.quote_plus(url) for i in queries]
 
             result = ''
-            domains = [self.base_link_1, self.base_link_2, self.base_link_3, self.base_link_4]
-            for domain in domains:
-                try: result += getUrl(domain + query).result
+            for query in queries:
+                try: result += getUrl(query).result
                 except: pass
 
             links = common.parseDOM(result, "div", attrs = { "class": "archive" })
@@ -2777,22 +2743,35 @@ class directdl:
         except:
             return
 
+    def get_cookie(self, username, password):
+        try:
+            query = self.base_link
+            post = urllib.urlencode({'username': username, 'password': password, 'Login': 'Login', 'mode': 'normal'})
+            cookie = getUrl(query, post=post, output='cookie').result
+            cookie = re.compile('(PHPSESSID=[\w]+)').findall(cookie)[0]
+            cookie = base64.urlsafe_b64encode(cookie)
+            return cookie
+        except:
+            return
+
     def get_sources(self, url, hosthdDict, hostDict):
         try:
             sources = []
 
-            from random import randint
-            user = 'gen%s' % str(randint(1,50))
-
-            query = self.base_link
-            post = urllib.urlencode({'username': user, 'password': user, 'Login': 'Login', 'mode': 'normal'})
-            cookie = getUrl(query, post=post, output='cookie').result
-
             query = urllib.quote_plus(url)
             query = self.base_link + self.search_link % query
 
+            cookie = base64.urlsafe_b64decode('UEhQU0VTU0lEPWFvb2ZhbDN2MGlrM2FwYTk1NXB2aHE2Mmsz')
+
             result = getUrl(query, cookie=cookie).result
             result = json.loads(result)
+
+            link = urlparse.urlparse(result[0]['links'][0]['url']).path
+            if link in ['/', '']: raise Exception()
+
+            result = getUrl(query, cookie=cookie).result
+            result = json.loads(result)
+
             links = result
 
             title, hdlr = re.compile('(.+?) (S\d*E\d*)$').findall(url)[0]
@@ -2853,6 +2832,14 @@ class directdl:
         except:
             return sources
 
+    def resolve(self, url):
+        try:
+            import commonresolvers
+            url = commonresolvers.get(url)
+            return url
+        except:
+            return
+
 class noobroom:
     def __init__(self):
         self.base_link = 'http://superchillin.com'
@@ -2891,7 +2878,8 @@ class noobroom:
             result = [i for i in result if title in cleantitle().movie(i)][0]
             result = re.compile("href='(.+?)'").findall(result)[0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -2925,7 +2913,10 @@ class noobroom:
                 except:
                     pass
 
-            url = match.replace(self.base_link, '')
+            result = match
+
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -2939,7 +2930,8 @@ class noobroom:
             result = getUrl(url).result
             result = re.compile("<b>%01dx%02d .+?style=.+? href='(.+?)'" % (int(season), int(episode))).findall(result)[0]
 
-            url = result.replace(self.base_link, '')
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url

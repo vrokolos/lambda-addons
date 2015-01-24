@@ -1,4 +1,18 @@
 ------------------------
+Genesis v3.5.1 (24-Jan-15)
+------------------------
+
+- Fixed issues with WSO source.
+- Fixed issues with YIFY source.
+- Fixed issues with Twomovies source.
+- Fixed issues with Myvideolinks source.
+- Fixed issues with DirectDL source.
+- Removed Niter source.
+- Tweaked available sources.
+- Code cosmetics.
+
+
+------------------------
 Genesis v3.5.0 (22-Jan-15)
 ------------------------
 

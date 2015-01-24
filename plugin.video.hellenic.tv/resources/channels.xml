@@ -47,6 +47,18 @@
 			<base>http://www.hellenicparliament.gr/Enimerosi/Vouli-Tileorasi</base>
 		</channel>
 		<channel active="True">
+			<name>NERIT</name>
+			<type>hls</type>
+			<url>http://nerit1-lh.akamaihd.net/i/live_1@120689/master.m3u8</url>
+			<base>http://webtv.nerit.gr/nerit1-live/</base>
+		</channel>
+		<channel active="True">
+			<name>NERIT PLUS</name>
+			<type>hls</type>
+			<url>http://nerit2-lh.akamaihd.net/i/live_1@121149/master.m3u8</url>
+			<base>http://webtv.nerit.gr/neritplus-live/</base>
+		</channel>
+		<channel active="True">
 			<name>ET3</name>
 			<type>hls</type>
 			<url>http://live2.ertopen.com/live2/e600/playlist.m3u8</url>
