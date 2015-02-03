@@ -53,6 +53,7 @@ class getUrl(object):
             request.add_header('Referer', referer)
         if not cookie == None:
             request.add_header('cookie', cookie)
+        request.add_header('Accept-Language', 'en-US')
         response = urllib2.urlopen(request, timeout=int(timeout))
         if output == 'cookie':
             result = str(response.headers.get('Set-Cookie'))
@@ -544,21 +545,22 @@ class movie25:
 
             proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
             for proxy in proxies:
-                if "links_quality" in result: break
+                if '"links"' in result: break
                 base_link = proxy
                 try: result = getUrl(base_link + url, referer=base_link).result
                 except: result = ''
 
             result = result.decode('iso-8859-1').encode('utf-8')
-            result = common.parseDOM(result, "div", attrs = { "class": "links_quality" })[0]
+            result = result.replace('\n','')
 
-            quality = common.parseDOM(result, "h1")[0]
-            quality = quality.replace('\n','').rsplit(' ', 1)[-1]
+            quality = re.compile('>Links - Quality(.+?)<').findall(result)[0]
+            quality = quality.strip()
             if quality == 'CAM' or quality == 'TS': quality = 'CAM'
             elif quality == 'SCREENER': quality = 'SCR'
             else: quality = 'SD'
 
-            links = common.parseDOM(result, "ul")
+            links = common.parseDOM(result, "div", attrs = { "class": "links" })[0]
+            links = common.parseDOM(links, "ul")
 
             for i in links:
                 try:
@@ -595,15 +597,16 @@ class movie25:
 
             proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
             for proxy in proxies:
-                if "location.href" in result: break
+                if "iframe" in result or "IFRAME" in result: break
                 base_link = proxy + urlparse.urlparse(url).path
                 try: result = getUrl(base_link, referer=base_link).result
                 except: pass
 
             result = result.decode('iso-8859-1').encode('utf-8')
-            url = common.parseDOM(result, "input", ret="onclick")
-            url = [i for i in url if 'location.href' in i and 'http://' in i][0]
-            url = url.split("'", 1)[-1].rsplit("'", 1)[0]
+
+            url = common.parseDOM(result, "iframe", ret="src")
+            url += common.parseDOM(result, "IFRAME", ret="SRC")
+            url = re.compile('(http.+)').findall(url[0])[0]
 
             import commonresolvers
             url = commonresolvers.get(url)
@@ -1480,7 +1483,9 @@ class movieshd:
 
             url = re.compile('data-rocketsrc=[\'|\"](.+?)[\'|\"]').findall(result)
             url = [i for i in url if 'hashkey' in i]
-            if len(url) > 0: result = getUrl('http:' + url[0] if url[0].startswith('//') else url[0]).result
+            if len(url) > 0:
+                url = 'http:' + url[0] if url[0].startswith('//') else url[0]
+                result = getUrl(url, referer=url).result
             url = re.compile('ref=[\'|\"](.+?)[\'|\"]').findall(result)[0]
 
             url = self.player_link % url
@@ -2110,7 +2115,7 @@ class merdb:
 
 class wso:
     def __init__(self):
-        self.base_link = 'http://free-movies.li'
+        self.base_link = 'http://watchmovies-online.ch'
         self.tvbase_link = 'http://watchseries-online.ch'
         self.search_link = '/?s=%s'
 
@@ -2233,13 +2238,13 @@ class twomovies:
         try:
             query = self.base_link + self.search_link % imdb
 
-            check = getUrl(query, output='geturl').result
+            check = getUrl(query, output='geturl', referer=query).result
             if not self.base_link in check: raise Exception()
 
-            cookie = getUrl(query, output='cookie').result
+            cookie = getUrl(query, output='cookie', referer=query).result
             cookie = re.compile('(PHPSESSID=[\w]+)').findall(cookie)[0]
 
-            result = getUrl(query, cookie=cookie, referer=self.base_link).result
+            result = getUrl(query, cookie=cookie, referer=query).result
             result = common.parseDOM(result, "meta", ret="content", attrs = { "property": "og:url" })[0]
 
             try: url = re.compile('//.+?(/.+)').findall(result)[0]
@@ -2254,13 +2259,13 @@ class twomovies:
         try:
             query = self.base_link + self.search_link % imdb
 
-            check = getUrl(query, output='geturl').result
+            check = getUrl(query, output='geturl', referer=query).result
             if not self.base_link in check: raise Exception()
 
-            cookie = getUrl(query, output='cookie').result
+            cookie = getUrl(query, output='cookie', referer=query).result
             cookie = re.compile('(PHPSESSID=[\w]+)').findall(cookie)[0]
 
-            result = getUrl(query, cookie=cookie, referer=self.base_link).result
+            result = getUrl(query, cookie=cookie, referer=query).result
             result = common.parseDOM(result, "meta", ret="content", attrs = { "property": "og:url" })[0]
 
             try: url = re.compile('//.+?(/.+)').findall(result)[0]
@@ -2285,11 +2290,11 @@ class twomovies:
 
             base = self.base_link + url
 
-            check = getUrl(base, output='geturl').result
+            check = getUrl(base, output='geturl', referer=base).result
             if not self.base_link in check: raise Exception()
 
             base += '?sort=date.desc#links'
-            result = getUrl(base, referer=self.base_link).result
+            result = getUrl(base, referer=base).result
 
             links = common.parseDOM(result, "tr", attrs = { "id": "link_row_.+?" })
 
@@ -2322,14 +2327,14 @@ class twomovies:
 
     def resolve(self, url):
         try:
-            check = getUrl(url, output='geturl').result
+            check = getUrl(url, output='geturl', referer=url).result
             if not self.base_link in check: raise Exception()
 
-            cookie = getUrl(url, output='cookie').result
+            cookie = getUrl(url, output='cookie', referer=url).result
             cookie = re.compile('(PHPSESSID=[\w]+)').findall(cookie)[0]
             cookie += '; links_tos=1'
 
-            result = getUrl(url, cookie=cookie, referer=self.base_link).result
+            result = getUrl(url, cookie=cookie, referer=url).result
 
             url = common.parseDOM(result, "iframe", ret="src")
             url += common.parseDOM(result, "IFRAME", ret="SRC")
@@ -2501,7 +2506,8 @@ class myvideolinks:
                 try: result += getUrl(domain).result
                 except: pass
 
-            queries = common.parseDOM(result, "iframe", ret="src")
+            queries = re.compile('[\'|\"](http.+?)[\'|\"]').findall(result)
+            queries = [i for i in queries if 'myvideolinks' in i]
             queries = [i + self.search_link % urllib.quote_plus(url) for i in queries]
 
             result = ''
@@ -2761,7 +2767,7 @@ class directdl:
             query = urllib.quote_plus(url)
             query = self.base_link + self.search_link % query
 
-            cookie = base64.urlsafe_b64decode('UEhQU0VTU0lEPWFvb2ZhbDN2MGlrM2FwYTk1NXB2aHE2Mmsz')
+            cookie = base64.urlsafe_b64decode('UEhQU0VTU0lEPWp1dXZxdmxib3Uxc3V0ZHRqOGZsMDllNG0x')
 
             result = getUrl(query, cookie=cookie).result
             result = json.loads(result)

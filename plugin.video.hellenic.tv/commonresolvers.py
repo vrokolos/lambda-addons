@@ -135,6 +135,7 @@ class getUrl(object):
             request.add_header('Referer', referer)
         if not cookie == None:
             request.add_header('cookie', cookie)
+        request.add_header('Accept-Language', 'en-US')
         response = urllib2.urlopen(request, timeout=int(timeout))
         if output == 'cookie':
             result = str(response.headers.get('Set-Cookie'))
@@ -320,7 +321,7 @@ def _180upload(url):
         result = jsunpack(result)
 
         url = re.compile("'file' *, *'(.+?)'").findall(result)
-        url += re.compile("file *: *'(.+?)'").findall(result)
+        url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
         url += common.parseDOM(result, "embed", ret="src")
         url = 'http://' + url[-1].split('://', 1)[-1]
         return url
@@ -610,8 +611,9 @@ def gorillavid(url):
         url = re.compile('file *: *"(http.+?)"').findall(result)[-1]
 
         request = urllib2.Request(url)
-        response = urllib2.urlopen(request, timeout=10)
+        response = urllib2.urlopen(request, timeout=30)
         response.close()
+
         type = str(response.info()["Content-Type"])
         if type == 'text/html': raise Exception()
 
@@ -642,7 +644,7 @@ def grifthost(url):
         result = jsunpack(result)
 
         url = re.compile("'file' *, *'(.+?)'").findall(result)
-        url += re.compile("file *: *'(.+?)'").findall(result)
+        url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
         url += common.parseDOM(result, "embed", ret="src")
         url = 'http://' + url[-1].split('://', 1)[-1]
         return url
@@ -657,7 +659,7 @@ def hostingbulk(url):
         result = jsunpack(result)
 
         url = re.compile("'file' *, *'(.+?)'").findall(result)
-        url += re.compile("file *: *'(.+?)'").findall(result)
+        url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
         url += common.parseDOM(result, "embed", ret="src")
         url = 'http://' + url[-1].split('://', 1)[-1]
         return url
@@ -702,7 +704,7 @@ def ipithos(url):
         result = jsunpack(result)
 
         url = re.compile("'file' *, *'(.+?)'").findall(result)
-        url += re.compile("file *: *'(.+?)'").findall(result)
+        url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
         url += common.parseDOM(result, "embed", ret="src")
         url = 'http://' + url[-1].split('://', 1)[-1]
         return url
@@ -783,7 +785,7 @@ def mightyupload(url):
         result = jsunpack(result)
 
         url += re.compile("'file' *, *'(.+?)'").findall(result)
-        url += re.compile("file *: *'(.+?)'").findall(result)
+        url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
         url += common.parseDOM(result, "embed", ret="src")
         url = 'http://' + url[-1].split('://', 1)[-1]
         return url
@@ -822,7 +824,7 @@ def movdivx(url):
         result = jsunpack(result)
 
         url = re.compile("'file' *, *'(.+?)'").findall(result)
-        url += re.compile("file *: *'(.+?)'").findall(result)
+        url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
         url += common.parseDOM(result, "embed", ret="src")
         url = 'http://' + url[-1].split('://', 1)[-1]
         return url
@@ -841,9 +843,12 @@ def movpod(url):
         url = re.compile('file *: *"(http.+?)"').findall(result)[-1]
 
         request = urllib2.Request(url)
-        response = urllib2.urlopen(request, timeout=10)
+        response = urllib2.urlopen(request, timeout=30)
         response.close()
+
         type = str(response.info()["Content-Type"])
+        if type == 'text/html': raise Exception()
+
         if type == 'text/html': raise Exception()
 
         return url
@@ -1032,7 +1037,7 @@ def thefile(url):
         result = jsunpack(result)
 
         url = re.compile("'file' *, *'(.+?)'").findall(result)
-        url += re.compile("file *: *'(.+?)'").findall(result)
+        url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
         url += common.parseDOM(result, "embed", ret="src")
         url = 'http://' + url[-1].split('://', 1)[-1]
         return url
@@ -1051,7 +1056,7 @@ def thevideo(url):
         result = jsunpack(result)
 
         url = re.compile("'file' *, *'(.+?)'").findall(result)
-        url += re.compile("file *: *'(.+?)'").findall(result)
+        url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
         url += common.parseDOM(result, "embed", ret="src")
         url = 'http://' + url[0].split('://', 1)[-1]
         return url
@@ -1075,7 +1080,7 @@ def uploadc(url):
             pass
 
         url += re.compile("'file' *, *'(.+?)'").findall(result)
-        url += re.compile("file *: *'(.+?)'").findall(result)
+        url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
         url += common.parseDOM(result, "embed", ret="src")
         url = 'http://' + url[-1].split('://', 1)[-1]
         url += '|Referer=%s' % urllib.quote_plus('http://uploadc.com')
@@ -1169,26 +1174,21 @@ def vidspot(url):
 
 def vidto(url):
     try:
-        result = getUrl(url, close=False).result
+        url = url.replace('/embed-', '/')
+        url = re.compile('//.+?/([\w]+)').findall(url)[0]
+        url = 'http://vidto.me/embed-%s.html' % url
 
-        post = {}
-        f = common.parseDOM(result, "Form", attrs = { "method": "POST" })[0]
-        k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
-        for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-        post = urllib.urlencode(post)
+        result = getUrl(url).result
 
-        import time
-        request = urllib2.Request(url, post)
+        result = re.compile('(eval.*?\)\)\))').findall(result)[-1]
+        result = re.sub(r'(\',\d*,\d*,)', r';\1', result)
+        result = jsunpack(result)
 
-        for i in range(0, 8):
-            try:
-                response = urllib2.urlopen(request, timeout=5)
-                result = response.read()
-                url = common.parseDOM(result, "a", ret="href", attrs = { "id": "lnk_download" })[0]
-                response.close()
-                return url
-            except:
-                time.sleep(1)
+        url = re.compile("'file' *, *'(.+?)'").findall(result)
+        url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
+        url += common.parseDOM(result, "embed", ret="src")
+        url = 'http://' + url[-1].split('://', 1)[-1]
+        return url
     except:
         return
 
@@ -1268,7 +1268,7 @@ def xvidstage(url):
         result = jsunpack(result)
 
         url = re.compile("'file' *, *'(.+?)'").findall(result)
-        url += re.compile("file *: *'(.+?)'").findall(result)
+        url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
         url += common.parseDOM(result, "embed", ret="src")
         url = 'http://' + url[-1].split('://', 1)[-1]
         return url
@@ -1304,7 +1304,7 @@ def zettahost(url):
         result = jsunpack(result)
 
         url = re.compile("'file' *, *'(.+?)'").findall(result)
-        url += re.compile("file *: *'(.+?)'").findall(result)
+        url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
         url += common.parseDOM(result, "embed", ret="src")
         url = 'http://' + url[-1].split('://', 1)[-1]
         return url

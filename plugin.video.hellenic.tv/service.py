@@ -2,7 +2,7 @@
 
 '''
     Hellenic TV Add-on
-    Copyright (C) 2014 lambda
+    Copyright (C) 2015 lambda
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -71,6 +71,7 @@ class getUrl(object):
             request.add_header('Referer', referer)
         if not cookie == None:
             request.add_header('cookie', cookie)
+        request.add_header('Accept-Language', 'el-GR')
         response = urllib2.urlopen(request, timeout=int(timeout))
         if output == 'cookie':
             result = str(response.headers.get('Set-Cookie'))

@@ -80,17 +80,17 @@
 		</channel>
 		<channel active="True">
 			<name>ANT1 CYPRUS</name>
-			<url>rtmpe://l.xuscacamusca.se/r/ playpath=ant1cy653 pageUrl=http://fa16bb1eb942c5c48ac3cd66aff4c32f2a015b1af198c14b88.com live=1 timeout=10</url>
-			<base>http://www.ant1iwo.com/livestreaming/</base>
+			<url>rtmpe://l.xuscacamusca.se/r/ playpath=ant1new877 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
+			<base>http://www.lakatamia.tv/share/ant1.html</base>
 		</channel>
 		<channel active="True">
 			<name>SIGMA</name>
-			<url>rtmpe://l.xuscacamusca.se/r/ playpath=sigma1678 pageUrl=http://fa16bb1eb942c5c48ac3cd66aff4c32f2a015b1af198c14b88.com live=1 timeout=10</url>
-			<base>http://www.sigmatv.com/</base>
+			<url>rtmpe://l.xuscacamusca.se/r/ playpath=sigma1678 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
+			<base>http://www.lakatamia.tv/share/sigma.html</base>
 		</channel>
 		<channel active="True">
 			<name>CAPITAL</name>
-			<url>rtmpe://l.xuscacamusca.se/r/ playpath=capitalcy447 pageUrl=http://fa16bb1eb942c5c48ac3cd66aff4c32f2a015b1af198c14b88.com live=1 timeout=10</url>
+			<url>rtmpe://l.xuscacamusca.se/r/ playpath=capnew886 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
 			<base>http://www.lakatamia.tv/share/capital.html</base>
 		</channel>
 		<channel active="True">

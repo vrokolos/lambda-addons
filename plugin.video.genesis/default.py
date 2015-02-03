@@ -227,6 +227,7 @@ class getUrl(object):
             request.add_header('Referer', referer)
         if not cookie == None:
             request.add_header('cookie', cookie)
+        request.add_header('Accept-Language', 'en-US')
         response = urllib2.urlopen(request, timeout=int(timeout))
         if output == 'cookie':
             result = str(response.headers.get('Set-Cookie'))
@@ -388,6 +389,7 @@ class player(xbmc.Player):
             xbmc.sleep(1000)
         time.sleep(5)
 
+
     def video_info(self, content, name, imdb, tvdb):
         try:
             self.name = name
@@ -445,6 +447,7 @@ class player(xbmc.Player):
             try:
                 if self.folderPath.startswith(sys.argv[0]): raise Exception()
                 xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid" : %s, "playcount" : 1 }, "id": 1 }' % str(self.meta['movieid']))
+                index().container_refresh()
             except:
                 pass
 
@@ -471,6 +474,7 @@ class player(xbmc.Player):
             try:
                 if self.folderPath.startswith(sys.argv[0]): raise Exception()
                 xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid" : %s, "playcount" : 1 }, "id": 1 }' % str(self.meta['episodeid']))
+                index().container_refresh()
             except:
                 pass
 
@@ -2116,39 +2120,38 @@ class root:
 class link:
     def __init__(self):
         self.imdb_base = 'http://www.imdb.com'
-        self.imdb_akas = 'http://akas.imdb.com'
         self.imdb_mobile = 'http://m.imdb.com'
-        self.imdb_genre = 'http://akas.imdb.com/genre/'
-        self.imdb_language = 'http://akas.imdb.com/language/'
+        self.imdb_genre = 'http://www.imdb.com/genre/'
+        self.imdb_language = 'http://www.imdb.com/language/'
         self.imdb_title = 'http://www.imdb.com/title/tt%s/'
         self.imdb_info = 'http://www.imdbapi.com/?t=%s&y=%s'
         self.imdb_media = 'http://ia.media-imdb.com'
-        self.imdb_seasons = 'http://akas.imdb.com/title/tt%s/episodes'
+        self.imdb_seasons = 'http://www.imdb.com/title/tt%s/episodes'
         self.imdb_episodes = 'http://www.imdb.com/title/tt%s/episodes?season=%s'
         self.imdb_image = 'http://i.media-imdb.com/images/SFaa265aa19162c9e4f3781fbae59f856d/nopicture/medium/film.png'
         self.imdb_tv_image = 'http://i.media-imdb.com/images/SF1b61b592d2fa1b9cfb8336f160e1efcf/nopicture/medium/tv.png'
-        self.imdb_genres = 'http://akas.imdb.com/search/title?title_type=feature,tv_movie&sort=boxoffice_gross_us&count=25&start=1&genres=%s'
-        self.imdb_languages = 'http://akas.imdb.com/search/title?languages=%s|1&title_type=feature,tv_movie&sort=moviemeter,asc&count=25&start=1'
-        self.imdb_years = 'http://akas.imdb.com/search/title?title_type=feature,tv_movie&sort=boxoffice_gross_us&count=25&start=1&year=%s,%s'
-        self.imdb_popular = 'http://akas.imdb.com/search/title?title_type=feature,tv_movie&sort=moviemeter,asc&count=25&start=1'
-        self.imdb_boxoffice = 'http://akas.imdb.com/search/title?title_type=feature,tv_movie&sort=boxoffice_gross_us,desc&count=25&start=1'
-        self.imdb_views = 'http://akas.imdb.com/search/title?title_type=feature,tv_movie&sort=num_votes,desc&count=25&start=1'
-        self.imdb_oscars = 'http://akas.imdb.com/search/title?title_type=feature,tv_movie&groups=oscar_best_picture_winners&sort=year,desc&count=25&start=1'
-        self.imdb_search = 'http://akas.imdb.com/search/title?title_type=feature,short,tv_movie,tv_special,video&sort=moviemeter,asc&count=25&start=1&title=%s'
-        self.imdb_tv_genres = 'http://akas.imdb.com/search/title?title_type=tv_series,mini_series&sort=moviemeter,asc&count=25&start=1&genres=%s'
-        self.imdb_tv_popular = 'http://akas.imdb.com/search/title?title_type=tv_series,mini_series&sort=moviemeter,asc&count=25&start=1'
-        self.imdb_tv_rating = 'http://akas.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=5000,&sort=user_rating,desc&count=25&start=1'
-        self.imdb_tv_views = 'http://akas.imdb.com/search/title?title_type=tv_series,mini_series&sort=num_votes,desc&count=25&start=1'
-        self.imdb_tv_active = 'http://akas.imdb.com/search/title?title_type=tv_series,mini_series&production_status=active&sort=moviemeter,asc&count=25&start=1'
-        self.imdb_tv_search = 'http://akas.imdb.com/search/title?title_type=tv_series,mini_series&sort=moviemeter,asc&count=25&start=1&title=%s'
+        self.imdb_genres = 'http://www.imdb.com/search/title?title_type=feature,tv_movie&sort=boxoffice_gross_us&count=25&start=1&genres=%s'
+        self.imdb_languages = 'http://www.imdb.com/search/title?languages=%s|1&title_type=feature,tv_movie&sort=moviemeter,asc&count=25&start=1'
+        self.imdb_years = 'http://www.imdb.com/search/title?title_type=feature,tv_movie&sort=boxoffice_gross_us&count=25&start=1&year=%s,%s'
+        self.imdb_popular = 'http://www.imdb.com/search/title?title_type=feature,tv_movie&sort=moviemeter,asc&count=25&start=1'
+        self.imdb_boxoffice = 'http://www.imdb.com/search/title?title_type=feature,tv_movie&sort=boxoffice_gross_us,desc&count=25&start=1'
+        self.imdb_views = 'http://www.imdb.com/search/title?title_type=feature,tv_movie&sort=num_votes,desc&count=25&start=1'
+        self.imdb_oscars = 'http://www.imdb.com/search/title?title_type=feature,tv_movie&groups=oscar_best_picture_winners&sort=year,desc&count=25&start=1'
+        self.imdb_search = 'http://www.imdb.com/search/title?title_type=feature,short,tv_movie,tv_special,video&sort=moviemeter,asc&count=25&start=1&title=%s'
+        self.imdb_tv_genres = 'http://www.imdb.com/search/title?title_type=tv_series,mini_series&sort=moviemeter,asc&count=25&start=1&genres=%s'
+        self.imdb_tv_popular = 'http://www.imdb.com/search/title?title_type=tv_series,mini_series&sort=moviemeter,asc&count=25&start=1'
+        self.imdb_tv_rating = 'http://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=5000,&sort=user_rating,desc&count=25&start=1'
+        self.imdb_tv_views = 'http://www.imdb.com/search/title?title_type=tv_series,mini_series&sort=num_votes,desc&count=25&start=1'
+        self.imdb_tv_active = 'http://www.imdb.com/search/title?title_type=tv_series,mini_series&production_status=active&sort=moviemeter,asc&count=25&start=1'
+        self.imdb_tv_search = 'http://www.imdb.com/search/title?title_type=tv_series,mini_series&sort=moviemeter,asc&count=25&start=1&title=%s'
         self.imdb_api_search = 'http://www.imdb.com/xml/find?json=1&nr=1&tt=on&q=%s'
         self.imdb_people_search = 'http://www.imdb.com/search/name?count=100&name=%s'
-        self.imdb_people = 'http://akas.imdb.com/search/title?count=25&sort=year,desc&title_type=feature,tv_movie&start=1&role=nm%s'
-        self.imdb_tv_people = 'http://akas.imdb.com/search/title?count=25&sort=year,desc&title_type=tv_series,mini_series&start=1&role=nm%s'
-        self.imdb_userlists = 'http://akas.imdb.com/user/ur%s/lists?tab=all&sort=modified:desc&filter=titles'
-        self.imdb_watchlist ='http://akas.imdb.com/user/ur%s/watchlist'
-        self.imdb_list = 'http://akas.imdb.com/list/%s/?view=detail&sort=title:asc&title_type=feature,short,tv_movie,tv_special,video,documentary,game&start=1'
-        self.imdb_tv_list = 'http://akas.imdb.com/list/%s/?view=detail&sort=title:asc&title_type=tv_series,mini_series&start=1'
+        self.imdb_people = 'http://www.imdb.com/search/title?count=25&sort=year,desc&title_type=feature,tv_movie&start=1&role=nm%s'
+        self.imdb_tv_people = 'http://www.imdb.com/search/title?count=25&sort=year,desc&title_type=tv_series,mini_series&start=1&role=nm%s'
+        self.imdb_userlists = 'http://www.imdb.com/user/ur%s/lists?tab=all&sort=modified:desc&filter=titles'
+        self.imdb_watchlist ='http://www.imdb.com/user/ur%s/watchlist'
+        self.imdb_list = 'http://www.imdb.com/list/%s/?view=detail&sort=title:asc&title_type=feature,short,tv_movie,tv_special,video,documentary,game&start=1'
+        self.imdb_tv_list = 'http://www.imdb.com/list/%s/?view=detail&sort=title:asc&title_type=tv_series,mini_series&start=1'
         self.imdb_user = getSetting("imdb_user").replace('ur', '')
 
         self.tmdb_base = 'http://api.themoviedb.org'
@@ -2197,10 +2200,11 @@ class link:
         self.tvrage_info = 'http://www.tvrage.com/shows/id-%s/episode_list/all'
         self.epguides_info = 'http://epguides.com/common/exportToCSV.asp?rage=%s'
 
-        self.scn_base = 'http://www.vcdq.com'
-        self.scn_added = 'http://www.vcdq.com/all-movies'
-        self.scn_added_hd = 'http://www.vcdq.com/hd-movies'
-        self.scn_tv_added = 'http://m2v.ru/?Part=11&func=part&page='
+        self.scn_base = 'http://predb.me'
+        self.scn_added = 'http://predb.me/?cats=movies-hd%2Cmovies-sd&page=1'
+        self.scn_added_hd = 'http://predb.me/?cats=movies-hd&page=1'
+        self.scn_tv_base = 'http://m2v.ru'
+        self.scn_tv_added = 'http://m2v.ru/?Part=11&func=part&page=1'
 
 class people:
     def __init__(self):
@@ -2216,6 +2220,7 @@ class people:
             self.imdb_list(self.query)
             for i in range(0, len(self.list)): self.list[i].update({'action': 'movies', 'url': link().imdb_people % self.list[i]['url']})
             index().rootList(self.list)
+            return self.list
 
     def shows(self, query=None):
         if query == None:
@@ -2266,11 +2271,13 @@ class genres:
         self.list = index().cache(self.imdb_list, 24)
         for i in range(0, len(self.list)): self.list[i].update({'image': 'genres_movies.jpg', 'action': 'movies'})
         index().rootList(self.list)
+        return self.list
 
     def shows(self):
         self.list = index().cache(self.imdb_list2, 24)
         for i in range(0, len(self.list)): self.list[i].update({'image': 'genres_shows.jpg', 'action': 'shows'})
         index().rootList(self.list)
+        return self.list
 
     def imdb_list(self):
         try:
@@ -2336,6 +2343,7 @@ class languages:
         self.list = index().cache(self.imdb_list, 24)
         for i in range(0, len(self.list)): self.list[i].update({'image': 'languages_movies.jpg', 'action': 'movies'})
         index().rootList(self.list)
+        return self.list
 
     def imdb_list(self):
         try:
@@ -2371,6 +2379,7 @@ class years:
         self.list = self.imdb_list()
         for i in range(0, len(self.list)): self.list[i].update({'image': 'years_movies.jpg', 'action': 'movies'})
         index().rootList(self.list)
+        return self.list
 
     def imdb_list(self):
         year = (datetime.datetime.utcnow() - datetime.timedelta(hours = 5)).strftime("%Y")
@@ -2391,6 +2400,7 @@ class calendar:
         self.list = self.trakt_list()
         for i in range(0, len(self.list)): self.list[i].update({'image': 'calendar_episodes.jpg', 'action': 'episodes_calendar'})
         index().rootList(self.list)
+        return self.list
 
     def trakt_list(self):
         now = datetime.datetime.utcnow() - datetime.timedelta(hours = 5)
@@ -2413,12 +2423,14 @@ class userlists:
         if not (link().imdb_user == ''): self.imdb_list()
         for i in range(0, len(self.list)): self.list[i].update({'image': 'userlists_movies.jpg', 'action': 'movies_userlist'})
         index().rootList(self.list)
+        return self.list
 
     def shows(self):
         if not (link().trakt_user == '' or link().trakt_password == ''): self.trakt_list()
         if not (link().imdb_user == ''): self.imdb_list()
         for i in range(0, len(self.list)): self.list[i].update({'image': 'userlists_movies.jpg', 'action': 'shows_userlist', 'url': self.list[i]['url'].replace(link().imdb_list.split('?', 1)[-1], link().imdb_tv_list.split('?', 1)[-1])})
         index().rootList(self.list)
+        return self.list
 
     def trakt_list(self):
         try:
@@ -2496,6 +2508,7 @@ class channels:
         self.list = sorted(self.list, key=itemgetter('num'))
 
         index().channelList(self.list)
+        return self.list
 
     def sky_list(self, num, channel, id):
         try:
@@ -2606,9 +2619,9 @@ class movies:
         self.list = []
 
     def get(self, url, idx=True):
-        if (url.startswith(link().imdb_base) or url.startswith(link().imdb_akas)) and not ('/user/' in url or '/list/' in url):
+        if url.startswith(link().imdb_base) and not ('/user/' in url or '/list/' in url):
             self.list = index().cache(self.imdb_list, 24, url)
-        elif url.startswith(link().imdb_base) or url.startswith(link().imdb_akas):
+        elif url.startswith(link().imdb_base):
             self.list = index().cache(self.imdb_list2, 0, url, idx)
         elif url.startswith(link().tmdb_base):
             self.list = index().cache(self.tmdb_list, 24, url)
@@ -2618,48 +2631,56 @@ class movies:
             except: pass
         elif url.startswith(link().scn_base):
             self.list = index().cache(self.scn_list, 24, url)
-        if idx == False: return self.list
-        index().movieList(self.list)
+        if idx == True: index().movieList(self.list)
+        return self.list
 
     def popular(self):
         url = link().imdb_popular
         self.list = index().cache(self.imdb_list, 24, url)
         index().movieList(self.list)
+        return self.list
 
     def boxoffice(self):
         url = link().imdb_boxoffice
         self.list = index().cache(self.imdb_list, 24, url)
         index().movieList(self.list)
+        return self.list
 
     def views(self):
         url = link().imdb_views
         self.list = index().cache(self.imdb_list, 24, url)
         index().movieList(self.list)
+        return self.list
 
     def oscars(self):
         url = link().imdb_oscars
         self.list = index().cache(self.imdb_list, 24, url)
         index().movieList(self.list)
+        return self.list
 
     def added(self):
         url = link().scn_added
         self.list = index().cache(self.scn_list, 24, url)
         index().movieList(self.list)
+        return self.list
 
     def added_hd(self):
         url = link().scn_added_hd
         self.list = index().cache(self.scn_list, 24, url)
         index().movieList(self.list)
+        return self.list
 
     def theaters(self):
         url = link().tmdb_theaters % link().tmdb_key
         self.list = index().cache(self.tmdb_list, 24, url)
         index().movieList(self.list)
+        return self.list
 
     def trending(self):
         url = link().trakt_trending
         self.list = index().cache(self.trakt_list, 24, url)
         index().movieList(self.list)
+        return self.list
 
     def featured(self):
         url = link().trakt_trending
@@ -2669,6 +2690,7 @@ class movies:
         try: self.list = [i for i in self.list if i['year'] in years]
         except: return
         index().movieList(self.list)
+        return self.list
 
     def trakt_collection(self):
         url = link().trakt_collection % link().trakt_user
@@ -2676,6 +2698,7 @@ class movies:
         try: self.list = sorted(self.list, key=itemgetter('title'))
         except: return
         index().movieList(self.list)
+        return self.list
 
     def trakt_watchlist(self):
         url = link().trakt_watchlist % link().trakt_user
@@ -2683,11 +2706,13 @@ class movies:
         try: self.list = sorted(self.list, key=itemgetter('title'))
         except: return
         index().movieList(self.list)
+        return self.list
 
     def imdb_watchlist(self):
         url = link().imdb_watchlist % link().imdb_user
         self.list = index().cache(self.imdb_list2, 0, url)
         index().movieList(self.list)
+        return self.list
 
     def search(self, query=None):
         if query == None:
@@ -2698,6 +2723,7 @@ class movies:
             self.query = link().imdb_search % urllib.quote_plus(self.query)
             self.list = self.imdb_list(self.query)
             index().movieList(self.list)
+            return self.list
 
     def favourites(self):
         try:
@@ -2724,12 +2750,12 @@ class movies:
 
             self.list = sorted(self.list, key=itemgetter('title'))
             index().movieList(self.list)
+            return self.list
         except:
             return
 
     def imdb_list(self, url):
         try:
-            url = url.replace(link().imdb_base, link().imdb_akas)
             result = getUrl(url, timeout='30').result
             result = result.decode('iso-8859-1').encode('utf-8')
             movies = common.parseDOM(result, "tr", attrs = { "class": ".+?" })
@@ -2741,7 +2767,7 @@ class movies:
             name = common.parseDOM(next, "a")[-1]
             if 'laquo' in name: raise Exception()
             next = common.parseDOM(next, "a", ret="href")[-1]
-            next = '%s%s' % (link().imdb_akas, next)
+            next = '%s%s' % (link().imdb_base, next)
             next = common.replaceHTMLCodes(next)
             next = next.encode('utf-8')
         except:
@@ -2856,7 +2882,6 @@ class movies:
                 url = re.compile('/export[?]list_id=(ls\d*)').findall(result)[0]
                 url = link().imdb_list % url
 
-            url = url.replace(link().imdb_base, link().imdb_akas)
             result = getUrl(url, timeout='30').result
 
             try:
@@ -3158,15 +3183,17 @@ class movies:
             result = getUrl(url, timeout='10').result
             result = result.decode('iso-8859-1').encode('utf-8')
 
-            movies = common.parseDOM(result, "a", ret="href", attrs = { "title": "IMDB" })
-            movies = [re.sub('[^0-9]', '', i) for i in movies]
+            movies = common.parseDOM(result, "a", attrs = { "class": "p-title" })
+            movies = [re.compile('(.+?\.\d{4})\.').findall(i) for i in movies]
+            movies = [i[0] for i in movies if len(i) > 0]
+            movies = [i.replace('.3D.', '.').replace('.', ' ') for i in movies]
             movies = uniqueList(movies).list
         except:
             return
 
         try:
-            next = common.parseDOM(result, "a", ret="href", attrs = { "id": "pag-next" })[0]
-            next = '%s%s' % (link().scn_base, next)
+            next = re.compile('class=[\'|\"]page-button page-current[\'|\"]>.+?href=[\'|\"](.+?)[\'|\"]').findall(result)[0]
+            if next == link().scn_base: raise Exception()
             next = common.replaceHTMLCodes(next)
             next = next.encode('utf-8')
         except:
@@ -3174,35 +3201,108 @@ class movies:
 
         for movie in movies:
             try:
+                title = re.compile('(.+?) \d{4}$').findall(movie)[0]
+                title = common.replaceHTMLCodes(title)
+                title = title.encode('utf-8')
+
+                year = re.compile('(\d{4})$').findall(movie)[0]
+                year = year.encode('utf-8')
+
+                name = '%s (%s)' % (title, year)
+                try: name = name.encode('utf-8')
+                except: pass
+
                 poster = link().imdb_image
 
-                imdb = re.sub('[^0-9]', '', str(movie))
-                imdb = imdb.encode('utf-8')
-
-                url = link().imdb_title % imdb
-                url = common.replaceHTMLCodes(url)
-                url = url.encode('utf-8')
-
-                self.list.append({'name': '0', 'title': '0', 'year': '0', 'imdb': imdb, 'tvdb': '0', 'season': '0', 'episode': '0', 'show': '0', 'show_alt': '0', 'date': '0', 'genre': '0', 'url': url, 'poster': poster, 'fanart': '0', 'studio': '0', 'duration': '0', 'rating': '0', 'votes': '0', 'mpaa': '0', 'director': '0', 'plot': '0', 'plotoutline': '0', 'tagline': '0', 'next': next})
+                self.list.append({'name': name, 'title': title, 'year': year, 'imdb': '0000000', 'tvdb': '0', 'season': '0', 'episode': '0', 'show': '0', 'show_alt': '0', 'date': '0', 'genre': '0', 'url': '0', 'poster': poster, 'fanart': '0', 'studio': '0', 'duration': '0', 'rating': '0', 'votes': '0', 'mpaa': '0', 'director': '0', 'plot': '0', 'plotoutline': '0', 'tagline': '0', 'next': next})
             except:
                 pass
+
+        threads = []
+        for i in range(0, len(self.list)): threads.append(Thread(self.imdb_info, i))
+        [i.start() for i in threads]
+        [i.join() for i in threads]
+
+        self.list = [i for i in self.list if not i['imdb'] == '0000000']
 
         threads = []
         for i in range(0, len(self.list)): threads.append(Thread(self.tmdb_info, i))
         [i.start() for i in threads]
         [i.join() for i in threads]
 
-        self.list = [i for i in self.list if not i['title'] == '0']
-
-        for i in range(0, len(self.list)):
-            try:
-                name = '%s (%s)' % (self.list[i]['title'], self.list[i]['year'])
-                name = name.encode('utf-8')
-                self.list[i].update({'name': name})
-            except:
-                pass
-
         return self.list
+
+    def imdb_info(self, i):
+        try:
+            url = link().imdb_info % (urllib.quote_plus(self.list[i]['title']), self.list[i]['year'])
+            result = getUrl(url, timeout='10').result
+            result = json.loads(result)
+
+            imdb = result['imdbID']
+            if imdb == 'N/A' or imdb == None: imdb = '0000000'
+            imdb = re.sub('[^0-9]', '', str(imdb))
+            imdb = imdb.encode('utf-8')
+            if not imdb == '0000000': self.list[i].update({'imdb': imdb})
+
+            url = link().imdb_title % imdb
+            url = common.replaceHTMLCodes(url)
+            url = url.encode('utf-8')
+            if not imdb == '0000000': self.list[i].update({'url': url})
+
+            poster = result['Poster']
+            if not ('_SX' in poster or '_SY' in poster): poster = link().imdb_image
+            poster = re.sub('_SX\d*|_SY\d*|_CR\d+?,\d+?,\d+?,\d*','_SX500', poster)
+            poster = common.replaceHTMLCodes(poster)
+            poster = poster.encode('utf-8')
+            if not poster == link().imdb_image: self.list[i].update({'poster': poster})
+
+            genre = result['Genre'].split(',')
+            genre = [x.strip() for x in genre]
+            if genre == ['N/A'] or genre == None: genre = '0'
+            genre = " / ".join(genre)
+            genre = common.replaceHTMLCodes(genre)
+            genre = genre.encode('utf-8')
+            if not genre == '0': self.list[i].update({'genre': genre})
+
+            duration = str(result['Runtime'])
+            if duration == 'N/A' or duration == None: duration = '0'
+            duration = re.sub('[^0-9]', '', str(duration))
+            duration = duration.encode('utf-8')
+            if not duration == '0': self.list[i].update({'duration': duration})
+
+            rating = str(result['imdbRating'])
+            if rating == 'N/A' or rating == None: rating = '0'
+            rating = common.replaceHTMLCodes(rating)
+            rating = rating.encode('utf-8')
+            if not rating == '0': self.list[i].update({'rating': rating})
+
+            votes = str(result['imdbVotes'])
+            if votes == 'N/A' or votes == None: votes = '0'
+            votes = common.replaceHTMLCodes(votes)
+            votes = votes.encode('utf-8')
+            if not votes == '0': self.list[i].update({'votes': votes})
+
+            director = result['Director'].split(',')
+            director = [x.strip() for x in director]
+            if director == ['N/A'] or director == None: director = '0'
+            director = " / ".join(director)
+            director = common.replaceHTMLCodes(director)
+            director = director.encode('utf-8')
+            if not director == '0': self.list[i].update({'director': director})
+
+            plot = result['Plot']
+            if plot == 'N/A' or plot == None: plot = '0'
+            plot = common.replaceHTMLCodes(plot)
+            plot = plot.encode('utf-8')
+            if not plot == '0': self.list[i].update({'plot': plot})
+
+            tagline = re.compile('[.!?][\s]{1,2}(?=[A-Z])').split(plot)[0]
+            try: tagline = tagline.encode('utf-8')
+            except: pass
+            if self.list[i]['plotoutline'] == '0' and not plot == '0': self.list[i].update({'plotoutline': tagline})
+            if self.list[i]['tagline'] == '0' and not plot == '0': self.list[i].update({'tagline': tagline})
+        except:
+            pass
 
     def tmdb_info(self, i):
         try:
@@ -3349,41 +3449,46 @@ class shows:
         self.list = []
 
     def get(self, url, idx=True):
-        if (url.startswith(link().imdb_base) or url.startswith(link().imdb_akas)) and not ('/user/' in url or '/list/' in url):
+        if url.startswith(link().imdb_base) and not ('/user/' in url or '/list/' in url):
             self.list = index().cache(self.imdb_list, 24, url)
-        elif url.startswith(link().imdb_base) or url.startswith(link().imdb_akas):
+        elif url.startswith(link().imdb_base):
             self.list = index().cache(self.imdb_list2, 0, url, idx)
         elif url.startswith(link().trakt_base):
             self.list = index().cache(self.trakt_list, 0, url)
             try: self.list = sorted(self.list, key=itemgetter('title'))
             except: pass
-        if idx == False: return self.list
-        index().showList(self.list)
+        if idx == True: index().showList(self.list)
+        return self.list
 
     def popular(self):
         url = link().imdb_tv_popular
         self.list = index().cache(self.imdb_list, 24, url)
         index().showList(self.list)
+        return self.list
 
     def active(self):
         url = link().imdb_tv_active
         self.list = index().cache(self.imdb_list, 24, url)
         index().showList(self.list)
+        return self.list
 
     def rating(self):
         url = link().imdb_tv_rating
         self.list = index().cache(self.imdb_list, 24, url)
         index().showList(self.list)
+        return self.list
 
     def views(self):
         url = link().imdb_tv_views
         self.list = index().cache(self.imdb_list, 24, url)
         index().showList(self.list)
+        return self.list
 
     def trending(self):
         url = link().trakt_tv_trending
         self.list = index().cache(self.trakt_list, 24, url)
         index().showList(self.list)
+        return self.list
 
     def trakt_collection(self):
         url = link().trakt_tv_collection % link().trakt_user
@@ -3391,6 +3496,7 @@ class shows:
         try: self.list = sorted(self.list, key=itemgetter('title'))
         except: return
         index().showList(self.list)
+        return self.list
 
     def trakt_watchlist(self):
         url = link().trakt_tv_watchlist % link().trakt_user
@@ -3398,16 +3504,19 @@ class shows:
         try: self.list = sorted(self.list, key=itemgetter('title'))
         except: return
         index().showList(self.list)
+        return self.list
 
     def trakt_progress(self):
         url = link().trakt_tv_watched % link().trakt_user
         self.list = index().cache(self.trakt_list2, 0, url)
         index().showList(self.list)
+        return self.list
 
     def imdb_watchlist(self):
         url = link().imdb_watchlist % link().imdb_user
         self.list = index().cache(self.imdb_list2, 0, url)
         index().showList(self.list)
+        return self.list
 
     def search(self, query=None):
         if query == None:
@@ -3422,6 +3531,7 @@ class shows:
             except:
                 pass
             index().showList(self.list)
+            return self.list
 
     def favourites(self):
         try:
@@ -3447,6 +3557,7 @@ class shows:
 
             self.list = sorted(self.list, key=itemgetter('title'))
             index().showList(self.list)
+            return self.list
         except:
             return
 
@@ -3456,7 +3567,6 @@ class shows:
 
     def imdb_list(self, url):
         try:
-            url = url.replace(link().imdb_base, link().imdb_akas)
             result = getUrl(url, timeout='30').result
             result = result.decode('iso-8859-1').encode('utf-8')
             shows = common.parseDOM(result, "tr", attrs = { "class": ".+?" })
@@ -3468,7 +3578,7 @@ class shows:
             name = common.parseDOM(next, "a")[-1]
             if 'laquo' in name: raise Exception()
             next = common.parseDOM(next, "a", ret="href")[-1]
-            next = '%s%s' % (link().imdb_akas, next)
+            next = '%s%s' % (link().imdb_base, next)
             next = common.replaceHTMLCodes(next)
             next = next.encode('utf-8')
         except:
@@ -3553,7 +3663,6 @@ class shows:
                 url = re.compile('/export[?]list_id=(ls\d*)').findall(result)[0]
                 url = link().imdb_tv_list % url
 
-            url = url.replace(link().imdb_base, link().imdb_akas)
             result = getUrl(url, timeout='30').result
 
             try:
@@ -3987,6 +4096,7 @@ class seasons:
             self.list = index().cache(self.tvdb_list, 24, show, year, imdb, tvdb, '-1')
             self.list = self.list[0]['seasons']
             index().seasonList(self.list)
+            return self.list
         else:
             self.list = self.tvdb_list(show, year, imdb, tvdb, '-1')
             return self.list
@@ -4299,6 +4409,7 @@ class episodes:
             self.list = index().cache(seasons().tvdb_list, 1, show, year, imdb, tvdb, season)
             self.list = self.list[1]['episodes']
             index().episodeList(self.list)
+            return self.list
         else:
             self.list = seasons().tvdb_list(show, year, imdb, tvdb, season)
             return self.list
@@ -4340,6 +4451,7 @@ class episodes:
                 index().okDialog(language(30321).encode("utf-8"), language(30322).encode("utf-8"))
 
             index().episodeList(self.list)
+            return self.list
         except:
             pass
 
@@ -4350,6 +4462,7 @@ class episodes:
         try: self.list = sorted(self.list, key=itemgetter('name'))
         except: return
         index().episodeList(self.list)
+        return self.list
 
     def trakt_added(self):
         now = datetime.datetime.utcnow() - datetime.timedelta(hours = 5)
@@ -4359,12 +4472,14 @@ class episodes:
         try: self.list = sorted(self.list, key=itemgetter('date'))[::-1]
         except: return
         index().episodeList(self.list)
+        return self.list
 
     def added(self):
         self.list = index().cache(self.scn_list, 1)
         try: self.list = sorted(self.list, key=itemgetter('date'))[::-1]
         except: return
         index().episodeList(self.list)
+        return self.list
 
     def cleantitle_tv(self, title):
         title = re.sub('\n|\s(|[(])(UK|US|AU|\d{4})(|[)])$|\s(vs|v[.])\s|(:|;|-|"|,|\'|\.|\?)|\s', '', title).lower()
@@ -4581,28 +4696,37 @@ class episodes:
 
     def scn_list(self):
         try:
-            result = getUrl(link().scn_tv_added + '1', timeout='10').result
-            result += getUrl(link().scn_tv_added + '2', timeout='10').result
-            result = result.decode('iso-8859-1').encode('utf-8')
+            result = getUrl(link().scn_tv_added, timeout='10').result
 
-            dates = common.parseDOM(result, "tr", attrs = { "class": "MainTable" })
-            dates = [re.compile('(\d{4}-\d{2}-\d{2})').findall(i) for i in dates]
+            url = common.parseDOM(result, "a", ret="href", attrs = { "id": "nav" })
+            url = [i for i in url if 'page=2' in i]
+            url += re.compile('href="(.+?)".+?>PREV<').findall(result)
+            if len(url) > 0:
+                url = link().scn_tv_base + url[0]
+                url = common.replaceHTMLCodes(url)
+                result += getUrl(url, timeout='10').result
+
+            result = result.decode('iso-8859-1').encode('utf-8')
+            result = common.parseDOM(result, "tr", attrs = { "class": "MainTable" })
+
+            dates = [re.compile('(\d{4}-\d{2}-\d{2})').findall(i) for i in result]
             dates = [i[0] for i in dates if not len(i) == 0]
-            dates = [i.encode('utf-8') for i in dates]
+            dates = [link().trakt_tv_calendar % (i, '1') for i in dates]
             dates = uniqueList(dates).list
             dates = dates[:7]
 
-            shows = common.parseDOM(result, "tr", attrs = { "class": "MainTable" })
-            shows = [common.parseDOM(i, "a")[0] for i in shows]
+            shows = [common.parseDOM(i, "a")[0] for i in result]
             shows = [re.compile('(.*)[.]S\d+?E\d+?[.]').findall(i) for i in shows]
             shows = [i[0] for i in shows if not len(i) == 0]
             shows = [self.cleantitle_tv_2(i) for i in shows]
             shows = [i.encode('utf-8') for i in shows]
             shows = uniqueList(shows).list
 
-            date = datetime.date(int(dates[-1].split('-')[0]), int(dates[-1].split('-')[1]), int(dates[-1].split('-')[2]))
-            url = link().trakt_tv_calendar % (str(date), str(len(dates)))
-            self.list = self.trakt_list(url, auth=False)
+            threads = []
+            for url in dates: threads.append(Thread(self.trakt_list, url, False))
+            [i.start() for i in threads]
+            [i.join() for i in threads]
+
             self.list = [i for i in self.list if self.cleantitle_tv(i['show']) in shows]
 
             return self.list

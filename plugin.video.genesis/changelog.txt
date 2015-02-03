@@ -1,4 +1,24 @@
 ------------------------
+Genesis v3.5.2 (3-Feb-15)
+------------------------
+
+- Tweaked IMDb listings.
+- Tweaked playback functions.
+- Re-work of "Latest HD Movies" section.
+- Re-work of "Latest Movies" section.
+- Re-work of "Latest episodes" section.
+- Fixed issues with Movie25 source.
+- Fixed issues with MoviesHD source.
+- Fixed issues with WSO source.
+- Fixed issues with Twomovies source.
+- Fixed issues with Myvideolinks source.
+- Fixed issues with DirectDL source.
+- Fixed issues with Vidto resolver.
+- Tweaked available resolvers.
+- Code cosmetics.
+
+
+------------------------
 Genesis v3.5.1 (24-Jan-15)
 ------------------------
 

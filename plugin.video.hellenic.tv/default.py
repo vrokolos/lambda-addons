@@ -236,6 +236,7 @@ class getUrl(object):
             request.add_header('Referer', referer)
         if not cookie == None:
             request.add_header('cookie', cookie)
+        request.add_header('Accept-Language', 'el-GR')
         response = urllib2.urlopen(request, timeout=int(timeout))
         if output == 'cookie':
             result = str(response.headers.get('Set-Cookie'))
@@ -1927,7 +1928,7 @@ class gm:
 
     def resolve(self, url):
         try:
-            host_order = ['youtube', 'dailymotion', 'datemule', 'streamin', 'megatv', 'antenna', 'alphatv', 'skai', 'sigmatv', 'nerit', 'ant1iwo', 'livenews']
+            host_order = ['youtube', 'dailymotion', 'datemule', 'streamin', 'vidto', 'megatv', 'antenna', 'alphatv', 'skai', 'sigmatv', 'nerit', 'ant1iwo', 'livenews']
 
             if url.startswith(self.movies_link):
                 result = getUrl(url).result
@@ -3572,7 +3573,7 @@ class livestream:
             url = 'http://www.youtube.com/watch?v=%s' % url
 
             result = getUrl(url).result
-            url = re.compile('"hlsvp": "(.+?)"').findall(result)[0]
+            url = re.compile('"hlsvp" *: *"(.+?)"').findall(result)[0]
             url = urllib.unquote(url).replace('\\/', '/')
             return url
         except:
@@ -3606,7 +3607,7 @@ class livestream:
             url = 'http://www.youtube.com/watch?v=%s' % url
 
             result = getUrl(url).result
-            url = re.compile('"hlsvp": "(.+?)"').findall(result)[0]
+            url = re.compile('"hlsvp" *: *"(.+?)"').findall(result)[0]
             url = urllib.unquote(url).replace('\\/', '/')
             return url
         except:
