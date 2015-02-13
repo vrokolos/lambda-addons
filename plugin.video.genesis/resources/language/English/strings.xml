@@ -60,10 +60,11 @@
 	<string id="30102">Movies</string>
 	<string id="30103">TV</string>
 	<string id="30104">Auto update TV Shows</string>
-	<string id="30105">Add only latest season during update</string>
-	<string id="30106">Update interval</string>
-	<string id="30107">Update Kodi library after adding content</string>
-	<string id="30108">Avoid creating duplicate content</string>
+	<string id="30105">Show notifications during update</string>
+	<string id="30106">Check movie before adding it</string>
+	<string id="30107">Check first episode of season before adding it</string>
+	<string id="30108">Update Kodi library after adding content</string>
+	<string id="30109">Avoid creating duplicate content</string>
 	<string id="30120">Accounts</string>
 	<string id="30121">User</string>
 	<string id="30122">Password</string>
@@ -80,19 +81,18 @@
 	<string id="30303">Added to Favourites</string>
 	<string id="30304">Removed from Favourites</string>
 	<string id="30305">Item already in Favourites</string>
-	<string id="30306">Download started</string>
-	<string id="30307">Download Progress - </string>
-	<string id="30308">Download finished successfully</string>
-	<string id="30309">Added to Genesis Movie Folder</string>
-	<string id="30310">Added to Genesis TV Folder</string>
-	<string id="30311">Genesis Library updated</string>
-	<string id="30312">Genesis cache cleared</string>
-	<string id="30313">No subtitles available</string>
-	<string id="30314">No stream available</string>
-	<string id="30315">Loaded in</string>
-	<!-- OK -->
-	<string id="30321">No episodes available.</string>
-	<string id="30322">Mark it as watched to remove it from Trakt Progress.</string>
+	<string id="30306">Genesis cache cleared</string>
+	<string id="30307">No subtitles available</string>
+	<string id="30308">No stream available</string>
+	<string id="30309">Loaded in</string>
+	<string id="30310">Adding to library...</string>
+	<string id="30311">Importing movies</string>
+	<string id="30312">Importing TV shows</string>
+	<string id="30313">Updating TV shows</string>
+	<string id="30314">Finished in</string>
+	<string id="30315">Working...</string>
+	<string id="30316">Failed!</string>
+	<string id="30317">Done!</string>
 	<!-- YesNo -->
 	<string id="30341">You have not set the download folder.</string>
 	<string id="30342">Do you want to set it now?</string>
@@ -106,8 +106,6 @@
 	<string id="30350">Start from beginning</string>
 	<!-- Progress -->
 	<string id="30361">Getting information</string>
-	<string id="30362">items found</string>
-	<string id="30363">Update Library</string>
 	<!-- Misc -->
 	<string id="30381">Next Page</string>
 	<string id="30382">Search</string>

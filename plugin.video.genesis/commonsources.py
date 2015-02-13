@@ -597,16 +597,16 @@ class movie25:
 
             proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
             for proxy in proxies:
-                if "iframe" in result or "IFRAME" in result: break
+                if "location.href" in result: break
                 base_link = proxy + urlparse.urlparse(url).path
                 try: result = getUrl(base_link, referer=base_link).result
                 except: pass
 
             result = result.decode('iso-8859-1').encode('utf-8')
 
-            url = common.parseDOM(result, "iframe", ret="src")
-            url += common.parseDOM(result, "IFRAME", ret="SRC")
-            url = re.compile('(http.+)').findall(url[0])[0]
+            url = common.parseDOM(result, "input", ret="onclick")
+            url = [i for i in url if 'location.href' in i and 'http://' in i][0]
+            url = url.split("'", 1)[-1].rsplit("'", 1)[0]
 
             import commonresolvers
             url = commonresolvers.get(url)
@@ -1449,7 +1449,7 @@ class movieshd:
     def __init__(self):
         self.base_link = 'http://movieshd.co'
         self.search_link = '/?s=%s'
-        self.player_link = 'http://videomega.tv/iframe.php?ref=%s'
+        self.player_link = 'http://videomega.tv/cdn.php?ref=%s'
 
     def get_movie(self, imdb, title, year):
         try:
@@ -2506,7 +2506,7 @@ class myvideolinks:
                 try: result += getUrl(domain).result
                 except: pass
 
-            queries = re.compile('[\'|\"](http.+?)[\'|\"]').findall(result)
+            queries = re.compile('(http.+?)[\'|\"|<|>]').findall(result)
             queries = [i for i in queries if 'myvideolinks' in i]
             queries = [i + self.search_link % urllib.quote_plus(url) for i in queries]
 

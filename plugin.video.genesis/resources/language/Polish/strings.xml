@@ -60,10 +60,11 @@
 	<string id="30102">Filmy</string>
 	<string id="30103">Seriale</string>
 	<string id="30104">Automatyczna aktualizacja Seriali</string>
-	<string id="30105">Podczas aktualizacji dodaj tylko najnowsze odcinki</string>
-	<string id="30106">Częstotliwość aktualizacji</string>
-	<string id="30107">Zaktualizuj Bibliotekę po dodaniu nowej zawartości</string>
-	<string id="30108">Unikaj tworzenia duplikatów</string>
+	<string id="30105">Show notifications during update</string>
+	<string id="30106">Check movie before adding it</string>
+	<string id="30107">Check first episode of season before adding it</string>
+	<string id="30108">Zaktualizuj Bibliotekę po dodaniu nowej zawartości</string>
+	<string id="30109">Unikaj tworzenia duplikatów</string>
 	<string id="30120">Konta</string>
 	<string id="30121">Użytkownik</string>
 	<string id="30122">Hasło</string>
@@ -80,19 +81,18 @@
 	<string id="30303">Dodane do Ulubionych</string>
 	<string id="30304">Usunięte z Ulubionych</string>
 	<string id="30305">Ta pozycja jest już w Ulubionych</string>
-	<string id="30306">Pobieranie rozpoczęte</string>
-	<string id="30307">Postęp pobierania - </string>
-	<string id="30308">Pobieranie zakończone pomyślnie</string>
-	<string id="30309">Dodane do folderu Filmy w Genesis</string>
-	<string id="30310">Dodane do folderu Seriale w Genesis </string>
-	<string id="30311">Biblioteka Genesis zaktualizowana</string>
-	<string id="30312">Pamięć podręczna Genesis wyczyszczona</string>
-	<string id="30313">Brak dostępnych napisów</string>
-	<string id="30314">Źródło niedostępne</string>
-	<string id="30315">Załadowane w</string>
-	<!-- OK -->
-	<string id="30321">No episodes available.</string>
-	<string id="30322">Mark it as watched to remove it from Trakt Progress.</string>
+	<string id="30306">Pamięć podręczna Genesis wyczyszczona</string>
+	<string id="30307">Brak dostępnych napisów</string>
+	<string id="30308">Źródło niedostępne</string>
+	<string id="30309">Załadowane w</string>
+	<string id="30310">Adding to library...</string>
+	<string id="30311">Importing movies</string>
+	<string id="30312">Importing TV shows</string>
+	<string id="30313">Updating TV shows</string>
+	<string id="30314">Finished in</string>
+	<string id="30315">Working...</string>
+	<string id="30316">Failed!</string>
+	<string id="30317">Done!</string>
 	<!-- YesNo -->
 	<string id="30341">Folder pobierania nie został ustawiony.</string>
 	<string id="30342">Chcesz go teraz ustawić?</string>
@@ -106,8 +106,6 @@
 	<string id="30350">Zacznij od początku</string>
 	<!-- Progress -->
 	<string id="30361">Pobieranie informacji</string>
-	<string id="30362">pozycja znaleziona</string>
-	<string id="30363">Aktualizuj Bibliotekę</string>
 	<!-- Misc -->
 	<string id="30381">Następna strona</string>
 	<string id="30382">Szukaj</string>

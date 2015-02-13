@@ -60,10 +60,11 @@
 	<string id="30102">סרטים</string>
 	<string id="30103">סדרות</string>
 	<string id="30104">עדכן סדרות אוטומטי</string>
-	<string id="30105">הוסף רק עונה אחרונה בעת עדכון</string>
-	<string id="30106">תזמון עדכון</string>
-	<string id="30107">עדכן ספרייה לאחר הוספת תוכן</string>
-	<string id="30108">המנע מיצירת כפילויות</string>
+	<string id="30105">Show notifications during update</string>
+	<string id="30106">Check movie before adding it</string>
+	<string id="30107">Check first episode of season before adding it</string>
+	<string id="30108">עדכן ספרייה לאחר הוספת תוכן</string>
+	<string id="30109">המנע מיצירת כפילויות</string>
 	<string id="30120">חשבונות</string>
 	<string id="30121">משתמש</string>
 	<string id="30122">ססמא</string>
@@ -80,19 +81,18 @@
 	<string id="30303">נוסף למעודפים</string>
 	<string id="30304">הוסר מהמעודפים</string>
 	<string id="30305">קיים כבר במעודפים</string>
-	<string id="30306">מתחיל בהורדה</string>
-	<string id="30307">תהליך הורדה</string>
-	<string id="30308">הורדה הסתיימה בהצלחה</string>
-	<string id="30309">Genesis נוסף לספריית סרטים</string>
-	<string id="30310">Genesis נוסף לספריית סדרות טלוויזיה</string>
-	<string id="30311">Genesis הסתיים עדכון ספרייה</string>
-	<string id="30312">מטמון התנקה</string>
-	<string id="30313">תרגום לא זמין</string>
-	<string id="30314">לא נמצאו מקורות לניגון</string>
-	<string id="30315">נטען ב</string>
-	<!-- OK -->
-	<string id="30321">אין פרקים זמינים.</string>
-	<string id="30322">Mark it as watched to remove it from Trakt Progress.</string>
+	<string id="30306">מטמון התנקה</string>
+	<string id="30307">תרגום לא זמין</string>
+	<string id="30308">לא נמצאו מקורות לניגון</string>
+	<string id="30309">נטען ב</string>
+	<string id="30310">Adding to library...</string>
+	<string id="30311">Importing movies</string>
+	<string id="30312">Importing TV shows</string>
+	<string id="30313">Updating TV shows</string>
+	<string id="30314">Finished in</string>
+	<string id="30315">Working...</string>
+	<string id="30316">Failed!</string>
+	<string id="30317">Done!</string>
 	<!-- YesNo -->
 	<string id="30341">לא הגדרת תיקיה להורדות.</string>
 	<string id="30342">בא לך להגדיר אותה עכשיו?</string>
@@ -106,8 +106,6 @@
 	<string id="30350">התחל מהתחלה</string>
 	<!-- Progress -->
 	<string id="30361">אוסף מידע...</string>
-	<string id="30362">פריטים מצאו</string>
-	<string id="30363">עדכון ספרייה</string>
 	<!-- Misc -->
 	<string id="30381">עמוד הבא</string>
 	<string id="30382">חיפוש</string>

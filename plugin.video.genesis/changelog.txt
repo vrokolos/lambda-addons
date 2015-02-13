@@ -1,4 +1,24 @@
 ------------------------
+Genesis v3.6.0 (13-Feb-15)
+------------------------
+
+- Re-work of TVDB listings.
+- Re-work of Trakt Progress.
+- Re-work of "Latest episodes" section.
+- Re-work of library integration.
+- Added new options in library integration.
+- Fixed issues with Movie25 source.
+- Fixed issues with MoviesHD source.
+- Fixed issues with Myvideolinks source.
+- Fixed issues with Videomega resolver.
+- Disabled Billionuploads host.
+- Disabled Hostingbulk and Movzap hosts.
+- Disabled Divxstage host. 
+- Updated translations.
+- Code cosmetics.
+
+
+------------------------
 Genesis v3.5.2 (3-Feb-15)
 ------------------------
 

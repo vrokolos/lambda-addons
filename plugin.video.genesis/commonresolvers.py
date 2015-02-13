@@ -1145,7 +1145,7 @@ def videomega(url):
     try:
         url = urlparse.urlparse(url).query
         url = urlparse.parse_qs(url)['ref'][0]
-        url = 'http://videomega.tv/iframe.php?ref=%s' % url
+        url = 'http://videomega.tv/cdn.php?ref=%s' % url
 
         result = getUrl(url, referer=url).result
 

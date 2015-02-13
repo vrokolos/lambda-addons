@@ -60,10 +60,11 @@
 	<string id="30102">Films</string>
 	<string id="30103">TV</string>
 	<string id="30104">Mise à jour Automatique des Séries TV</string>
-	<string id="30105">Ajouter Uniquement les dernières Saisons durant la Mise à Jour</string>
-	<string id="30106">Intervalle de Mise à Jour</string>
-	<string id="30107">Mise à Jour de la Librairie Kodi après Ajout de Contenu</string>
-	<string id="30108">Éviter des doublons</string>
+	<string id="30105">Show notifications during update</string>
+	<string id="30106">Check movie before adding it</string>
+	<string id="30107">Check first episode of season before adding it</string>
+	<string id="30108">Mise à Jour de la Librairie Kodi après Ajout de Contenu</string>
+	<string id="30109">Éviter des doublons</string>
 	<string id="30120">Comptes</string>
 	<string id="30121">Utilisateur</string>
 	<string id="30122">Mot de Passe</string>
@@ -80,19 +81,18 @@
 	<string id="30303">Ajouté aux Favoris</string>
 	<string id="30304">Enlevé des Favoris</string>
 	<string id="30305">Cet Item est déjà dans les Fovoris</string>
-	<string id="30306">Téléchargement Démarré</string>
-	<string id="30307">Téléchargement en Cours - </string>
-	<string id="30308">Téléchargement Terminé avec Succès</string>
-	<string id="30309">Ajouté au Dossier Film Genesis</string>
-	<string id="30310">Ajouté au Dossier Genesis TV</string>
-	<string id="30311">Librairie Genesis Mise à Jour</string>
-	<string id="30312">Cache de Genesis Nettoyée</string>
-	<string id="30313">Pas de Sous-Titre Disponible</string>
-	<string id="30314">Pas de Source Disponible</string>
-	<string id="30315">Déjà Chargé</string>
-	<!-- OK -->
-	<string id="30321">No episodes available.</string>
-	<string id="30322">Mark it as watched to remove it from Trakt Progress.</string>
+	<string id="30306">Cache de Genesis Nettoyée</string>
+	<string id="30307">Pas de Sous-Titre Disponible</string>
+	<string id="30308">Pas de Source Disponible</string>
+	<string id="30309">Déjà Chargé</string>
+	<string id="30310">Adding to library...</string>
+	<string id="30311">Importing movies</string>
+	<string id="30312">Importing TV shows</string>
+	<string id="30313">Updating TV shows</string>
+	<string id="30314">Finished in</string>
+	<string id="30315">Working...</string>
+	<string id="30316">Failed!</string>
+	<string id="30317">Done!</string>
 	<!-- YesNo -->
 	<string id="30341">Vous n'avez pas Configuré le Dossier de Téléchargement.</string>
 	<string id="30342">Voulez-vous le Configurer Maintenant?</string>
@@ -106,8 +106,6 @@
 	<string id="30350">Démarrer à Partir du Début</string>
 	<!-- Progress -->
 	<string id="30361">Acquisition de l'information</string>
-	<string id="30362">item Trouvé</string>
-	<string id="30363">Mise à Jour de la Librairie</string>
 	<!-- Misc -->
 	<string id="30381">Page Suivante</string>
 	<string id="30382">Recherche</string>

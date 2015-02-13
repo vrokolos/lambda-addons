@@ -4,7 +4,7 @@
 	<string id="30000">Algemeen</string>
 	<string id="30001">Uiterlijk</string>
 	<string id="30002">Fanart inschakelen</string>
-	<string id="30003">Main menu</string>
+	<string id="30003">Hoofd menu</string>
 	<string id="30004">Laatste Films</string>
 	<string id="30005">Uitgeschakeld</string>
 	<string id="30006">Aanbevolen</string>
@@ -13,8 +13,8 @@
 	<string id="30009">Laatste Afleveringen</string>
 	<string id="30010">Uitgeschakeld</string>
 	<string id="30011">Standaard</string>
-	<string id="30012">Trakt Progress</string>
-	<string id="30013">Trakt Episodes</string>
+	<string id="30012">Trakt Voortgang</string>
+	<string id="30013">Trakt Afleveringen</string>
 	<string id="30014">TV Kalender</string>
 	<string id="30015">Uitgeschakeld</string>
 	<string id="30016">Ingeschakeld</string>
@@ -22,9 +22,9 @@
 	<string id="30018">Folder</string>
 	<string id="30020">Afspelen</string>
 	<string id="30021">Automatisch-afspelen</string>
-	<string id="30022">Host selection</string>
-	<string id="30023">Dialogue</string>
-	<string id="30024">Folder</string>
+	<string id="30022">Host selecteren</string>
+	<string id="30023">Dialoog</string>
+	<string id="30024">Map</string>
 	<string id="30025">Automatisch-afspelen (Bibliotheek)</string>
 	<string id="30026">HD Hosts</string>
 	<string id="30027">HD Hosts in Automatisch-afspelen</string>
@@ -60,10 +60,11 @@
 	<string id="30102">Films</string>
 	<string id="30103">Series</string>
 	<string id="30104">Automatisch je abonnementen updaten</string>
-	<string id="30105">Voeg alleen nieuwe afleveringen toe tijdens update</string>
-	<string id="30106">Update interval</string>
-	<string id="30107">Update Bibliotheek na toevoegen van content</string>
-	<string id="30108">Voorkom het creëren van dubbele content</string>
+	<string id="30105">Show notifications during update</string>
+	<string id="30106">Check movie before adding it</string>
+	<string id="30107">Check first episode of season before adding it</string>
+	<string id="30108">Update Bibliotheek na toevoegen van content</string>
+	<string id="30109">Voorkom het creëren van dubbele content</string>
 	<string id="30120">Accounts</string>
 	<string id="30121">Gebruikersnaam</string>
 	<string id="30122">Wachtwoord</string>
@@ -80,19 +81,18 @@
 	<string id="30303">Toegevoegd aan Favorieten</string>
 	<string id="30304">Verwijderd uit Favorieten</string>
 	<string id="30305">Artikel staat al in Favorieten</string>
-	<string id="30306">Download gestart</string>
-	<string id="30307">Download voortgang - </string>
-	<string id="30308">Download succesvol afgerond</string>
-	<string id="30309">Toegevoegd aan Film map</string>
-	<string id="30310">Toegevoegd aan Serie map</string>
-	<string id="30311">Bibliotheek geupdatet</string>
-	<string id="30312">Cache schoongemaakt</string>
-	<string id="30313">Ondertiteling niet beschikbaar</string>
-	<string id="30314">Stream niet beschikbaar</string>
-	<string id="30315">Begonnen in</string>
-	<!-- OK -->
-	<string id="30321">No episodes available.</string>
-	<string id="30322">Mark it as watched to remove it from Trakt Progress.</string>
+	<string id="30306">Cache schoongemaakt</string>
+	<string id="30307">Ondertiteling niet beschikbaar</string>
+	<string id="30308">Stream niet beschikbaar</string>
+	<string id="30309">Begonnen in</string>
+	<string id="30310">Adding to library...</string>
+	<string id="30311">Importing movies</string>
+	<string id="30312">Importing TV shows</string>
+	<string id="30313">Updating TV shows</string>
+	<string id="30314">Finished in</string>
+	<string id="30315">Working...</string>
+	<string id="30316">Failed!</string>
+	<string id="30317">Done!</string>
 	<!-- YesNo -->
 	<string id="30341">Je hebt geen Download-map ingesteld.</string>
 	<string id="30342">Wil je dat nu doen?</string>
@@ -106,8 +106,6 @@
 	<string id="30350">Starten vanaf het begin</string>
 	<!-- Progress -->
 	<string id="30361">Informatie ophalen</string>
-	<string id="30362">items gevonden</string>
-	<string id="30363">Update bibliotheek</string>
 	<!-- Misc -->
 	<string id="30381">Volgende Pagina</string>
 	<string id="30382">Zoeken</string>
@@ -160,10 +158,10 @@
 	<string id="30527">Meest Gestemt</string>
 	<string id="30528">Oscar Winners</string>
 	<string id="30529">In de Bioscoop</string>
-	<string id="30530">Latest HD Movies</string>
+	<string id="30530">Laatste HD Films</string>
 	<string id="30531">Laatste Films</string>
 	<string id="30532">Favorieten</string>
-	<string id="30533">People Search</string>
+	<string id="30533">Zoek Acteurs</string>
 	<string id="30534">Zoeken</string>
 	<string id="30541">Genres</string>
 	<string id="30542">Populair</string>
@@ -174,14 +172,14 @@
 	<string id="30547">Laatste Afleveringen</string>
 	<string id="30548">TV Kalender</string>
 	<string id="30549">Favorieten</string>
-	<string id="30550">People Search</string>
+	<string id="30550">Zoek Acteurs</string>
 	<string id="30551">Zoeken</string>
 	<string id="30561">[B]TRAKT[/B] : Collectie</string>
 	<string id="30562">[B]TRAKT[/B] : Serie Collectie</string>
 	<string id="30563">[B]TRAKT[/B] : Watchlist</string>
 	<string id="30564">[B]TRAKT[/B] : Serie Watchlist</string>
-	<string id="30565">[B]TRAKT[/B] : Progress</string>
-	<string id="30566">[B]TRAKT[/B] : Episodes</string>
+	<string id="30565">[B]TRAKT[/B] : Voortgang</string>
+	<string id="30566">[B]TRAKT[/B] : Afleveringen</string>
 	<string id="30567">[B]IMDB[/B] : Watchlist</string>
 	<string id="30568">[B]IMDB[/B] : Serie Watchlist</string>
 	<string id="30569">Film Lijst</string>
@@ -191,8 +189,8 @@
 	<string id="30573">Downloads</string>
 	<string id="30581">Films</string>
 	<string id="30582">Series</string>
-	<string id="30583">People (Movies)</string>
-	<string id="30584">People (TV)</string>
+	<string id="30583">Acteurs (Films)</string>
+	<string id="30584">Acteurs (Series)</string>
 	<string id="30601">Open Genesis instellingen...</string>
 	<string id="30602">Wis Genesis cache...</string>
 	<string id="30603">Clear Genesis sources...</string>

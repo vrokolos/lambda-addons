@@ -60,10 +60,11 @@
 	<string id="30102">Filmes</string>
 	<string id="30103">TV</string>
 	<string id="30104">Actualizar automaticamente Séries</string>
-	<string id="30105">Adicionar apenas a última temporada durante o update</string>
-	<string id="30106">Intervalo de Actualização</string>
-	<string id="30107">Actualizar biblioteca Kodi depois de adicionar conteúdo</string>
-	<string id="30108">Evitar criar conteúdo duplicado</string>
+	<string id="30105">Show notifications during update</string>
+	<string id="30106">Check movie before adding it</string>
+	<string id="30107">Check first episode of season before adding it</string>
+	<string id="30108">Actualizar biblioteca Kodi depois de adicionar conteúdo</string>
+	<string id="30109">Evitar criar conteúdo duplicado</string>
 	<string id="30120">Contas</string>
 	<string id="30121">Utilizador</string>
 	<string id="30122">Palavra-chave</string>
@@ -80,19 +81,18 @@
 	<string id="30303">Adicionado aos Favoritos</string>
 	<string id="30304">Removido dos Favoritos</string>
 	<string id="30305">Item já está nos Favoritos</string>
-	<string id="30306">Transferência começou</string>
-	<string id="30307">Progresso da Transferências - </string>
-	<string id="30308">Transferência acabou com sucesso</string>
-	<string id="30309">Adicionado à pasta de Filmes de Genesis</string>
-	<string id="30310">Adicionado à pasta de Séries de Genesis</string>
-	<string id="30311">Biblioteca Genesis actualizada</string>
-	<string id="30312">Cache do addon Genesis apagada</string>
-	<string id="30313">Não existem legendas disponíveis</string>
-	<string id="30314">Não existe fonte disponível</string>
-	<string id="30315">Carregado em</string>
-	<!-- OK -->
-	<string id="30321">No episodes available.</string>
-	<string id="30322">Mark it as watched to remove it from Trakt Progress.</string>
+	<string id="30306">Cache do addon Genesis apagada</string>
+	<string id="30307">Não existem legendas disponíveis</string>
+	<string id="30308">Não existe fonte disponível</string>
+	<string id="30309">Carregado em</string>
+	<string id="30310">Adding to library...</string>
+	<string id="30311">Importing movies</string>
+	<string id="30312">Importing TV shows</string>
+	<string id="30313">Updating TV shows</string>
+	<string id="30314">Finished in</string>
+	<string id="30315">Working...</string>
+	<string id="30316">Failed!</string>
+	<string id="30317">Done!</string>
 	<!-- YesNo -->
 	<string id="30341">Não configurou a pasta de transferências.</string>
 	<string id="30342">Quer configurar agora?</string>
@@ -106,8 +106,6 @@
 	<string id="30350">Começar desde o inicio</string>
 	<!-- Progress -->
 	<string id="30361">Obtendo informação</string>
-	<string id="30362">itens encontrados</string>
-	<string id="30363">Actualizar Bibliteca</string>
 	<!-- Misc -->
 	<string id="30381">Próxima Página</string>
 	<string id="30382">Pesquisa</string>

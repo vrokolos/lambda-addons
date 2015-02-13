@@ -142,13 +142,14 @@ class main:
         elif action == 'library_movie_list':          contextMenu().library_movie_list(url)
         elif action == 'library_tv_add':              contextMenu().library_tv_add(name, year, imdb, tvdb)
         elif action == 'library_tv_list':             contextMenu().library_tv_list(url)
-        elif action == 'library_update':              contextMenu().library_update()
-        elif action == 'library_trakt_collection':    contextMenu().library_movie_list('trakt_collection')
-        elif action == 'library_trakt_watchlist':     contextMenu().library_movie_list('trakt_watchlist')
-        elif action == 'library_imdb_watchlist':      contextMenu().library_movie_list('imdb_watchlist')
-        elif action == 'library_tv_trakt_collection': contextMenu().library_tv_list('trakt_tv_collection')
-        elif action == 'library_tv_trakt_watchlist':  contextMenu().library_tv_list('trakt_tv_watchlist')
-        elif action == 'library_tv_imdb_watchlist':   contextMenu().library_tv_list('imdb_tv_watchlist')
+        elif action == 'library_update_tool':         contextMenu().library_update_tool()
+        elif action == 'library_update':              contextMenu().library_update('true')
+        elif action == 'library_trakt_collection':    contextMenu().library_movie_tool('trakt_collection')
+        elif action == 'library_trakt_watchlist':     contextMenu().library_movie_tool('trakt_watchlist')
+        elif action == 'library_imdb_watchlist':      contextMenu().library_movie_tool('imdb_watchlist')
+        elif action == 'library_tv_trakt_collection': contextMenu().library_tv_tool('trakt_tv_collection')
+        elif action == 'library_tv_trakt_watchlist':  contextMenu().library_tv_tool('trakt_tv_watchlist')
+        elif action == 'library_tv_imdb_watchlist':   contextMenu().library_tv_tool('imdb_tv_watchlist')
         elif action == 'toggle_movie_playback':       contextMenu().toggle_playback('movie', name, title, year, imdb, '', '', '', '', '', '', '')
         elif action == 'toggle_episode_playback':     contextMenu().toggle_playback('episode', name, title, year, imdb, tvdb, season, episode, show, show_alt, date, genre)
         elif action == 'download':                    contextMenu().download(name, url, provider)
@@ -179,15 +180,15 @@ class main:
         elif action == 'shows_trending':              shows().trending()
         elif action == 'shows_trakt_collection':      shows().trakt_collection()
         elif action == 'shows_trakt_watchlist':       shows().trakt_watchlist()
-        elif action == 'shows_trakt_progress':        shows().trakt_progress()
         elif action == 'shows_imdb_watchlist':        shows().imdb_watchlist()
         elif action == 'shows_search':                shows().search(query)
         elif action == 'shows_favourites':            shows().favourites()
         elif action == 'seasons':                     seasons().get(show, year, imdb, tvdb)
         elif action == 'episodes':                    episodes().get(show, year, imdb, tvdb, season)
-        elif action == 'episodes_progress':           episodes().progress(show, year, imdb, tvdb)
-        elif action == 'episodes_added':              episodes().added()
+        elif action == 'episodes2':                   episodes().get2(show, year, imdb, tvdb, season, episode)
+        elif action == 'episodes_trakt_progress':     episodes().trakt_progress()
         elif action == 'episodes_trakt':              episodes().trakt_added()
+        elif action == 'episodes_added':              episodes().added()
         elif action == 'episodes_calendar':           episodes().calendar(url)
         elif action == 'people_movies':               people().movies(query)
         elif action == 'people_shows':                people().shows(query)
@@ -389,7 +390,6 @@ class player(xbmc.Player):
             xbmc.sleep(1000)
         time.sleep(5)
 
-
     def video_info(self, content, name, imdb, tvdb):
         try:
             self.name = name
@@ -518,7 +518,7 @@ class player(xbmc.Player):
 			pass
 
         if getSetting("playback_info") == 'true' and not PseudoTV == 'True':
-            elapsedTime = '%s %.2f seconds' % (language(30315).encode("utf-8"), (time.time() - self.loadingStarting))     
+            elapsedTime = '%s %.2f seconds' % (language(30309).encode("utf-8"), (time.time() - self.loadingStarting))     
             index().infoDialog(elapsedTime, header=self.name)
 
     def onPlayBackStopped(self):
@@ -631,13 +631,13 @@ class subtitles:
 
             return subtitle
         except:
-            index().infoDialog(language(30313).encode("utf-8"), name)
+            index().infoDialog(language(30307).encode("utf-8"), name)
             return
 
 class index:
-    def infoDialog(self, str, header=addonName):
-        try: xbmcgui.Dialog().notification(header, str, self.addonArt('icon.png'), 3000, sound=False)
-        except: xbmc.executebuiltin("Notification(%s,%s, 3000, %s)" % (header, str, self.addonArt('icon.png')))
+    def infoDialog(self, str, header=addonName, time=3000):
+        try: xbmcgui.Dialog().notification(header, str, self.addonArt('icon.png'), time, sound=False)
+        except: xbmc.executebuiltin("Notification(%s,%s, %s, %s)" % (header, str, time, self.addonArt('icon.png')))
 
     def okDialog(self, str1, str2, header=addonName):
         xbmcgui.Dialog().ok(header, str1, str2)
@@ -769,8 +769,11 @@ class index:
             dbcur.execute("DROP TABLE IF EXISTS rel_list")
             dbcur.execute("VACUUM")
             dbcon.commit()
+            dbcur.execute("DROP TABLE IF EXISTS rel_lib")
+            dbcur.execute("VACUUM")
+            dbcon.commit()
 
-            index().infoDialog(language(30312).encode("utf-8"))
+            index().infoDialog(language(30306).encode("utf-8"))
         except:
             pass
 
@@ -782,7 +785,7 @@ class index:
             dbcur.execute("VACUUM")
             dbcon.commit()
 
-            index().infoDialog(language(30312).encode("utf-8"))
+            index().infoDialog(language(30306).encode("utf-8"))
         except:
             pass
 
@@ -792,7 +795,7 @@ class index:
         elif getSetting("appearance") == '-':
             if image == 'fanart.jpg': image = '-'
             elif image == 'icon.png': image = os.path.join(addonPath,'icon.png')
-            elif root == 'shows_trakt_progress' or root == 'episodes_added' or root == 'episodes_trakt': image = 'DefaultRecentlyAddedEpisodes.png'
+            elif root == 'episodes_added' or root == 'episodes_trakt_progress' or root == 'episodes_trakt': image = 'DefaultRecentlyAddedEpisodes.png'
             elif root == 'movies_added_hd' or root == 'movies_added': image = 'DefaultRecentlyAddedMovies.png'
             elif root == 'root_genesis': image = 'DefaultVideoPlaylists.png'
             elif root == 'root_tools': image = 'DefaultAddonProgram.png'
@@ -836,22 +839,24 @@ class index:
 
                 cm = []
                 replaceItems = False
+
                 if root == 'movies_userlist':
                     cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_movie_list&url=%s)' % (sys.argv[0], urllib.quote_plus(i['url']))))
+                elif root == 'movies_trakt_collection':
+                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_movie_list&url=%s)' % (sys.argv[0], urllib.quote_plus(link().trakt_collection % link().trakt_user))))
+                elif root == 'movies_trakt_watchlist':
+                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_movie_list&url=%s)' % (sys.argv[0], urllib.quote_plus(link().trakt_watchlist % link().trakt_user))))
+                elif root == 'movies_imdb_watchlist':
+                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_movie_list&url=%s)' % (sys.argv[0], urllib.quote_plus(link().imdb_watchlist % link().imdb_user))))
                 elif root == 'shows_userlist':
                     cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_tv_list&url=%s)' % (sys.argv[0], urllib.quote_plus(i['url']))))
-                elif root == 'movies_trakt_collection':
-                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_trakt_collection)' % (sys.argv[0])))
-                elif root == 'movies_trakt_watchlist':
-                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_trakt_watchlist)' % (sys.argv[0])))
-                elif root == 'movies_imdb_watchlist':
-                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_imdb_watchlist)' % (sys.argv[0])))
                 elif root == 'shows_trakt_collection':
-                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_tv_trakt_collection)' % (sys.argv[0])))
+                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_tv_list&url=%s)' % (sys.argv[0], urllib.quote_plus(link().trakt_tv_collection % link().trakt_user))))
                 elif root == 'shows_trakt_watchlist':
-                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_tv_trakt_watchlist)' % (sys.argv[0])))
+                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_tv_list&url=%s)' % (sys.argv[0], urllib.quote_plus(link().trakt_tv_watchlist % link().trakt_user))))
                 elif root == 'shows_imdb_watchlist':
-                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_tv_imdb_watchlist)' % (sys.argv[0])))
+                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_tv_list&url=%s)' % (sys.argv[0], urllib.quote_plus(link().imdb_watchlist % link().imdb_user))))
+
                 if root == 'movies_search' or root == 'shows_search' or root == 'people_movies' or root == 'people_shows':
                     cm.append((language(30411).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
                     cm.append((language(30412).encode("utf-8"), 'RunPlugin(%s?action=playlist_open)' % (sys.argv[0])))
@@ -1099,10 +1104,7 @@ class index:
                 meta = {'title': title, 'tvshowtitle': title, 'year': year, 'imdb_id' : 'tt' + imdb, 'tvdb_id': tvdb, 'genre' : genre, 'studio': studio, 'premiered': premiered, 'duration' : duration, 'rating' : rating, 'mpaa' : mpaa, 'plot': plot}
                 meta = dict((k,v) for k, v in meta.iteritems() if not v == '0')
 
-                if action == 'shows_trakt_progress':
-                    u = '%s?action=episodes_progress&show=%s&year=%s&imdb=%s&tvdb=%s' % (sys.argv[0], systitle, sysyear, sysimdb, systvdb)
-                else:
-                    u = '%s?action=seasons&show=%s&year=%s&imdb=%s&tvdb=%s' % (sys.argv[0], systitle, sysyear, sysimdb, systvdb)
+                u = '%s?action=seasons&show=%s&year=%s&imdb=%s&tvdb=%s' % (sys.argv[0], systitle, sysyear, sysimdb, systvdb)
 
                 try:
                     if traktMode == False: raise Exception()
@@ -1129,9 +1131,7 @@ class index:
                     else: cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&imdb=%s)' % (sys.argv[0], sysimdb)))
                 cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=library_tv_add&name=%s&year=%s&imdb=%s&tvdb=%s)' % (sys.argv[0], systitle, sysyear, sysimdb, systvdb)))
                 cm.append((language(30414).encode("utf-8"), 'Action(Info)'))
-                if action == 'shows_trakt_progress':
-                    cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=watched_shows&name=%s&year=%s&imdb=%s&tvdb=%s)' % (sys.argv[0], systitle, sysyear, sysimdb, systvdb)))
-                elif not imdb == '0000000' and not action == 'shows_search':
+                if not imdb == '0000000' and not action == 'shows_search':
                     cm.append((language(30403).encode("utf-8"), 'RunPlugin(%s?action=unwatched_shows&name=%s&year=%s&imdb=%s&tvdb=%s)' % (sys.argv[0], systitle, sysyear, sysimdb, systvdb)))
                     cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=watched_shows&name=%s&year=%s&imdb=%s&tvdb=%s)' % (sys.argv[0], systitle, sysyear, sysimdb, systvdb)))
                 cm.append((language(30417).encode("utf-8"), 'RunPlugin(%s?action=view_tvshows)' % (sys.argv[0])))
@@ -1252,6 +1252,9 @@ class index:
         if (getSetting("trakt_user") == '' or getSetting("trakt_password") == ''): traktMode = False
         else: traktMode = True
 
+        cacheToDisc = False
+        if action == 'episodes_trakt_progress': cacheToDisc = True
+
         try:
             favourites = []
             dbcon = database.connect(addonSettings)
@@ -1290,7 +1293,7 @@ class index:
                 name, title, year, imdb, tvdb, season, episode, show, show_alt, genre, url, poster, banner, thumb, fanart, studio, status, premiered, duration, rating, mpaa, director, writer, plot = i['name'], i['title'], i['year'], i['imdb'], i['tvdb'], i['season'], i['episode'], i['show'], i['show_alt'], i['genre'], i['url'], i['poster'], i['banner'], i['thumb'], i['fanart'], i['studio'], i['status'], i['date'], i['duration'], i['rating'], i['mpaa'], i['director'], i['writer'], i['plot']
 
                 label = season + 'x' + '%02d' % int(episode) + ' . ' + title
-                if action == 'episodes_added' or action == 'episodes_trakt' or action == 'episodes_calendar': label = show + ' - ' + label
+                if action == 'episodes_added' or action == 'episodes_trakt_progress' or action == 'episodes_trakt' or action == 'episodes_calendar': label = show + ' - ' + label
 
                 if fanart == '0' or not getSetting("fanart") == 'true': fanart = addonFanart
                 if duration == '0': duration == '60'
@@ -1301,7 +1304,10 @@ class index:
                 meta = dict((k,v) for k, v in meta.iteritems() if not v == '0')
                 sysmeta = urllib.quote_plus(json.dumps(meta))
 
-                if video_type == 'true':
+                if action == 'episodes_trakt_progress':
+                    u = '%s?action=episodes2&show=%s&year=%s&imdb=%s&tvdb=%s&season=%s&episode=%s' % (sys.argv[0], sysshow, sysyear, sysimdb, systvdb, sysseason, sysepisode)
+                    isFolder = True
+                elif video_type == 'true':
                     u = '%s?action=play&name=%s&title=%s&year=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&show=%s&show_alt=%s&date=%s&genre=%s&url=%s&t=%s' % (sys.argv[0], sysname, systitle, sysyear, sysimdb, systvdb, sysseason, sysepisode, sysshow, sysshow_alt, sysdate, sysgenre, sysurl, t)
                     isFolder = False
                 else:
@@ -1355,7 +1361,7 @@ class index:
                 pass
 
         xbmcplugin.setContent(int(sys.argv[1]), 'episodes')
-        xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=False)
+        xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=cacheToDisc)
         for i in range(0, 200):
             if xbmc.getCondVisibility('Container.Content(episodes)'):
                 return index().container_view('episodes', {'skin.confluence' : 504})
@@ -1671,17 +1677,69 @@ class contextMenu:
 
         index().container_refresh()
 
-    def library_movie_add(self, name, title, year, imdb, url):
-        self.library_movie_processor(name, title, year, imdb, url)
+    def library_movie_add(self, name, title, year, imdb, url, batch=False):
+        try:
+            check = getSetting("check_movie_link")
+        except:
+            pass
 
-        index().infoDialog(language(30309).encode("utf-8"), name)
+        if check == 'true' or batch == False:
+            index().infoDialog(language(30310).encode("utf-8"), str(name), time=10000000)
+
+        try:
+            if not getSetting("check_library") == 'true': raise Exception()
+
+            lib = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["imdbnumber"]}, "id": 1}' % (year, str(int(year)+1), str(int(year)-1)))
+            lib = unicode(lib, 'utf-8', errors='ignore')
+            lib = json.loads(lib)['result']['movies']
+            lib = [i for i in lib if imdb in i['imdbnumber']][0]
+        except:
+            lib = []
+
+        try:
+            if not lib == []: raise Exception()
+
+            if check == 'true':
+                src = resolver().sources_get(name, title, year, imdb, None, None, None, None, None, None, None)
+                if not len(src) > 0: raise Exception()
+
+            self.library_movie_strm({'name': name, 'title': title, 'year': year, 'imdb': imdb, 'url': url})
+        except:
+            pass
+
+        if batch == True: return
+
+        index().infoDialog(language(30317).encode("utf-8"), str(name))
+
         if getSetting("update_library") == 'true' and not xbmc.getCondVisibility('Library.IsScanningVideo'):
             xbmc.executebuiltin('UpdateLibrary(video)')
 
     def library_movie_list(self, url):
-        if xbmc.getInfoLabel('Container.FolderPath').endswith('root_tools'):
-            yes = index().yesnoDialog(language(30347).encode("utf-8"), '')
-            if not yes: return
+        index().infoDialog(language(30315).encode("utf-8"), language(30311).encode("utf-8"), time=10000000)
+
+        try:
+            match = index().cache(movies().get, 0, url, False)
+            if match == None: raise Exception()
+        except:
+            index().infoDialog(language(30316).encode("utf-8"), language(30311).encode("utf-8"))
+            return
+
+        for i in match:
+            try:
+                if xbmc.abortRequested == True: return sys.exit()
+
+                self.library_movie_add(i['name'], i['title'], i['year'], i['imdb'], i['url'], batch=True)
+            except:
+                pass
+
+        index().infoDialog(language(30317).encode("utf-8"), language(30311).encode("utf-8"))
+
+        if getSetting("update_library") == 'true' and not xbmc.getCondVisibility('Library.IsScanningVideo'):
+            xbmc.executebuiltin('UpdateLibrary(video)')
+
+    def library_movie_tool(self, url):
+        yes = index().yesnoDialog(language(30347).encode("utf-8"), '')
+        if not yes: return
 
         if url == 'trakt_collection':
             url = link().trakt_collection % link().trakt_user
@@ -1690,45 +1748,17 @@ class contextMenu:
         elif url == 'imdb_watchlist':
             url = link().imdb_watchlist % link().imdb_user
 
+        xbmc.executebuiltin('RunPlugin(%s?action=library_movie_list&url=%s)' % (sys.argv[0], urllib.quote_plus(url)))
+
+    def library_movie_strm(self, i):
         try:
-            dialog = xbmcgui.DialogProgress()
-            dialog.create(addonName.encode("utf-8"), language(30408).encode("utf-8"))
-            dialog.update(0, language(30408).encode("utf-8"), language(30361).encode("utf-8") + '...')
-
-            match = index().cache(movies().get, 0, url, False)
-            if match == None: return dialog.close()
-
-            dialog.update(50, language(30408).encode("utf-8"), str(len(match)) + ' ' + language(30362).encode("utf-8"))
-            xbmc.sleep(1000)
-
-            for i in range(len(match)):
-                if xbmc.abortRequested == True: return sys.exit()
-                if dialog.iscanceled(): return dialog.close()
-                self.library_movie_processor(match[i]['name'], match[i]['title'], match[i]['year'], match[i]['imdb'], match[i]['url'])
-
-            dialog.close()
-        except:
-            return
-
-        index().infoDialog(language(30309).encode("utf-8"))
-        if getSetting("update_library") == 'true' and not xbmc.getCondVisibility('Library.IsScanningVideo'):
-            xbmc.executebuiltin('UpdateLibrary(video)')
-
-    def library_movie_processor(self, name, title, year, imdb, url):
-        try:
-            if getSetting("check_library") == 'true': filter = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["imdbnumber"]}, "id": 1}' % (year, str(int(year)+1), str(int(year)-1)))
-            filter = unicode(filter, 'utf-8', errors='ignore')
-            filter = json.loads(filter)['result']['movies']
-            filter = [i for i in filter if imdb in i['imdbnumber']][0]
-        except:
-            filter = []
-
-        try:
-            if not filter == []: return
-            if not xbmcvfs.exists(movieLibrary): xbmcvfs.mkdir(movieLibrary)
+            name, title, year, imdb, url = i['name'], i['title'], i['year'], i['imdb'], i['url']
 
             sysname, systitle, sysyear, sysimdb, sysurl = urllib.quote_plus(name), urllib.quote_plus(title), urllib.quote_plus(year), urllib.quote_plus(imdb), urllib.quote_plus(url)
+
             content = '%s?action=play&name=%s&title=%s&year=%s&imdb=%s&url=%s' % (sys.argv[0], sysname, systitle, sysyear, sysimdb, sysurl)
+
+            if not xbmcvfs.exists(movieLibrary): xbmcvfs.mkdir(movieLibrary)
 
             enc_name = name.translate(None, '\/:*?"<>|').strip('.')
             folder = os.path.join(movieLibrary, enc_name)
@@ -1739,19 +1769,98 @@ class contextMenu:
             file.write(str(content))
             file.close()
         except:
+            pass
+
+    def library_tv_add(self, name, year, imdb, tvdb, batch=False):
+        try:
+            block = True
+            check = getSetting("check_episode_link")
+            date = datetime.datetime.utcnow() - datetime.timedelta(hours = 29)
+            date = int(date.strftime("%Y%m%d"))
+        except:
+            pass
+
+        if check == 'true' or batch == False:
+            index().infoDialog(language(30310).encode("utf-8"), str(name), time=10000000)
+
+        try:
+            match = episodes().get(name, year, imdb, tvdb, idx=False)
+            match = match[1]['episodes']
+        except:
+            if check == 'true' or batch == False:
+                index().infoDialog(language(30316).encode("utf-8"), str(name))
             return
 
-    def library_tv_add(self, name, year, imdb, tvdb):
-        self.library_tv_processor(name, year, imdb, tvdb)
+        try:
+            if not getSetting("check_library") == 'true': raise Exception()
 
-        index().infoDialog(language(30310).encode("utf-8"), name)
+            lib = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"properties" : ["title", "imdbnumber"]}, "id": 1}')
+            lib = unicode(lib, 'utf-8', errors='ignore')
+            lib = json.loads(lib)['result']['tvshows']
+
+            lib = [i['title'].encode("utf-8") for i in lib if match[0]['tvdb'] in i['imdbnumber']][0]
+            lib = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "tvshow", "operator": "is", "value": "%s"}]}, "properties": ["season", "episode"]}, "id": 1}' % lib)
+            lib = unicode(lib, 'utf-8', errors='ignore')
+            lib = json.loads(lib)['result']['episodes']
+            lib = ['S%02dE%02d' % (i['season'], i['episode']) for i in lib]
+        except:
+            lib = []
+
+        for i in match:
+            try:
+                if xbmc.abortRequested == True: return sys.exit()
+
+                if check == 'true':
+                    if block == False:
+                        pass
+                    elif i['episode'] == '1':
+                        src = resolver().sources_get(i['name'], i['title'], i['year'], i['imdb'], i['tvdb'], i['season'], i['episode'], i['show'], i['show_alt'], i['date'], i['genre'])
+                        if len(src) > 0: block = False
+                    if block == True: raise Exception()
+
+                l = 'S%02dE%02d' % (int(i['season']), int(i['episode']))
+                if l in lib: raise Exception()
+
+                if date <= int(re.sub('[^0-9]', '', str(i['date']))):
+                    src = resolver().sources_get(i['name'], i['title'], i['year'], i['imdb'], i['tvdb'], i['season'], i['episode'], i['show'], i['show_alt'], i['date'], i['genre'])
+                    if not len(src) > 0: raise Exception()
+
+                self.library_tv_strm(i)
+            except:
+                pass
+
+        if batch == True: return
+
+        index().infoDialog(language(30317).encode("utf-8"), str(name))
+
         if getSetting("update_library") == 'true' and not xbmc.getCondVisibility('Library.IsScanningVideo'):
             xbmc.executebuiltin('UpdateLibrary(video)')
 
     def library_tv_list(self, url):
-        if xbmc.getInfoLabel('Container.FolderPath').endswith('root_tools'):
-            yes = index().yesnoDialog(language(30347).encode("utf-8"), '')
-            if not yes: return
+        index().infoDialog(language(30315).encode("utf-8"), language(30312).encode("utf-8"), time=10000000)
+
+        try:
+            match = index().cache(shows().get, 0, url, False)
+            if match == None: raise Exception()
+        except:
+            index().infoDialog(language(30316).encode("utf-8"), language(30312).encode("utf-8"))
+            return
+
+        for i in match:
+            try:
+                if xbmc.abortRequested == True: return sys.exit()
+                self.library_tv_add(i['title'], i['year'], i['imdb'], i['tvdb'], batch=True)
+            except:
+                pass
+
+        index().infoDialog(language(30317).encode("utf-8"), language(30312).encode("utf-8"))
+
+        if getSetting("update_library") == 'true' and not xbmc.getCondVisibility('Library.IsScanningVideo'):
+            xbmc.executebuiltin('UpdateLibrary(video)')
+
+    def library_tv_tool(self, url):
+        yes = index().yesnoDialog(language(30347).encode("utf-8"), '')
+        if not yes: return
 
         if url == 'trakt_tv_collection':
             url = link().trakt_tv_collection % link().trakt_user
@@ -1760,139 +1869,155 @@ class contextMenu:
         elif url == 'imdb_tv_watchlist':
             url = link().imdb_watchlist % link().imdb_user
 
+        xbmc.executebuiltin('RunPlugin(%s?action=library_tv_list&url=%s)' % (sys.argv[0], urllib.quote_plus(url)))
+
+    def library_tv_strm(self, i):
         try:
-            dialog = xbmcgui.DialogProgress()
-            dialog.create(addonName.encode("utf-8"), language(30408).encode("utf-8"))
-            dialog.update(0, language(30408).encode("utf-8"), language(30361).encode("utf-8") + '...')
+            name, title, year, imdb, tvdb, season, episode, show, show_alt, date, genre, url = i['name'], i['title'], i['year'], i['imdb'], i['tvdb'], i['season'], i['episode'], i['show'], i['show_alt'], i['date'], i['genre'], i['url']
 
-            match = index().cache(shows().get, 0, url, False)
-            if match == None: return dialog.close()
+            sysname, systitle, sysyear, sysimdb, systvdb, sysseason, sysepisode, sysshow, sysshow_alt, sysdate, sysgenre, sysurl = urllib.quote_plus(name), urllib.quote_plus(title), urllib.quote_plus(year), urllib.quote_plus(imdb), urllib.quote_plus(tvdb), urllib.quote_plus(season), urllib.quote_plus(episode), urllib.quote_plus(show), urllib.quote_plus(show_alt), urllib.quote_plus(date), urllib.quote_plus(genre), urllib.quote_plus(url)
 
-            dialog.update(0, language(30408).encode("utf-8"), str(len(match)) + ' ' + language(30362).encode("utf-8"))
-            xbmc.sleep(1000)
+            content = '%s?action=play&name=%s&title=%s&year=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&show=%s&show_alt=%s&date=%s&genre=%s&url=%s' % (sys.argv[0], sysname, systitle, sysyear, sysimdb, systvdb, sysseason, sysepisode, sysshow, sysshow_alt, sysdate, sysgenre, sysurl)
 
-            for i in range(len(match)):
-                if xbmc.abortRequested == True: return sys.exit()
-                if dialog.iscanceled(): return dialog.close()
-                dialog.update(int((100 / float(len(match))) * i), language(30408).encode("utf-8"), str(match[i]['title']))
-                self.library_tv_processor(match[i]['title'], match[i]['year'], match[i]['imdb'], match[i]['tvdb'])
+            if not xbmcvfs.exists(tvLibrary): xbmcvfs.mkdir(tvLibrary)
 
-            dialog.close()
+            enc_show = show_alt.translate(None, '\/:*?"<>|').strip('.')
+            folder = os.path.join(tvLibrary, enc_show)
+            if not xbmcvfs.exists(folder): xbmcvfs.mkdir(folder)
+
+            enc_season = 'Season %s' % season.translate(None, '\/:*?"<>|').strip('.')
+            folder = os.path.join(folder, enc_season)
+            if not xbmcvfs.exists(folder): xbmcvfs.mkdir(folder)
+
+            enc_name = name.translate(None, '\/:*?"<>|').strip('.')
+            stream = os.path.join(folder, enc_name + '.strm')
+            file = xbmcvfs.File(stream, 'w')
+            file.write(str(content))
+            file.close()
         except:
-            return
+            pass
 
-        index().infoDialog(language(30310).encode("utf-8"))
-        if getSetting("update_library") == 'true' and not xbmc.getCondVisibility('Library.IsScanningVideo'):
-            xbmc.executebuiltin('UpdateLibrary(video)')
+    def library_update_tool(self):
+        xbmc.executebuiltin('RunPlugin(%s?action=library_update)' % sys.argv[0])
 
-    def library_tv_processor(self, name, year, imdb, tvdb, limit=False):
-        try:
-            dt = datetime.datetime.utcnow() - datetime.timedelta(hours = 5)
+    def library_update(self, notify):
+        start = time.time()
 
-            match = episodes().get(name, year, imdb, tvdb, idx=False)
-            match = match[1]['episodes']
-        except:
-            return
+        if notify == 'true':
+            index().infoDialog(language(30315).encode("utf-8"), language(30313).encode("utf-8"), time=10000000)
 
         try:
-            filter = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"properties" : ["title", "imdbnumber"]}, "id": 1}')
-            filter = unicode(filter, 'utf-8', errors='ignore')
-            filter = json.loads(filter)['result']['tvshows']
-            filter = [i['title'].encode("utf-8") for i in filter if match[0]['tvdb'] in i['imdbnumber']][0]
-            filter = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "tvshow", "operator": "is", "value": "%s"}]}, "properties": ["season", "episode"]}, "id": 1}' % filter)
-            filter = unicode(filter, 'utf-8', errors='ignore')
-            filter = json.loads(filter)['result']['episodes']
-            filter = ['S%02dE%02d' % (int(i['season']), int(i['episode'])) for i in filter]
-        except:
-            filter = []
+            shows = []
+            season, episode = [], []
+            show = [os.path.join(tvLibrary, i) for i in xbmcvfs.listdir(tvLibrary)[0]]
+            for s in show: season += [os.path.join(s, i) for i in xbmcvfs.listdir(s)[0]]
+            for s in season: episode.append([os.path.join(s, i) for i in xbmcvfs.listdir(s)[1] if i.endswith('.strm')][-1])
 
-        try:
-            match = [{'name': i['name'], 'title': i['title'], 'year': i['year'], 'imdb': i['imdb'], 'tvdb': i['tvdb'], 'season': i['season'], 'episode': i['episode'], 'show': i['show'], 'show_alt': i['show_alt'], 'date': i['date'], 'genre': i['genre'], 'url': i['url'], 'filter': 'S%02dE%02d' % (int(i['season']), int(i['episode']))} for i in match]
-            if getSetting("service_limit") == 'true' and limit == True:
-                match = [i for i in match if i['season'] == match[-1]['season']]
-            if getSetting("check_library") == 'true':
-                match = [i for i in match if not i['filter'] in filter]
-        except:
-            return
-
-        for i in match:
-            try:
-                if not xbmcvfs.exists(tvLibrary): xbmcvfs.mkdir(tvLibrary)
-
-                name, title, year, imdb, tvdb, season, episode, show, show_alt, date, genre, url = i['name'], i['title'], i['year'], i['imdb'], i['tvdb'], i['season'], i['episode'], i['show'], i['show_alt'], i['date'], i['genre'], i['url']
-
-                if int(re.sub('[^0-9]', '', str(date))) == int(dt.strftime("%Y%m%d")):
-                    try: src = resolver().sources_tv(name, title, year, imdb, tvdb, date, season, episode, show, show_alt)
-                    except: src = []
-                    if not len(src) > 0: raise Exception()
-
-                sysname, systitle, sysyear, sysimdb, systvdb, sysseason, sysepisode, sysshow, sysshow_alt, sysdate, sysgenre, sysurl = urllib.quote_plus(name), urllib.quote_plus(title), urllib.quote_plus(year), urllib.quote_plus(imdb), urllib.quote_plus(tvdb), urllib.quote_plus(season), urllib.quote_plus(episode), urllib.quote_plus(show), urllib.quote_plus(show_alt), urllib.quote_plus(date), urllib.quote_plus(genre), urllib.quote_plus(url)
-
-                content = '%s?action=play&name=%s&title=%s&year=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&show=%s&show_alt=%s&date=%s&genre=%s&url=%s' % (sys.argv[0], sysname, systitle, sysyear, sysimdb, systvdb, sysseason, sysepisode, sysshow, sysshow_alt, sysdate, sysgenre, sysurl)
-
-                enc_show = show_alt.translate(None, '\/:*?"<>|').strip('.')
-                folder = os.path.join(tvLibrary, enc_show)
-                if not xbmcvfs.exists(folder): xbmcvfs.mkdir(folder)
-
-                enc_season = 'Season %s' % season.translate(None, '\/:*?"<>|').strip('.')
-                folder = os.path.join(folder, enc_season)
-                if not xbmcvfs.exists(folder): xbmcvfs.mkdir(folder)
-
-                enc_name = name.translate(None, '\/:*?"<>|').strip('.')
-                stream = os.path.join(folder, enc_name + '.strm')
-                file = xbmcvfs.File(stream, 'w')
-                file.write(str(content))
-                file.close()
-            except:
-                pass
-
-    def library_update(self, silent=False):
-        try:
-            match = []
-
-            seasons, episodes = [], []
-            shows = [os.path.join(tvLibrary, i) for i in xbmcvfs.listdir(tvLibrary)[0]]
-            for show in shows: seasons += [os.path.join(show, i) for i in xbmcvfs.listdir(show)[0]]
-            for season in seasons: episodes += [os.path.join(season, i) for i in xbmcvfs.listdir(season)[1] if i.endswith('.strm')]
-
-            for episode in episodes:
+            for file in episode:
                 try:
-                    file = xbmcvfs.File(episode)
+                    file = xbmcvfs.File(file)
                     read = file.read()
                     read = read.encode("utf-8")
                     file.close()
-                    if not read.startswith(sys.argv[0]): raise Exception()
+
                     params = {}
+                    if not read.startswith(sys.argv[0]): raise Exception()
                     query = read[read.find('?') + 1:].split('&')
                     for i in query: params[i.split('=')[0]] = i.split('=')[1]
                     show, year, imdb, tvdb = urllib.unquote_plus(params["show"]), urllib.unquote_plus(params["year"]), urllib.unquote_plus(params["imdb"]), urllib.unquote_plus(params["tvdb"])
-                    match.append({'show': show, 'year': year, 'imdb': imdb, 'tvdb': tvdb})
+                    shows.append({'show': show, 'year': year, 'imdb': imdb, 'tvdb': tvdb})
                 except:
                     pass
 
-            match = [i for x, i in enumerate(match) if i not in match[x + 1:]]
-            if len(match) == 0: return
+            shows = [i for x, i in enumerate(shows) if i not in shows[x + 1:]]
+            if len(shows) == 0: return
         except:
+            if notify == 'true':
+                index().infoDialog(language(30316).encode("utf-8"), language(30313).encode("utf-8"))
             return
 
         try:
-            if silent == False:
-                dialog = xbmcgui.DialogProgress()
-                dialog.create(addonName.encode("utf-8"), language(30363).encode("utf-8"))
+            lib = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"properties" : ["title", "imdbnumber"]}, "id": 1}')
+            lib = unicode(lib, 'utf-8', errors='ignore')
+            lib = json.loads(lib)['result']['tvshows']
 
-            for i in range(len(match)):
-                if xbmc.abortRequested == True: return sys.exit()
-                if silent == False:
-                    if dialog.iscanceled(): return dialog.close()
-                    dialog.update(int((100 / float(len(match))) * i), language(30363).encode("utf-8"), str(match[i]['show']))
-                self.library_tv_processor(match[i]['show'], match[i]['year'], match[i]['imdb'], match[i]['tvdb'], limit=True)
-
-            if silent == False: dialog.close()
+            date = datetime.datetime.utcnow() - datetime.timedelta(hours = 29)
+            date = int(date.strftime("%Y%m%d"))
         except:
+            if notify == 'true':
+                index().infoDialog(language(30316).encode("utf-8"), language(30313).encode("utf-8"))
             return
 
-        if silent == False:
-            index().infoDialog(language(30311).encode("utf-8"))
+        for sh in shows:
+            if xbmc.abortRequested == True: return sys.exit()
+
+            try:
+                fetch = None
+                dbcon = database.connect(addonCache)
+                dbcur = dbcon.cursor()
+                dbcur.execute("SELECT * FROM rel_lib WHERE tvdb_id = '%s'" % sh['tvdb'])
+                fetch = dbcur.fetchone()
+
+                tvdb_id = str(fetch[0].encode('utf-8'))
+                show = eval(fetch[1].encode('utf-8'))
+                status = show['status']
+                episode = eval(fetch[2].encode('utf-8'))
+            except:
+                pass
+
+            try:
+                if not fetch == None: raise Exception()
+                match = episodes().get(sh['show'], sh['year'], sh['imdb'], sh['tvdb'], idx=False)
+                match = match[1]['episodes']
+
+                tvdb_id = str(match[0]['tvdb'])
+                show = {'show': match[0]['show'], 'show_alt': match[0]['show_alt'], 'year': match[0]['year'], 'genre': match[0]['genre'], 'url': match[0]['url'], 'imdb': match[0]['imdb'], 'tvdb': match[0]['tvdb'], 'status': match[0]['status']}
+                status = show['status']
+                episode = [{'name': i['name'], 'title': i['title'], 'season': i['season'], 'episode': i['episode'], 'date': i['date']} for i in match]
+            except:
+                pass
+
+            try:
+                if status.lower() == 'continuing': raise Exception()
+                if not fetch == None: raise Exception()
+
+                dbcur.execute("CREATE TABLE IF NOT EXISTS rel_lib (""tvdb_id TEXT, ""show TEXT, ""episode TEXT, ""UNIQUE(tvdb_id)"");")
+                dbcur.execute("DELETE FROM rel_lib WHERE tvdb_id = '%s'" % tvdb_id)
+                dbcur.execute("INSERT INTO rel_lib Values (?, ?, ?)", (tvdb_id, repr(show), repr(episode)))
+                dbcon.commit()
+            except:
+                pass
+
+            try:
+                ep = [i['title'].encode("utf-8") for i in lib if tvdb_id in i['imdbnumber']][0]
+                ep = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "tvshow", "operator": "is", "value": "%s"}]}, "properties": ["season", "episode"]}, "id": 1}' % ep)
+                ep = unicode(ep, 'utf-8', errors='ignore')
+                ep = json.loads(ep)['result']['episodes'][-1]
+
+                num = [x for x,y in enumerate(episode) if str(y['season']) == str(ep['season']) and str(y['episode']) == str(ep['episode'])][-1]
+                episode = [y for x,y in enumerate(episode) if x > num]
+                if len(episode) == 0: continue
+            except:
+                continue
+
+            for i in episode:
+                try:
+                    if xbmc.abortRequested == True: return sys.exit()
+
+                    i.update({'show': show['show'], 'show_alt': show['show_alt'], 'year': show['year'], 'genre': show['genre'], 'url': show['url'], 'imdb': show['imdb'], 'tvdb': show['tvdb']})
+
+                    if date <= int(re.sub('[^0-9]', '', str(i['date']))):
+                        src = resolver().sources_get(i['name'], i['title'], i['year'], i['imdb'], i['tvdb'], i['season'], i['episode'], i['show'], i['show_alt'], i['date'], i['genre'])
+                        if not len(src) > 0: raise Exception()
+
+                    self.library_tv_strm(i)
+                except:
+                    pass
+
+        if notify == 'true':
+            end = '%s %.2f seconds' % (language(30314).encode("utf-8"), (time.time() - start))
+            index().infoDialog(end, language(30313).encode("utf-8"))
+
         if getSetting("update_library") == 'true' and not xbmc.getCondVisibility('Library.IsScanningVideo'):
             xbmc.executebuiltin('UpdateLibrary(video)')
 
@@ -1922,7 +2047,9 @@ class contextMenu:
                     getTrakt().sync()
 
                     if not getSetting("service_update") == 'true': raise Exception()
-                    self.library_update(silent=True)
+                    try: notify = getSetting("service_notification")
+                    except: notify = 'true'
+                    self.library_update(notify)
                 except:
                     pass
 
@@ -2025,7 +2152,7 @@ class root:
         if root_episodes == '1':
             rootList.append({'name': 30506, 'image': 'episodes_added.jpg', 'action': 'episodes_added'})
         elif root_episodes == '2':
-            rootList.append({'name': 30506, 'image': 'episodes_added.jpg', 'action': 'shows_trakt_progress'})
+            rootList.append({'name': 30506, 'image': 'episodes_added.jpg', 'action': 'episodes_trakt_progress'})
         elif root_episodes == '3':
             rootList.append({'name': 30506, 'image': 'episodes_added.jpg', 'action': 'episodes_trakt'})
 
@@ -2077,7 +2204,7 @@ class root:
             rootList.append({'name': 30562, 'image': 'shows_trakt_collection.jpg', 'action': 'shows_trakt_collection'})
             rootList.append({'name': 30563, 'image': 'movies_trakt_watchlist.jpg', 'action': 'movies_trakt_watchlist'})
             rootList.append({'name': 30564, 'image': 'shows_trakt_watchlist.jpg', 'action': 'shows_trakt_watchlist'})
-            rootList.append({'name': 30565, 'image': 'shows_trakt_progress.jpg', 'action': 'shows_trakt_progress'})
+            rootList.append({'name': 30565, 'image': 'episodes_trakt_progress.jpg', 'action': 'episodes_trakt_progress'})
             rootList.append({'name': 30566, 'image': 'episodes_trakt.jpg', 'action': 'episodes_trakt'})
         if not (link().imdb_user == ''):
             rootList.append({'name': 30567, 'image': 'movies_imdb_watchlist.jpg', 'action': 'movies_imdb_watchlist'})
@@ -2103,7 +2230,7 @@ class root:
         rootList.append({'name': 30601, 'image': 'settings_open.jpg', 'action': 'settings_open'})
         rootList.append({'name': 30602, 'image': 'cache_clear.jpg', 'action': 'cache_clear_list'})
         rootList.append({'name': 30603, 'image': 'cache_clear.jpg', 'action': 'cache_clear_src'})
-        rootList.append({'name': 30604, 'image': 'library_update.jpg', 'action': 'library_update'})
+        rootList.append({'name': 30604, 'image': 'library_update.jpg', 'action': 'library_update_tool'})
         if not (link().trakt_user == '' or link().trakt_password == ''):
             rootList.append({'name': 30605, 'image': 'movies_trakt_collection.jpg', 'action': 'library_trakt_collection'})
             rootList.append({'name': 30606, 'image': 'shows_trakt_collection.jpg', 'action': 'library_tv_trakt_collection'})
@@ -3506,12 +3633,6 @@ class shows:
         index().showList(self.list)
         return self.list
 
-    def trakt_progress(self):
-        url = link().trakt_tv_watched % link().trakt_user
-        self.list = index().cache(self.trakt_list2, 0, url)
-        index().showList(self.list)
-        return self.list
-
     def imdb_watchlist(self):
         url = link().imdb_watchlist % link().imdb_user
         self.list = index().cache(self.imdb_list2, 0, url)
@@ -3854,116 +3975,6 @@ class shows:
 
         return self.list
 
-    def trakt_list2(self, url):
-        try:
-            url += '?extended=full,images&limit=200'
-            result = getTrakt().result(url)
-            shows = json.loads(result)
-        except:
-            return
-
-        for show in shows:
-            try:
-                num_1 = 0
-                for i in range(0, len(show['seasons'])): num_1 += len(show['seasons'][i]['episodes'])
-                num_2 = int(show['show']['aired_episodes'])
-                if num_1 >= num_2: raise Exception()
-
-                title = show['show']['title']
-                title = re.sub('\s(|[(])(UK|US|AU|\d{4})(|[)])$', '', title)
-                title = common.replaceHTMLCodes(title)
-                title = title.encode('utf-8')
-
-                year = show['show']['year']
-                year = re.sub('[^0-9]', '', str(year))
-                year = year.encode('utf-8')
-
-                if int(year) > int((datetime.datetime.utcnow() - datetime.timedelta(hours = 5)).strftime("%Y")): raise Exception()
-
-                imdb = show['show']['ids']['imdb']
-                if imdb == None or imdb == '': imdb = '0000000'
-                imdb = re.sub('[^0-9]', '', str(imdb))
-                imdb = imdb.encode('utf-8')
-
-                tvdb = show['show']['ids']['tvdb']
-                if tvdb == None or tvdb == '': tvdb = '0'
-                tvdb = re.sub('[^0-9]', '', str(tvdb))
-                tvdb = tvdb.encode('utf-8')
-
-                url = link().imdb_title % imdb
-                url = common.replaceHTMLCodes(url)
-                url = url.encode('utf-8')
-
-                poster = link().imdb_tv_image
-                try: poster = show['show']['images']['poster']['medium']
-                except: pass
-                if poster == None or not '/posters/' in poster: poster = link().imdb_tv_image
-                poster = poster.rsplit('?', 1)[0]
-                poster = common.replaceHTMLCodes(poster)
-                poster = poster.encode('utf-8')
-
-                banner = poster
-                try: banner = show['show']['images']['banner']['full']
-                except: pass
-                if banner == None or not '/banners/' in banner: banner = poster
-                banner = banner.rsplit('?', 1)[0]
-                banner = common.replaceHTMLCodes(banner)
-                banner = banner.encode('utf-8')
-
-                fanart = '0'
-                try: fanart = show['show']['images']['fanart']['full']
-                except: pass
-                if fanart == None or not '/fanarts/' in fanart: fanart = '0'
-                fanart = fanart.rsplit('?', 1)[0]
-                fanart = common.replaceHTMLCodes(fanart)
-                fanart = fanart.encode('utf-8')
-
-                genre = show['show']['genres']
-                genre = [i.title() for i in genre]
-                if genre == []: genre = '0'
-                genre = " / ".join(genre)
-                genre = common.replaceHTMLCodes(genre)
-                genre = genre.encode('utf-8')
-
-                studio = show['show']['network']
-                if studio == None: studio = '0'
-                studio = common.replaceHTMLCodes(studio)
-                studio = studio.encode('utf-8')
-
-                premiered = show['show']['first_aired']
-                try: premiered = re.compile('(\d{4}-\d{2}-\d{2})').findall(premiered)[0]
-                except: premiered = '0'
-                premiered = common.replaceHTMLCodes(premiered)
-                premiered = premiered.encode('utf-8')
-
-                try: duration = str(show['show']['runtime'])
-                except: duration = '0'
-                if duration == None: duration = '0'
-                duration = common.replaceHTMLCodes(duration)
-                duration = duration.encode('utf-8')
-
-                try: rating = str(show['show']['rating'])
-                except: rating = '0'
-                if rating == None or rating == '0.0': rating = '0'
-                rating = common.replaceHTMLCodes(rating)
-                rating = rating.encode('utf-8')
-
-                mpaa = show['show']['certification']
-                if mpaa == None: mpaa = '0'
-                mpaa = common.replaceHTMLCodes(mpaa)
-                mpaa = mpaa.encode('utf-8')
-
-                plot = show['show']['overview']
-                if plot == None: plot = '0'
-                plot = common.replaceHTMLCodes(plot)
-                plot = plot.encode('utf-8')
-
-                self.list.append({'title': title, 'year': year, 'imdb': imdb, 'tvdb': tvdb, 'genre': genre, 'url': url, 'poster': poster, 'banner': banner, 'fanart': fanart, 'studio': studio, 'premiered': premiered, 'duration': duration, 'rating': rating, 'mpaa': mpaa, 'plot': plot})
-            except:
-                pass
-
-        return self.list
-
     def tvdb_info(self, i):
         try:
             try: sid = self.list[i]['tvdb']
@@ -4154,8 +4165,8 @@ class seasons:
             if tvdb == '0': raise Exception()
 
             import zipfile, StringIO
-            tvdbUrl = link().tvdb_info % (link().tvdb_key, tvdb)
-            data = urllib2.urlopen(tvdbUrl, timeout=10).read()
+            url = link().tvdb_info % (link().tvdb_key, tvdb)
+            data = urllib2.urlopen(url, timeout=10).read()
             zip = zipfile.ZipFile(StringIO.StringIO(data))
             art = zip.read('banners.xml')
             result = zip.read('en.xml')
@@ -4165,17 +4176,26 @@ class seasons:
             dupe = re.compile('[***]Duplicate (\d*)[***]').findall(dupe)
             if len(dupe) > 0:
                 tvdb = str(dupe[0]).encode('utf-8')
-                tvdbUrl = link().tvdb_info % (link().tvdb_key, tvdb)
-                data = urllib2.urlopen(tvdbUrl, timeout=10).read()
+                url = link().tvdb_info % (link().tvdb_key, tvdb)
+                data = urllib2.urlopen(url, timeout=10).read()
                 zip = zipfile.ZipFile(StringIO.StringIO(data))
                 art = zip.read('banners.xml')
                 result = zip.read('en.xml')
                 zip.close()
 
-            art = common.parseDOM(art, "Banner")
-            art = [i for i in art if common.parseDOM(i, "Language")[0] == 'en']
-            art = [i for i in art if common.parseDOM(i, "BannerType")[0] == 'season']
-            art = [i for i in art if not 'seasonswide' in common.parseDOM(i, "BannerPath")[0]]
+            result = result.split('<Episode>')
+            episodes = [x for x in result if '<EpisodeNumber>' in x]
+            result = result[0]
+
+            art = art.split('<Banner>')
+            art = [i for i in art if '<Language>en</Language>' in i and '<BannerType>season</BannerType>' in i]
+            art = [i for i in art if not 'seasonswide' in re.compile('<BannerPath>(.+?)</BannerPath>').findall(i)[0]]
+
+            episodes = [i for i in episodes if not '<SeasonNumber>0</SeasonNumber>' in i]
+            episodes = [i for i in episodes if not '<EpisodeNumber>0</EpisodeNumber>' in i]
+            seasons = [i for i in episodes if '<EpisodeNumber>1</EpisodeNumber>' in i]
+
+            if not limit == '': episodes = [i for i in episodes if '<SeasonNumber>%01d</SeasonNumber>' % int(limit) in i]
 
             show_alt = common.parseDOM(result, "SeriesName")[0]
             dupe = re.compile('[***]Duplicate (\d*)[***]').findall(show)
@@ -4273,13 +4293,6 @@ class seasons:
 
         self.list = [{'seasons': []}, {'episodes': []}]
 
-        try:
-            seasons = common.parseDOM(result, "Episode")
-            seasons = [i for i in seasons if common.parseDOM(i, "EpisodeNumber")[0] == '1']
-            seasons = [i for i in seasons if not common.parseDOM(i, "SeasonNumber")[0] == '0']
-        except:
-            return
-
         for season in seasons:
             try:
                 date = common.parseDOM(season, "FirstAired")[0]
@@ -4309,18 +4322,6 @@ class seasons:
                 self.list[0]['seasons'].append({'title': num, 'year': year, 'imdb': imdb, 'tvdb': tvdb, 'season': num, 'show': show, 'show_alt': show_alt, 'genre': genre, 'url': url, 'poster': poster, 'banner': banner, 'thumb': thumb, 'fanart': fanart, 'studio': studio, 'status': status, 'date': date, 'duration': duration, 'rating': rating, 'mpaa': mpaa, 'plot': plot})
             except:
                 pass
-
-        try:
-            match = [i['season'] for i in self.list[0]['seasons']]
-            episodes = common.parseDOM(result, "Episode")
-            if limit == '':
-                episodes = [i for i in episodes if '%01d' % int(common.parseDOM(i, "SeasonNumber")[0]) in match]
-            else:
-                episodes = [i for i in episodes if '%01d' % int(common.parseDOM(i, "SeasonNumber")[0]) == limit]
-
-            episodes = [i for i in episodes if not common.parseDOM(i, "EpisodeNumber")[0] == '0']
-        except:
-            return
 
         for episode in episodes:
             try:
@@ -4414,41 +4415,13 @@ class episodes:
             self.list = seasons().tvdb_list(show, year, imdb, tvdb, season)
             return self.list
 
-    def progress(self, show, year, imdb, tvdb):
+    def get2(self, show, year, imdb, tvdb, season, episode):
         try:
             self.list = index().cache(seasons().tvdb_list, 1, show, year, imdb, tvdb)
             self.list = self.list[1]['episodes']
-        except:
-            pass
 
-        try:
-            record = ('shows', getSetting("trakt_user"))
-            dbcon = database.connect(addonCache)
-            dbcur = dbcon.cursor()
-            dbcur.execute("CREATE TABLE IF NOT EXISTS rel_trakt (""info TEXT, ""user TEXT, ""result TEXT, ""updated TEXT, ""UNIQUE(info, user)"");")
-
-            dbcur.execute("SELECT * FROM rel_trakt WHERE info = '%s' AND user = '%s'" % (record[0], record[1]))
-            result = dbcur.fetchone()
-            if result == None:
-                getTrakt().sync('shows')
-                dbcur.execute("SELECT * FROM rel_trakt WHERE info = '%s' AND user = '%s'" % (record[0], record[1]))
-                result = dbcur.fetchone()
-
-            result = result[2]
-            result = eval(result.encode('utf-8'))
-            result = json.loads(result)
-        except:
-            pass
-
-        try:
-            result = [i for i in result if str(i['show']['ids']['tvdb']) == tvdb][0]
-            season = result['seasons'][-1]['number']
-            episode = result['seasons'][-1]['episodes'][-1]['number']
-            num = [i for i,x in enumerate(self.list) if x['season'] == str(season) and  x['episode'] == str(episode)][-1]
-            self.list = [x for i,x in enumerate(self.list) if i > num]
-
-            if len(self.list) == 0 and 'shows_trakt_progress' in xbmc.getInfoLabel('Container.FolderPath'):
-                index().okDialog(language(30321).encode("utf-8"), language(30322).encode("utf-8"))
+            num = [x for x,y in enumerate(self.list) if y['season'] == str(season) and  y['episode'] == str(episode)][-1]
+            self.list = [y for x,y in enumerate(self.list) if x >= num]
 
             index().episodeList(self.list)
             return self.list
@@ -4460,6 +4433,13 @@ class episodes:
         url = link().trakt_tv_calendar % (str(date), '1')
         self.list = index().cache(self.trakt_list, 24, url)
         try: self.list = sorted(self.list, key=itemgetter('name'))
+        except: return
+        index().episodeList(self.list)
+        return self.list
+
+    def trakt_progress(self):
+        self.list = index().cache(self.trakt_list2, 1)
+        try: self.list = sorted(self.list, key=itemgetter('date'))[::-1]
         except: return
         index().episodeList(self.list)
         return self.list
@@ -4694,6 +4674,225 @@ class episodes:
 
         return self.list
 
+    def trakt_list2(self):
+        try:
+            url = link().trakt_tv_watched % link().trakt_user
+            url += '?extended=full'
+            result = getTrakt().result(url)
+            shows = json.loads(result)
+            showList = []
+        except:
+            return
+
+        for show in shows:
+            try:
+                num_1 = 0
+                for i in range(0, len(show['seasons'])): num_1 += len(show['seasons'][i]['episodes'])
+                num_2 = int(show['show']['aired_episodes'])
+                if num_1 >= num_2: raise Exception()
+
+                season = str(show['seasons'][-1]['number'])
+                season = season.encode('utf-8')
+
+                episode = str(show['seasons'][-1]['episodes'][-1]['number'])
+                episode = episode.encode('utf-8')
+
+                title = show['show']['title']
+                title = re.sub('\s(|[(])(UK|US|AU|\d{4})(|[)])$', '', title)
+                title = common.replaceHTMLCodes(title)
+                title = title.encode('utf-8')
+
+                year = show['show']['year']
+                year = re.sub('[^0-9]', '', str(year))
+                year = year.encode('utf-8')
+
+                if int(year) > int((datetime.datetime.utcnow() - datetime.timedelta(hours = 5)).strftime("%Y")): raise Exception()
+
+                imdb = show['show']['ids']['imdb']
+                if imdb == None or imdb == '': imdb = '0000000'
+                imdb = re.sub('[^0-9]', '', str(imdb))
+                imdb = imdb.encode('utf-8')
+
+                tvdb = show['show']['ids']['tvdb']
+                if tvdb == None or tvdb == '': tvdb = '0'
+                tvdb = re.sub('[^0-9]', '', str(tvdb))
+                tvdb = tvdb.encode('utf-8')
+
+                showList.append({'title': title, 'year': year, 'imdb': imdb, 'tvdb': tvdb, 'season': season, 'episode': episode})
+            except:
+                pass
+
+        def trakt_list2_thread(i):
+            try:
+                import zipfile, StringIO
+                url = link().tvdb_info % (link().tvdb_key, i['tvdb'])
+                data = urllib2.urlopen(url, timeout=10).read()
+                zip = zipfile.ZipFile(StringIO.StringIO(data))
+                result = zip.read('en.xml')
+                zip.close()
+
+                result = result.split('<Episode>')
+                episode = [x for x in result if '<EpisodeNumber>' in x]
+                result = result[0]
+
+                num = [x for x,y in enumerate(episode) if re.compile('<SeasonNumber>(.+?)</SeasonNumber>').findall(y)[0] == str(i['season']) and re.compile('<EpisodeNumber>(.+?)</EpisodeNumber>').findall(y)[0] == str(i['episode'])][-1]
+                episode = [y for x,y in enumerate(episode) if x > num][0]
+
+                date = common.parseDOM(episode, "FirstAired")[0]
+                if date == '' or '-00' in date: date = '0'
+                date = common.replaceHTMLCodes(date)
+                date = date.encode('utf-8')
+
+                try: status = common.parseDOM(result, "Status")[0]
+                except: status = ''
+                if status == '': status = 'Ended'
+                status = common.replaceHTMLCodes(status)
+                status = status.encode('utf-8')
+
+                dt = datetime.datetime.utcnow() - datetime.timedelta(hours = 5)
+
+                if status == 'Ended': pass
+                elif date == '0': raise Exception()
+                elif int(re.sub('[^0-9]', '', str(date))) > int(dt.strftime("%Y%m%d")): raise Exception()
+
+                show_alt = common.parseDOM(result, "SeriesName")[0]
+                show_alt = common.replaceHTMLCodes(show_alt)
+                show_alt = show_alt.encode('utf-8')
+
+                url = link().imdb_title % i['imdb']
+                url = url.encode('utf-8')
+
+                try: poster = common.parseDOM(result, "poster")[0]
+                except: poster = ''
+                if not poster == '': poster = link().tvdb_image + poster
+                else: poster = '0'
+                poster = common.replaceHTMLCodes(poster)
+                poster = poster.encode('utf-8')
+
+                try: banner = common.parseDOM(result, "banner")[0]
+                except: banner = ''
+                if not banner == '': banner = link().tvdb_image + banner
+                else: banner = '0'
+                banner = common.replaceHTMLCodes(banner)
+                banner = banner.encode('utf-8')
+
+                try: fanart = common.parseDOM(result, "fanart")[0]
+                except: fanart = ''
+                if not fanart == '': fanart = link().tvdb_image + fanart
+                else: fanart = '0'
+                fanart = common.replaceHTMLCodes(fanart)
+                fanart = fanart.encode('utf-8')
+
+                if not poster == '0': pass
+                elif not fanart == '0': poster = fanart
+                elif not banner == '0': poster = banner
+                else: poster = link().imdb_tv_image
+
+                if not banner == '0': pass
+                elif not fanart == '0': banner = fanart
+                elif not poster == '0': banner = poster
+
+                try: genre = common.parseDOM(result, "Genre")[0]
+                except: genre = ''
+                genre = [x for x in genre.split('|') if not x == '']
+                genre = " / ".join(genre)
+                if genre == '': genre = '0'
+                genre = common.replaceHTMLCodes(genre)
+                genre = genre.encode('utf-8')
+
+                try: studio = common.parseDOM(result, "Network")[0]
+                except: studio = ''
+                if studio == '': studio = '0'
+                studio = common.replaceHTMLCodes(studio)
+                studio = studio.encode('utf-8')
+
+                try: duration = common.parseDOM(result, "Runtime")[0]
+                except: duration = ''
+                if duration == '': duration = '0'
+                duration = common.replaceHTMLCodes(duration)
+                duration = duration.encode('utf-8')
+
+                try: mpaa = common.parseDOM(result, "ContentRating")[0]
+                except: mpaa = ''
+                if mpaa == '': mpaa = '0'
+                mpaa = common.replaceHTMLCodes(mpaa)
+                mpaa = mpaa.encode('utf-8')
+
+                try: plot = common.parseDOM(result, "Overview")[0]
+                except: plot = ''
+                try: desc = common.parseDOM(episode, "Overview")[0]
+                except: desc = ''
+                if not desc == '': plot = desc
+                if plot == '': plot = '0'
+                plot = common.replaceHTMLCodes(plot)
+                plot = plot.encode('utf-8')
+
+                season = common.parseDOM(episode, "SeasonNumber")[0]
+                season = '%01d' % int(season)
+                season = season.encode('utf-8')
+
+                num = common.parseDOM(episode, "EpisodeNumber")[0]
+                num = re.sub('[^0-9]', '', '%01d' % int(num))
+                num = num.encode('utf-8')
+
+                title = common.parseDOM(episode, "EpisodeName")[0]
+                title = common.replaceHTMLCodes(title)
+                title = title.encode('utf-8')
+
+                t = 'Episode ' + '%01d' % int(num)
+                t = t.encode('utf-8')
+                if title == '': title = t
+
+                name = show_alt + ' S' + '%02d' % int(season) + 'E' + '%02d' % int(num)
+                try: name = name.encode('utf-8')
+                except: pass
+
+                try: thumb = common.parseDOM(episode, "filename")[0]
+                except: thumb = ''
+                if not thumb == '': thumb = link().tvdb_image + thumb
+                else: thumb = '0'
+                thumb = common.replaceHTMLCodes(thumb)
+                thumb = thumb.encode('utf-8')
+
+                if not thumb == '0': pass
+                elif not fanart == '0': thumb = fanart.replace(link().tvdb_image, link().tvdb_image2)
+                elif not poster == '0': thumb = poster
+
+                try: rating = common.parseDOM(episode, "Rating")[0]
+                except: rating = ''
+                if rating == '': rating = '0'
+                rating = common.replaceHTMLCodes(rating)
+                rating = rating.encode('utf-8')
+
+                try: director = common.parseDOM(episode, "Director")[0]
+                except: director = ''
+                director = [x for x in director.split('|') if not x == '']
+                director = " / ".join(director)
+                if director == '': director = '0'
+                director = common.replaceHTMLCodes(director)
+                director = director.encode('utf-8')
+
+                try: writer = common.parseDOM(episode, "Writer")[0]
+                except: writer = ''
+                writer = [x for x in writer.split('|') if not x == '']
+                writer = " / ".join(writer)
+                if writer == '': writer = '0'
+                writer = common.replaceHTMLCodes(writer)
+                writer = writer.encode('utf-8')
+
+                self.list.append({'name': name, 'title': title, 'year': i['year'], 'imdb': i['imdb'], 'tvdb': i['tvdb'], 'season': season, 'episode': num, 'show': i['title'], 'show_alt': show_alt, 'genre': genre, 'url': url, 'poster': poster, 'banner': banner, 'thumb': thumb, 'fanart': fanart, 'studio': studio, 'status': status, 'date': date, 'duration': duration, 'rating': rating, 'mpaa': mpaa, 'director': director, 'writer': writer, 'plot': plot})
+            except:
+                pass
+
+        showList = showList[:30]
+
+        threads = []
+        for i in showList: threads.append(Thread(trakt_list2_thread, i))
+        [i.start() for i in threads]
+        [i.join() for i in threads]
+
+        return self.list
+
     def scn_list(self):
         try:
             result = getUrl(link().scn_tv_added, timeout='10').result
@@ -4702,7 +4901,7 @@ class episodes:
             url = [i for i in url if 'page=2' in i]
             url += re.compile('href="(.+?)".+?>PREV<').findall(result)
             if len(url) > 0:
-                url = link().scn_tv_base + url[0]
+                url = link().scn_tv_base + '/' + url[0]
                 url = common.replaceHTMLCodes(url)
                 result += getUrl(url, timeout='10').result
 
@@ -4716,9 +4915,9 @@ class episodes:
             dates = dates[:7]
 
             shows = [common.parseDOM(i, "a")[0] for i in result]
-            shows = [re.compile('(.*)[.]S\d+?E\d+?[.]').findall(i) for i in shows]
+            shows = [re.compile('(.*)[.](S\d+?E\d+?)[.]').findall(i) for i in shows]
             shows = [i[0] for i in shows if not len(i) == 0]
-            shows = [self.cleantitle_tv_2(i) for i in shows]
+            shows = [self.cleantitle_tv_2(i[0]) + ' ' + i[1] for i in shows]
             shows = [i.encode('utf-8') for i in shows]
             shows = uniqueList(shows).list
 
@@ -4727,7 +4926,9 @@ class episodes:
             [i.start() for i in threads]
             [i.join() for i in threads]
 
-            self.list = [i for i in self.list if self.cleantitle_tv(i['show']) in shows]
+            self.list = [i for i in self.list if self.cleantitle_tv(i['show']) + ' S' + '%02d' % int(i['season']) + 'E' + '%02d' % int(i['episode']) in shows]
+
+            self.list = [i for x, i in enumerate(self.list) if i not in self.list[x + 1:]]
 
             return self.list
         except:
@@ -4809,16 +5010,7 @@ class resolver:
             if show == None: content = 'movie'
             else: content = 'episode'
 
-            if content == 'movie':
-                title = self.normaltitle(title)
-                self.sources = self.sources_movie(name, title, year, imdb)
-            else:
-                show = self.normaltitle(show)
-                show_alt = self.normaltitle(show_alt)
-                season, episode = episodes().tvrage_redirect(title, year, imdb, tvdb, season, episode, show, date, genre)
-                self.sources = self.sources_tv(name, title, year, imdb, tvdb, date, season, episode, show, show_alt)
-
-            self.sources = self.sources_filter()
+            self.sources = self.sources_get(name, title, year, imdb, tvdb, season, episode, show, show_alt, date, genre)
             if self.sources == []: raise Exception()
 
             meta = json.loads(meta)
@@ -4828,7 +5020,7 @@ class resolver:
             else:
                 index().tvsourceList(self.sources, name, imdb, tvdb, meta)
         except:
-            index().infoDialog(language(30314).encode("utf-8"))
+            index().infoDialog(language(30308).encode("utf-8"))
             return
 
     def play_host(self, content, name, imdb, tvdb, url, source, provider):
@@ -4842,7 +5034,7 @@ class resolver:
             player().run(content, name, url, imdb, tvdb)
             return url
         except:
-            index().infoDialog(language(30314).encode("utf-8"))
+            index().infoDialog(language(30308).encode("utf-8"))
             return
 
     def run(self, name, title, year, imdb, tvdb, season, episode, show, show_alt, date, genre, url):
@@ -4850,16 +5042,7 @@ class resolver:
             if show == None: content = 'movie'
             else: content = 'episode'
 
-            if content == 'movie':
-                title = self.normaltitle(title)
-                self.sources = self.sources_movie(name, title, year, imdb)
-            else:
-                show = self.normaltitle(show)
-                show_alt = self.normaltitle(show_alt)
-                season, episode = episodes().tvrage_redirect(title, year, imdb, tvdb, season, episode, show, date, genre)
-                self.sources = self.sources_tv(name, title, year, imdb, tvdb, date, season, episode, show, show_alt)
-
-            self.sources = self.sources_filter()
+            self.sources = self.sources_get(name, title, year, imdb, tvdb, season, episode, show, show_alt, date, genre)
             if self.sources == []: raise Exception()
 
             autoplay = getSetting("autoplay")
@@ -4886,7 +5069,7 @@ class resolver:
             return url
         except:
             if PseudoTV == 'True': return
-            index().infoDialog(language(30314).encode("utf-8"))
+            index().infoDialog(language(30308).encode("utf-8"))
             return
 
     def normaltitle(self, title):
@@ -4906,41 +5089,41 @@ class resolver:
         except:
             return title
 
-    def sources_movie(self, name, title, year, imdb):
+    def sources_get(self, name, title, year, imdb, tvdb, season, episode, show, show_alt, date, genre):
+        if show == None: content = 'movie'
+        else: content = 'episode'
+
+        if content == 'movie':
+            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('movie25', 'true'), ('iwatchonline', 'true'), ('movietube', 'true'), ('moviezone', 'true'), ('zumvo', 'true'), ('view47', 'true'), ('g2g', 'true'), ('muchmovies', 'true'), ('sweflix', 'true'), ('movieshd', 'true'), ('onlinemovies', 'true'), ('yify', 'true'), ('vkbox', 'true'), ('moviestorm', 'true'), ('merdb', 'true'), ('wso', 'true'), ('twomovies', 'true'), ('einthusan', 'true'), ('myvideolinks', 'true'), ('noobroom', 'true'), ('furk', 'true')]
+            sourceDict = [('icefilms', getSetting("icefilms")), ('primewire', getSetting("primewire")), ('movie25', getSetting("movie25")), ('iwatchonline', getSetting("iwatchonline")), ('movietube', getSetting("movietube")), ('moviezone', getSetting("moviezone")), ('zumvo', getSetting("zumvo")), ('view47', getSetting("view47")), ('g2g', getSetting("g2g")), ('muchmovies', getSetting("muchmovies")), ('sweflix', getSetting("sweflix")), ('movieshd', getSetting("movieshd")), ('onlinemovies', getSetting("onlinemovies")), ('yify', getSetting("yify")), ('vkbox', getSetting("vkbox")), ('moviestorm', getSetting("moviestorm")), ('merdb', getSetting("merdb")), ('wso', getSetting("wso")), ('twomovies', getSetting("twomovies")), ('einthusan', getSetting("einthusan")), ('myvideolinks', getSetting("myvideolinks")), ('noobroom', getSetting("noobroom")), ('furk', getSetting("furk"))]
+        else:
+            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('watchseries', 'true'), ('iwatchonline', 'true'), ('movietube', 'true'), ('ororo', 'true'), ('vkbox', 'true'), ('clickplay', 'true'), ('moviestorm', 'true'), ('merdb', 'true'), ('wso', 'true'), ('twomovies', 'true'), ('animeultima', 'true'), ('tvrelease', 'true'), ('directdl', 'true'), ('noobroom', 'true'), ('furk', 'true')]
+            sourceDict = [('icefilms', getSetting("icefilms_tv")), ('primewire', getSetting("primewire_tv")), ('watchseries', getSetting("watchseries_tv")), ('iwatchonline', getSetting("iwatchonline_tv")), ('movietube', getSetting("movietube_tv")), ('ororo', getSetting("ororo_tv")), ('vkbox', getSetting("vkbox_tv")), ('clickplay', getSetting("clickplay_tv")), ('moviestorm', getSetting("moviestorm_tv")), ('merdb', getSetting("merdb_tv")), ('wso', getSetting("wso_tv")), ('twomovies', getSetting("twomovies_tv")), ('animeultima', getSetting("animeultima_tv")), ('tvrelease', getSetting("tvrelease_tv")), ('directdl', getSetting("directdl_tv")), ('noobroom', getSetting("noobroom_tv")), ('furk', getSetting("furk_tv"))]
+
+
         global global_sources
         global_sources = []
 
-        #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('movie25', 'true'), ('iwatchonline', 'true'), ('movietube', 'true'), ('moviezone', 'true'), ('zumvo', 'true'), ('view47', 'true'), ('g2g', 'true'), ('muchmovies', 'true'), ('sweflix', 'true'), ('movieshd', 'true'), ('onlinemovies', 'true'), ('yify', 'true'), ('vkbox', 'true'), ('moviestorm', 'true'), ('merdb', 'true'), ('wso', 'true'), ('twomovies', 'true'), ('einthusan', 'true'), ('myvideolinks', 'true'), ('noobroom', 'true'), ('furk', 'true')]
-        sourceDict = [('icefilms', getSetting("icefilms")), ('primewire', getSetting("primewire")), ('movie25', getSetting("movie25")), ('iwatchonline', getSetting("iwatchonline")), ('movietube', getSetting("movietube")), ('moviezone', getSetting("moviezone")), ('zumvo', getSetting("zumvo")), ('view47', getSetting("view47")), ('g2g', getSetting("g2g")), ('muchmovies', getSetting("muchmovies")), ('sweflix', getSetting("sweflix")), ('movieshd', getSetting("movieshd")), ('onlinemovies', getSetting("onlinemovies")), ('yify', getSetting("yify")), ('vkbox', getSetting("vkbox")), ('moviestorm', getSetting("moviestorm")), ('merdb', getSetting("merdb")), ('wso', getSetting("wso")), ('twomovies', getSetting("twomovies")), ('einthusan', getSetting("einthusan")), ('myvideolinks', getSetting("myvideolinks")), ('noobroom', getSetting("noobroom")), ('furk', getSetting("furk"))]
-
         threads = []
         sourceDict = [i[0] for i in sourceDict if i[1] == 'true']
-        for source in sourceDict:
-            threads.append(Thread(self.get_sources_movie, name, title, year, imdb, source))
+
+        if content == 'movie':
+            title = self.normaltitle(title)
+            for source in sourceDict: threads.append(Thread(self.sources_movie, name, title, year, imdb, source))
+        else:
+            show, show_alt = self.normaltitle(show), self.normaltitle(show_alt)
+            season, episode = episodes().tvrage_redirect(title, year, imdb, tvdb, season, episode, show, date, genre)
+            for source in sourceDict: threads.append(Thread(self.sources_tv, name, title, year, imdb, tvdb, date, season, episode, show, show_alt, source))
+
         [i.start() for i in threads]
         [i.join() for i in threads]
 
         self.sources = global_sources
+        self.sources = self.sources_filter()
+
         return self.sources
 
-    def sources_tv(self, name, title, year, imdb, tvdb, date, season, episode, show, show_alt):
-        global global_sources
-        global_sources = []
-
-        #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('watchseries', 'true'), ('iwatchonline', 'true'), ('movietube', 'true'), ('ororo', 'true'), ('vkbox', 'true'), ('clickplay', 'true'), ('moviestorm', 'true'), ('merdb', 'true'), ('wso', 'true'), ('twomovies', 'true'), ('animeultima', 'true'), ('tvrelease', 'true'), ('directdl', 'true'), ('noobroom', 'true'), ('furk', 'true')]
-        sourceDict = [('icefilms', getSetting("icefilms_tv")), ('primewire', getSetting("primewire_tv")), ('watchseries', getSetting("watchseries_tv")), ('iwatchonline', getSetting("iwatchonline_tv")), ('movietube', getSetting("movietube_tv")), ('ororo', getSetting("ororo_tv")), ('vkbox', getSetting("vkbox_tv")), ('clickplay', getSetting("clickplay_tv")), ('moviestorm', getSetting("moviestorm_tv")), ('merdb', getSetting("merdb_tv")), ('wso', getSetting("wso_tv")), ('twomovies', getSetting("twomovies_tv")), ('animeultima', getSetting("animeultima_tv")), ('tvrelease', getSetting("tvrelease_tv")), ('directdl', getSetting("directdl_tv")), ('noobroom', getSetting("noobroom_tv")), ('furk', getSetting("furk_tv"))]
-
-        threads = []
-        sourceDict = [i[0] for i in sourceDict if i[1] == 'true']
-        for source in sourceDict:
-            threads.append(Thread(self.get_sources_tv, name, title, year, imdb, tvdb, date, season, episode, show, show_alt, source))
-        [i.start() for i in threads]
-        [i.join() for i in threads]
-
-        self.sources = global_sources
-        return self.sources
-
-    def get_sources_movie(self, name, title, year, imdb, source):
+    def sources_movie(self, name, title, year, imdb, source):
         try:
             dbcon = database.connect(addonCache)
             dbcur = dbcon.cursor()
@@ -4991,7 +5174,7 @@ class resolver:
         except:
             pass
 
-    def get_sources_tv(self, name, title, year, imdb, tvdb, date, season, episode, show, show_alt, source):
+    def sources_tv(self, name, title, year, imdb, tvdb, date, season, episode, show, show_alt, source):
         try:
             dbcon = database.connect(addonCache)
             dbcur = dbcon.cursor()
@@ -5206,7 +5389,7 @@ class resolver:
         'bitshare',
         'uploadable',
         'movreel',
-        'billionuploads',
+        #'billionuploads',
         'v-vids',
         'vidbull',
         'hugefiles',
@@ -5221,18 +5404,18 @@ class resolver:
         '180upload',
         'allmyvideos',
         'bestreams',
-        'billionuploads',
+        #'billionuploads',
         'cloudyvideos',
         'cloudzilla',
         'daclips',
-        'divxstage',
+        #'divxstage',
         'fastvideo',
         #'filecloud',
         'filehoot',
         'filenuke',
         'gorillavid',
         'grifthost',
-        'hostingbulk',
+        #'hostingbulk',
         #'hugefiles',
         'ipithos',
         'ishared',
@@ -5243,7 +5426,7 @@ class resolver:
         'movpod',
         'movreel',
         'movshare',
-        'movzap',
+        #'movzap',
         'mrfile',
         'nosvideo',
         'novamov',
