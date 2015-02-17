@@ -203,13 +203,22 @@ def captcha(data):
         if len(solvemedia) > 0:
             url = solvemedia[0]
             result = getUrl(url).result
-            challenge = common.parseDOM(result, "input", ret="value", attrs = { "id": "adcopy_challenge" })[0]
+
             response = common.parseDOM(result, "iframe", ret="src")
             response += common.parseDOM(result, "img", ret="src")
             response = [i for i in response if '/papi/media' in i][0]
             response = 'http://api.solvemedia.com' + response
             response = get_response(response)
-            captcha.update({'adcopy_challenge': challenge, 'adcopy_response': response})
+
+            post = {}
+            f = common.parseDOM(result, "form", attrs = { "action": "verify.noscript" })[0]
+            k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
+            for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
+            post.update({'adcopy_response': response})
+
+            getUrl('http://api.solvemedia.com/papi/verify.noscript', post=urllib.urlencode(post)).result
+
+            captcha.update({'adcopy_challenge': post['adcopy_challenge'], 'adcopy_response': 'manual_challenge'})
             return captcha
 
         recaptcha = []
@@ -344,11 +353,33 @@ def bestreams(url):
     try:
         url = url.replace('/embed-', '/')
         url = re.compile('//.+?/([\w]+)').findall(url)[0]
-        url = 'http://bestreams.net/embed-%s.html' % url
+        url = 'http://bestreams.net/%s' % url
 
-        result = getUrl(url, mobile=True, referer=url).result
-        url = re.compile('file *: *"(http.+?)"').findall(result)[-1]
-        return url
+        result = getUrl(url, mobile=True, referer=url, close=False).result
+
+        post = {}
+        f = common.parseDOM(result, "Form", attrs = { "method": "POST" })[-1]
+        k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
+        for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
+        post.update({'imhuman': 'Proceed to video'})
+        post = urllib.urlencode(post)
+
+        import time
+        request = urllib2.Request(url, post)
+        request.add_header('User-Agent', 'Mozilla/5.0 (compatible; MSIE 9.0; Windows Phone OS 7.5; Trident/5.0; IEMobile/9.0)')
+
+        for i in range(0, 3):
+            try:
+                response = urllib2.urlopen(request, timeout=5)
+                result = response.read()
+                if 'Proceed to video' in result: raise Exception()
+                response.close()
+
+                url = common.parseDOM(result, "div", attrs = { "id": "main" })[0]
+                url = common.parseDOM(url, "a", ret="href")[0]
+                return url
+            except:
+                time.sleep(1)
     except:
         return
 
@@ -678,17 +709,10 @@ def hugefiles(url):
         post.update(captcha(result))
         post = urllib.urlencode(post)
 
-        result = getUrl(url, post=post).result
+        result = getUrl(url, post=post, referer=url).result
 
-        post = {}
-        f = common.parseDOM(result, "Form", attrs = { "action": "" })
-        k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
-        for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-        post.update({'method_free': 'Free Download'})
-        post = urllib.urlencode(post)
-
-        u = getUrl(url, output='geturl', post=post).result
-        if not url == u: return u
+        url = re.compile('fileUrl\s*=\s*[\'|\"](.+?)[\'|\"]').findall(result)[0]
+        return url
     except:
         return
 
@@ -1110,7 +1134,7 @@ def uploadrocket(url):
 
         result = getUrl(url, post=post).result
 
-        url = common.parseDOM(result, "a", ret="href", attrs = { "onclick": "window[.]open.+?" })[0]
+        url = common.parseDOM(result, "a", ret="href", attrs = { "onclick": "DL.+?" })[0]
         return url
     except:
         return

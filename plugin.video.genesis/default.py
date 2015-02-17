@@ -264,7 +264,7 @@ class getTrakt:
             trakt_key = base64.urlsafe_b64decode(link().trakt_key)
             headers = {'Content-Type': 'application/json', 'trakt-api-key': trakt_key, 'trakt-api-version': '2'}
             post = json.dumps({'login': trakt_user, 'password': trakt_password})
-            request = urllib2.Request('http://api.trakt.tv/auth/login', data=post, headers=headers)
+            request = urllib2.Request('http://api-v2launch.trakt.tv/auth/login', data=post, headers=headers)
             response = urllib2.urlopen(request, timeout=10)
             result = response.read()
             result = json.loads(result)
@@ -1903,15 +1903,16 @@ class contextMenu:
     def library_update(self, notify):
         start = time.time()
 
-        if notify == 'true':
-            index().infoDialog(language(30315).encode("utf-8"), language(30313).encode("utf-8"), time=10000000)
-
         try:
             shows = []
             season, episode = [], []
             show = [os.path.join(tvLibrary, i) for i in xbmcvfs.listdir(tvLibrary)[0]]
-            for s in show: season += [os.path.join(s, i) for i in xbmcvfs.listdir(s)[0]]
-            for s in season: episode.append([os.path.join(s, i) for i in xbmcvfs.listdir(s)[1] if i.endswith('.strm')][-1])
+            for s in show:
+                try: season += [os.path.join(s, i) for i in xbmcvfs.listdir(s)[0]]
+                except: pass
+            for s in season:
+                try: episode.append([os.path.join(s, i) for i in xbmcvfs.listdir(s)[1] if i.endswith('.strm')][-1])
+                except: pass
 
             for file in episode:
                 try:
@@ -1930,23 +1931,22 @@ class contextMenu:
                     pass
 
             shows = [i for x, i in enumerate(shows) if i not in shows[x + 1:]]
-            if len(shows) == 0: return
+            if len(shows) == 0: raise Exception()
         except:
-            if notify == 'true':
-                index().infoDialog(language(30316).encode("utf-8"), language(30313).encode("utf-8"))
             return
 
         try:
+            date = datetime.datetime.utcnow() - datetime.timedelta(hours = 29)
+            date = int(date.strftime("%Y%m%d"))
+
             lib = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"properties" : ["title", "imdbnumber"]}, "id": 1}')
             lib = unicode(lib, 'utf-8', errors='ignore')
             lib = json.loads(lib)['result']['tvshows']
-
-            date = datetime.datetime.utcnow() - datetime.timedelta(hours = 29)
-            date = int(date.strftime("%Y%m%d"))
         except:
-            if notify == 'true':
-                index().infoDialog(language(30316).encode("utf-8"), language(30313).encode("utf-8"))
             return
+
+        if notify == 'true':
+            index().infoDialog(language(30315).encode("utf-8"), language(30313).encode("utf-8"), time=10000000)
 
         for sh in shows:
             if xbmc.abortRequested == True: return sys.exit()
@@ -2298,29 +2298,29 @@ class link:
         self.tvdb_image = 'http://thetvdb.com/banners/'
         self.tvdb_image2 = 'http://thetvdb.com/banners/_cache/'
 
-        self.trakt_base = 'http://api.trakt.tv'
+        self.trakt_base = 'http://api-v2launch.trakt.tv'
         self.trakt_key = 'ZWI0MWU5NTI0M2Q4Yzk1MTUyZWQ3MmExZmMwMzk0YzkzY2I3ODVjYjMzYWVkNjA5ZmRkZTFhMDc0NTQ1ODRiNA=='
         self.trakt_user, self.trakt_password = getSetting("trakt_user"), getSetting("trakt_password")
-        self.trakt_trending = 'http://api.trakt.tv/movies/trending'
-        self.trakt_watchlist = 'http://api.trakt.tv/users/%s/watchlist/movies'
-        self.trakt_collection = 'http://api.trakt.tv/users/%s/collection/movies'
-        self.trakt_tv_summary = 'http://api.trakt.tv/shows/%s'
-        self.trakt_tv_trending = 'http://api.trakt.tv/shows/trending'
-        self.trakt_tv_watchlist = 'http://api.trakt.tv/users/%s/watchlist/shows'
-        self.trakt_tv_collection = 'http://api.trakt.tv/users/%s/collection/shows'
-        self.trakt_tv_calendar = 'http://api.trakt.tv/calendars/shows/%s/%s'
-        self.trakt_lists = 'http://api.trakt.tv/users/%s/lists'
-        self.trakt_list = 'http://api.trakt.tv/users/%s/lists/%s/items'
-        self.trakt_history = 'http://api.trakt.tv/sync/history'
-        self.trakt_history_remove = 'http://api.trakt.tv/sync/history/remove'
-        self.trakt_collection_add = 'http://api.trakt.tv/sync/collection'
-        self.trakt_collection_remove = 'http://api.trakt.tv/sync/collection/remove'
-        self.trakt_watchlist_add = 'http://api.trakt.tv/sync/watchlist'
-        self.trakt_watchlist_remove = 'http://api.trakt.tv/sync/watchlist/remove'
-        self.trakt_list_add = 'http://api.trakt.tv/users/%s/lists/%s/items'
-        self.trakt_list_remove = 'http://api.trakt.tv/users/%s/lists/%s/items/remove'
-        self.trakt_watched = 'http://api.trakt.tv/users/%s/watched/movies'
-        self.trakt_tv_watched = 'http://api.trakt.tv/users/%s/watched/shows'
+        self.trakt_trending = 'http://api-v2launch.trakt.tv/movies/trending'
+        self.trakt_watchlist = 'http://api-v2launch.trakt.tv/users/%s/watchlist/movies'
+        self.trakt_collection = 'http://api-v2launch.trakt.tv/users/%s/collection/movies'
+        self.trakt_tv_summary = 'http://api-v2launch.trakt.tv/shows/%s'
+        self.trakt_tv_trending = 'http://api-v2launch.trakt.tv/shows/trending'
+        self.trakt_tv_watchlist = 'http://api-v2launch.trakt.tv/users/%s/watchlist/shows'
+        self.trakt_tv_collection = 'http://api-v2launch.trakt.tv/users/%s/collection/shows'
+        self.trakt_tv_calendar = 'http://api-v2launch.trakt.tv/calendars/shows/%s/%s'
+        self.trakt_lists = 'http://api-v2launch.trakt.tv/users/%s/lists'
+        self.trakt_list = 'http://api-v2launch.trakt.tv/users/%s/lists/%s/items'
+        self.trakt_history = 'http://api-v2launch.trakt.tv/sync/history'
+        self.trakt_history_remove = 'http://api-v2launch.trakt.tv/sync/history/remove'
+        self.trakt_collection_add = 'http://api-v2launch.trakt.tv/sync/collection'
+        self.trakt_collection_remove = 'http://api-v2launch.trakt.tv/sync/collection/remove'
+        self.trakt_watchlist_add = 'http://api-v2launch.trakt.tv/sync/watchlist'
+        self.trakt_watchlist_remove = 'http://api-v2launch.trakt.tv/sync/watchlist/remove'
+        self.trakt_list_add = 'http://api-v2launch.trakt.tv/users/%s/lists/%s/items'
+        self.trakt_list_remove = 'http://api-v2launch.trakt.tv/users/%s/lists/%s/items/remove'
+        self.trakt_watched = 'http://api-v2launch.trakt.tv/users/%s/watched/movies'
+        self.trakt_tv_watched = 'http://api-v2launch.trakt.tv/users/%s/watched/shows'
 
         self.tvrage_base = 'http://services.tvrage.com'
         self.tvrage_search = 'http://services.tvrage.com/feeds/search.php?show=%s'

@@ -1,4 +1,18 @@
 ------------------------
+Genesis v3.6.1 (17-Feb-15)
+------------------------
+
+- Fixed issues with library integration.
+- Fixed issues with MoviesHD source.
+- Fixed issues with Twomovies source.
+- Fixed issues with Myvideolinks source.
+- Fixed issues with Bestreams resolver.
+- Fixed issues with Hugefiles resolver.
+- Fixed issues with Uploadrocket resolver.
+- Code cosmetics.
+
+
+------------------------
 Genesis v3.6.0 (13-Feb-15)
 ------------------------
 

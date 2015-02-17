@@ -1449,7 +1449,7 @@ class movieshd:
     def __init__(self):
         self.base_link = 'http://movieshd.co'
         self.search_link = '/?s=%s'
-        self.player_link = 'http://videomega.tv/cdn.php?ref=%s'
+        self.videomega_link = 'http://videomega.tv/cdn.php?ref=%s'
 
     def get_movie(self, imdb, title, year):
         try:
@@ -1477,22 +1477,22 @@ class movieshd:
         try:
             sources = []
 
-            url = self.base_link + url
-            result = getUrl(url).result
+            result = getUrl(self.base_link + url).result
             result = common.parseDOM(result, "div", attrs = { "class": "video-embed" })[0]
 
-            url = re.compile('data-rocketsrc=[\'|\"](.+?)[\'|\"]').findall(result)
-            url = [i for i in url if 'hashkey' in i]
-            if len(url) > 0:
-                url = 'http:' + url[0] if url[0].startswith('//') else url[0]
-                result = getUrl(url, referer=url).result
-            url = re.compile('ref=[\'|\"](.+?)[\'|\"]').findall(result)[0]
+            enigma = common.parseDOM(result, "span", ret="data-enigmav")
+            if len(enigma) > 0:
+                url = enigma[0].decode("unicode-escape")
+                url = re.compile('file *: *"(.+?)"').findall(url)[-1]
+                url += '|Referer=%s' % urllib.quote_plus(self.base_link)
 
-            url = self.player_link % url
-            url = url.encode('utf-8')
+            mega = re.compile('data-rocketsrc=[\'|\"].+?hashkey=(.+?)[\'|\"]').findall(result)
+            mega += re.compile('ref=[\'|\"](.+?)[\'|\"]').findall(result)
+            if len(mega) > 0:
+                url = self.videomega_link % mega[0]
+                import commonresolvers
+                url = commonresolvers.videomega(url)
 
-            import commonresolvers
-            url = commonresolvers.videomega(url)
             if url == None: raise Exception()
 
             sources.append({'source': 'Videomega', 'quality': 'HD', 'provider': 'MoviesHD', 'url': url})
@@ -2233,18 +2233,23 @@ class twomovies:
     def __init__(self):
         self.base_link = 'http://twomovies.us'
         self.search_link = '/search/?criteria=imdb&search_query=tt%s'
+        self.agent_link = 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C; .NET4.0E; Tablet PC 2.0)'
 
     def get_movie(self, imdb, title, year):
         try:
             query = self.base_link + self.search_link % imdb
 
-            check = getUrl(query, output='geturl', referer=query).result
-            if not self.base_link in check: raise Exception()
+            headers = {'User-Agent': self.agent_link}
+            request = urllib2.Request(self.base_link, headers=headers)
+            response = urllib2.urlopen(request, timeout=5)
+            cookie = str(response.headers.get('Set-Cookie'))
 
-            cookie = getUrl(query, output='cookie', referer=query).result
-            cookie = re.compile('(PHPSESSID=[\w]+)').findall(cookie)[0]
+            headers.update({'Referer': 'http://twomovies.us/', 'Cookie': cookie})
+            request = urllib2.Request(query, headers=headers)
+            response = urllib2.urlopen(request, timeout=5)
+            result = response.read(200 * 1024)
+            response.close()
 
-            result = getUrl(query, cookie=cookie, referer=query).result
             result = common.parseDOM(result, "meta", ret="content", attrs = { "property": "og:url" })[0]
 
             try: url = re.compile('//.+?(/.+)').findall(result)[0]
@@ -2259,13 +2264,17 @@ class twomovies:
         try:
             query = self.base_link + self.search_link % imdb
 
-            check = getUrl(query, output='geturl', referer=query).result
-            if not self.base_link in check: raise Exception()
+            headers = {'User-Agent': self.agent_link}
+            request = urllib2.Request(self.base_link, headers=headers)
+            response = urllib2.urlopen(request, timeout=5)
+            cookie = str(response.headers.get('Set-Cookie'))
 
-            cookie = getUrl(query, output='cookie', referer=query).result
-            cookie = re.compile('(PHPSESSID=[\w]+)').findall(cookie)[0]
+            headers.update({'Referer': 'http://twomovies.us/', 'Cookie': cookie})
+            request = urllib2.Request(query, headers=headers)
+            response = urllib2.urlopen(request, timeout=5)
+            result = response.read(200 * 1024)
+            response.close()
 
-            result = getUrl(query, cookie=cookie, referer=query).result
             result = common.parseDOM(result, "meta", ret="content", attrs = { "property": "og:url" })[0]
 
             try: url = re.compile('//.+?(/.+)').findall(result)[0]
@@ -2289,12 +2298,18 @@ class twomovies:
             sources = []
 
             base = self.base_link + url
-
-            check = getUrl(base, output='geturl', referer=base).result
-            if not self.base_link in check: raise Exception()
-
             base += '?sort=date.desc#links'
-            result = getUrl(base, referer=base).result
+
+            headers = {'User-Agent': self.agent_link}
+            request = urllib2.Request(self.base_link, headers=headers)
+            response = urllib2.urlopen(request, timeout=5)
+            cookie = str(response.headers.get('Set-Cookie'))
+
+            headers.update({'Referer': 'http://twomovies.us/', 'Cookie': cookie})
+            request = urllib2.Request(base, headers=headers)
+            response = urllib2.urlopen(request, timeout=5)
+            result = response.read(200 * 1024)
+            response.close()
 
             links = common.parseDOM(result, "tr", attrs = { "id": "link_row_.+?" })
 
@@ -2327,14 +2342,17 @@ class twomovies:
 
     def resolve(self, url):
         try:
-            check = getUrl(url, output='geturl', referer=url).result
-            if not self.base_link in check: raise Exception()
-
-            cookie = getUrl(url, output='cookie', referer=url).result
-            cookie = re.compile('(PHPSESSID=[\w]+)').findall(cookie)[0]
+            headers = {'User-Agent': self.agent_link}
+            request = urllib2.Request(self.base_link, headers=headers)
+            response = urllib2.urlopen(request, timeout=5)
+            cookie = str(response.headers.get('Set-Cookie'))
             cookie += '; links_tos=1'
 
-            result = getUrl(url, cookie=cookie, referer=url).result
+            headers.update({'Referer': 'http://twomovies.us/', 'Cookie': cookie})
+            request = urllib2.Request(url, headers=headers)
+            response = urllib2.urlopen(request, timeout=5)
+            result = response.read(200 * 1024)
+            response.close()
 
             url = common.parseDOM(result, "iframe", ret="src")
             url += common.parseDOM(result, "IFRAME", ret="SRC")
@@ -2485,6 +2503,7 @@ class myvideolinks:
     def __init__(self):
         self.base_link_1 = 'http://myvideolinks.eu'
         self.base_link_2 = 'http://myvideolinks.xyz'
+        self.static_link = 'https://raw.githubusercontent.com/lambda81/lambda-links/master/myvideolinks.txt'
         self.search_link = '/?s=%s'
 
     def get_movie(self, imdb, title, year):
@@ -2506,8 +2525,16 @@ class myvideolinks:
                 try: result += getUrl(domain).result
                 except: pass
 
+            iframes = common.parseDOM(result, "iframe", ret="src")
+            iframes += common.parseDOM(result, "IFRAME", ret="SRC")
+            for iframe in iframes:
+                try: result += getUrl(iframe).result
+                except: pass
+
             queries = re.compile('(http.+?)[\'|\"|<|>]').findall(result)
             queries = [i for i in queries if 'myvideolinks' in i]
+
+            if len(queries) == 0: queries.append((getUrl(self.static_link).result).replace('\n', ''))
             queries = [i + self.search_link % urllib.quote_plus(url) for i in queries]
 
             result = ''
@@ -2767,7 +2794,7 @@ class directdl:
             query = urllib.quote_plus(url)
             query = self.base_link + self.search_link % query
 
-            cookie = base64.urlsafe_b64decode('UEhQU0VTU0lEPWp1dXZxdmxib3Uxc3V0ZHRqOGZsMDllNG0x')
+            cookie = base64.urlsafe_b64decode('UEhQU0VTU0lEPTJiNTFjZWZ2cXNkdGYzc3I1NTg5bmFxcmUw')
 
             result = getUrl(query, cookie=cookie).result
             result = json.loads(result)
