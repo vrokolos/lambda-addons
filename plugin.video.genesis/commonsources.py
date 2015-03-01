@@ -559,28 +559,23 @@ class movie25:
             elif quality == 'SCREENER': quality = 'SCR'
             else: quality = 'SD'
 
-            links = common.parseDOM(result, "div", attrs = { "class": "links" })[0]
+            links = common.parseDOM(result, "div", attrs = { "id": "links" })[0]
             links = common.parseDOM(links, "ul")
 
             for i in links:
                 try:
-                    name = common.parseDOM(i, "a")[0]
-                    name = common.replaceHTMLCodes(name)
-                    if name.isdigit(): raise Exception()
+                    url = common.parseDOM(i, "li", ret="onclick", attrs = { "id": "playing_button" })[0]
+                    url = re.compile("'(http.+?)'").findall(url)[-1]
+                    url = common.replaceHTMLCodes(url)
+                    url = url.encode('utf-8')
 
-                    host = common.parseDOM(i, "li", attrs = { "class": "link_name" })[0]
-                    host = host.strip().lower()
+                    host = urlparse.urlparse(url).netloc
+                    host = host.replace('www.', '').replace('embed.', '')
+                    host = host.rsplit('.', 1)[0]
+                    host = host.lower()
                     if not host in hostDict: raise Exception()
                     host = common.replaceHTMLCodes(host)
                     host = host.encode('utf-8')
-
-                    url = common.parseDOM(i, "a", ret="href")[0]
-                    url = self.base_link + url
-                    url = 'http' + urllib.unquote_plus(url).rsplit('http', 1)[-1].split('&', 1)[0]
-                    url = urlparse.urlparse(url).path
-                    url = '%s%s' % (self.base_link, url)
-                    url = common.replaceHTMLCodes(url)
-                    url = url.encode('utf-8')
 
                     sources.append({'source': host, 'quality': quality, 'provider': 'Movie25', 'url': url})
                 except:
@@ -592,22 +587,6 @@ class movie25:
 
     def resolve(self, url):
         try:
-            try: result = getUrl(url, referer=url).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if "location.href" in result: break
-                base_link = proxy + urlparse.urlparse(url).path
-                try: result = getUrl(base_link, referer=base_link).result
-                except: pass
-
-            result = result.decode('iso-8859-1').encode('utf-8')
-
-            url = common.parseDOM(result, "input", ret="onclick")
-            url = [i for i in url if 'location.href' in i and 'http://' in i][0]
-            url = url.split("'", 1)[-1].rsplit("'", 1)[0]
-
             import commonresolvers
             url = commonresolvers.get(url)
             return url
@@ -916,8 +895,8 @@ class iwatchonline:
 
 class movietube:
     def __init__(self):
-        self.base_link = 'http://tunemovie.me'
-        self.tvbase_link = 'http://tvstreaming.cc'
+        self.base_link = 'http://movietube.vc'
+        self.tvbase_link = 'http://kissdrama.net'
         self.index_link = '/index.php'
         self.docs_link = 'https://docs.google.com/file/d/%s/'
 
@@ -1349,7 +1328,7 @@ class g2g:
 
 class muchmovies:
     def __init__(self):
-        self.base_link = 'http://aws.umovies.me'
+        self.base_link = 'http://umovies.me'
         self.search_link = '/search/%s'
 
     def get_movie(self, imdb, title, year):
@@ -1713,6 +1692,115 @@ class ororo:
             if url == None: return
             if not url.startswith('http://'): url = '%s%s' % (self.base_link, url)
             url = '%s|Cookie=%s' % (url, urllib.quote_plus('video=true'))
+
+            return url
+        except:
+            return
+
+class hdtvshows:
+    def __init__(self):
+        self.base_link = 'http://hdtvshows.net'
+        self.search_link = '/find.php?q=%s'
+
+    def get_show(self, imdb, tvdb, show, show_alt, year):
+        try:
+            query = self.base_link + self.search_link % (urllib.quote_plus(show))
+            post = urllib.urlencode({'q': show})
+
+            result = getUrl(query, post=post).result
+            result = common.parseDOM(result, "li", attrs = { "has_hover": ".+?" })
+            result = [common.parseDOM(i, "b")[0] for i in result]
+            result = [(common.parseDOM(i, "a", ret="title")[0].split('Watch ', 1)[-1].rsplit(' Free', 1)[0], common.parseDOM(i, "a", ret="href")[0]) for i in result]
+
+            shows = [cleantitle().tv(show), cleantitle().tv(show_alt)]
+            years = [str(year), str(int(year)+1), str(int(year)-1)]
+            result = [i[1] for i in result if any(x == cleantitle().tv(i[0]) for x in shows)][0]
+
+            u = result
+            if not u.startswith('http'): u = self.base_link + u
+            y = getUrl(u).result
+            y = re.compile('<b>Release Date:<.+?(\d{4})').findall(y)[0]
+            if not y in years: raise Exception()
+
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
+            url = common.replaceHTMLCodes(url)
+            url = url.encode('utf-8')
+            return url
+        except:
+            return
+
+    def get_episode(self, url, imdb, tvdb, title, date, season, episode):
+        try:
+            url = self.base_link + url
+
+            result = getUrl(url).result
+
+            result = common.parseDOM(result, "ul", attrs = { "id": "sge\d*" })
+            result = common.parseDOM(result, "li")
+
+            title = cleantitle().tv(title.lower())
+            ep = 'S%01d, Ep%01d' % (int(season), int(episode))
+            result = [(re.compile('>(S\d*, Ep\d*)<').findall(i)[0], common.parseDOM(i, "a", ret="title")[0], common.parseDOM(i, "a", ret="href")[0]) for i in result]
+
+            r = [i for i in result if title == cleantitle().tv(i[1].lower())]
+            if not len(r) == 1: r = [i for i in result if ep == i[0]]
+            result = r[0][2]
+
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
+            url = common.replaceHTMLCodes(url)
+            url = url.encode('utf-8')
+            return url
+        except:
+            return
+
+    def get_cookie(self, username, password):
+        try:
+            query = self.base_link + '/login.php'
+
+            result = getUrl(query, close=False).result
+            result = re.compile('type="hidden" name="(.+?)" value="(.+?)"').findall(result)
+
+            query = self.base_link + '/reg.php'
+            post = {'UserUsername': username, 'subscriptionsPass': password}
+            for i in result: post.update({i[0]: i[1]})
+            post = urllib.urlencode(post)
+
+            import cookielib
+            cookies = cookielib.LWPCookieJar()
+            handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
+            opener = urllib2.build_opener(*handlers)
+            request = urllib2.Request(query, post)
+            response = opener.open(request)
+            response.close()
+
+            cookie = ['vodcms_code_one=%s' % i.value for i in cookies if i.name == 'vodcms_code_one'][0]
+            cookie = base64.urlsafe_b64encode(cookie)
+            return cookie
+        except:
+            return
+
+    def get_sources(self, url, hosthdDict, hostDict):
+        try:
+            sources = []
+            url = self.base_link + url
+            sources.append({'source': 'HDTVshows', 'quality': 'SD', 'provider': 'HDTVshows', 'url': url})
+            return sources
+        except:
+            return sources
+
+    def resolve(self, url):
+        try:
+            cookie = base64.urlsafe_b64decode('dm9kY21zX2NvZGVfb25lPWIxZDJ4eHpLOGxiemR1VE43R1J1SUNTajVYdlpzR0U1JTJCTXVJMDgxMGdXYnhodw==')
+
+            result = getUrl(url, mobile=True, cookie=cookie).result
+
+            url = common.parseDOM(result, "video", ret="src", attrs = { "id": "ipadvideo" })[0]
+
+            try: key = urlparse.parse_qs(urlparse.urlparse(url).query)['key'][0]
+            except: key = ''
+            url = url.replace(key, urllib.quote(key))
 
             return url
         except:
@@ -2232,14 +2320,14 @@ class wso:
 class twomovies:
     def __init__(self):
         self.base_link = 'http://twomovies.us'
+        self.agent_link = 'TW96aWxsYS81LjAgKFdpbmRvd3MgTlQgNi4xOyBXT1c2NDsgVHJpZGVudC83LjA7IEFTOyBydjoxMS4wKSBsaWtlIEdlY2tv'
         self.search_link = '/search/?criteria=imdb&search_query=tt%s'
-        self.agent_link = 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C; .NET4.0E; Tablet PC 2.0)'
 
     def get_movie(self, imdb, title, year):
         try:
             query = self.base_link + self.search_link % imdb
 
-            headers = {'User-Agent': self.agent_link}
+            headers = {'User-Agent': base64.urlsafe_b64decode(self.agent_link)}
             request = urllib2.Request(self.base_link, headers=headers)
             response = urllib2.urlopen(request, timeout=5)
             cookie = str(response.headers.get('Set-Cookie'))
@@ -2264,7 +2352,7 @@ class twomovies:
         try:
             query = self.base_link + self.search_link % imdb
 
-            headers = {'User-Agent': self.agent_link}
+            headers = {'User-Agent': base64.urlsafe_b64decode(self.agent_link)}
             request = urllib2.Request(self.base_link, headers=headers)
             response = urllib2.urlopen(request, timeout=5)
             cookie = str(response.headers.get('Set-Cookie'))
@@ -2300,7 +2388,7 @@ class twomovies:
             base = self.base_link + url
             base += '?sort=date.desc#links'
 
-            headers = {'User-Agent': self.agent_link}
+            headers = {'User-Agent': base64.urlsafe_b64decode(self.agent_link)}
             request = urllib2.Request(self.base_link, headers=headers)
             response = urllib2.urlopen(request, timeout=5)
             cookie = str(response.headers.get('Set-Cookie'))
@@ -2342,7 +2430,7 @@ class twomovies:
 
     def resolve(self, url):
         try:
-            headers = {'User-Agent': self.agent_link}
+            headers = {'User-Agent': base64.urlsafe_b64decode(self.agent_link)}
             request = urllib2.Request(self.base_link, headers=headers)
             response = urllib2.urlopen(request, timeout=5)
             cookie = str(response.headers.get('Set-Cookie'))
@@ -2499,11 +2587,9 @@ class einthusan:
         except:
             return
 
-class myvideolinks:
+class oneclickwatch:
     def __init__(self):
-        self.base_link_1 = 'http://myvideolinks.eu'
-        self.base_link_2 = 'http://myvideolinks.xyz'
-        self.static_link = 'https://raw.githubusercontent.com/lambda81/lambda-links/master/myvideolinks.txt'
+        self.base_link = 'http://oneclickwatch.ws'
         self.search_link = '/?s=%s'
 
     def get_movie(self, imdb, title, year):
@@ -2515,111 +2601,117 @@ class myvideolinks:
         except:
             return
 
+    def get_show(self, imdb, tvdb, show, show_alt, year):
+        try:
+            url = show
+            url = common.replaceHTMLCodes(url)
+            url = url.encode('utf-8')
+            return url
+        except:
+            return
+
+    def get_episode(self, url, imdb, tvdb, title, date, season, episode):
+        try:
+            if url == None: return
+
+            url = '%s S%02dE%02d' % (url, int(season), int(episode))
+            url = common.replaceHTMLCodes(url)
+            url = url.encode('utf-8')
+            return url
+        except:
+            return
+
     def get_sources(self, url, hosthdDict, hostDict):
         try:
             sources = []
 
-            result = ''
-            domains = [self.base_link_1, self.base_link_2]
-            for domain in domains:
-                try: result += getUrl(domain).result
-                except: pass
+            query = self.base_link + self.search_link % (urllib.quote_plus(url))
 
-            iframes = common.parseDOM(result, "iframe", ret="src")
-            iframes += common.parseDOM(result, "IFRAME", ret="SRC")
-            for iframe in iframes:
-                try: result += getUrl(iframe).result
-                except: pass
+            result = getUrl(query).result
+            result = common.parseDOM(result, "div", attrs = { "id": "post-\d*" })
 
-            queries = re.compile('(http.+?)[\'|\"|<|>]').findall(result)
-            queries = [i for i in queries if 'myvideolinks' in i]
+            title, hdlr = re.compile('(.+?) (\d{4}|S\d*E\d*)$').findall(url)[0]
 
-            if len(queries) == 0: queries.append((getUrl(self.static_link).result).replace('\n', ''))
-            queries = [i + self.search_link % urllib.quote_plus(url) for i in queries]
-
-            result = ''
-            for query in queries:
-                try: result += getUrl(query).result
-                except: pass
-
-            links = common.parseDOM(result, "div", attrs = { "class": "archive" })
-            links = uniqueList(links).list
-
-            title, hdlr = re.compile('(.+?) (\d{4})$').findall(url)[0]
-            title = cleantitle().movie(title)
-            hdlr = [str(hdlr), str(int(hdlr)+1), str(int(hdlr)-1)]
+            if hdlr.isdigit():
+                type = 'movie'
+                title = cleantitle().movie(title)
+                hdlr = [str(hdlr), str(int(hdlr)+1), str(int(hdlr)-1)]
+            else:
+                type = 'episode'
+                title = cleantitle().tv(title)
+                hdlr = [hdlr]
 
             dt = int(datetime.datetime.now().strftime("%Y%m%d"))
+            mt = {'jan':'1', 'feb':'2', 'mar':'3', 'apr':'4', 'may':'5', 'jun':'6', 'jul':'7', 'aug':'8', 'sep':'9', 'oct':'10', 'nov':'11', 'dec':'12'}
 
-            for link in links:
+            links = []
+
+            for i in result:
                 try:
-                    name = common.parseDOM(link, "a", attrs = { "title": ".+?" })[-1]
+                    date = common.parseDOM(i, "a", attrs = { "rel": "bookmark" })[0]
+                    m, d, y = re.compile('(\w+).+?(\d*).+?(\d{4})').findall(date)[0]
+                    date = '%04d%02d%02d' % (int(y), int(mt[m[:3].lower()]), int(d))
+                    if (abs(dt - int(date)) < 100) == False: raise Exception()
+
+                    name = common.parseDOM(i, "h2", attrs = { "class": "title" })[0]
+                    name = common.parseDOM(name, "a")[0]
                     name = common.replaceHTMLCodes(name)
 
-                    url = common.parseDOM(link, "a", ret="href")[0]
+                    t = re.sub('(\.|\(|\[|\s)(\d{4}|S\d*E\d*|3D)(\.|\)|\]|\s)(.+)', '', name)
+                    if type == 'movie': t = cleantitle().movie(t)
+                    else: t = cleantitle().tv(t)
+                    if not t == title: raise Exception()
+
+                    y = re.compile('[\.|\(|\[|\s](\d{4}|S\d*E\d*)[\.|\)|\]|\s]').findall(name)[-1]
+                    if not any(x == y for x in hdlr): raise Exception()
+
+                    fmt = re.sub('(.+)(\.|\(|\[|\s)(\d{4}|S\d*E\d*)(\.|\)|\]|\s)', '', name)
+                    fmt = re.split('\.|\(|\)|\[|\]|\s|\-', fmt)
+                    fmt = [x.lower() for x in fmt]
+
+                    if any(x.endswith(('subs', 'sub', 'dubbed', 'dub')) for x in fmt): raise Exception()
+                    if any(x in ['extras'] for x in fmt): raise Exception()
+
+                    if any(x in ['dvdscr', 'r5', 'r6', 'camrip', 'tsrip', 'hdcam', 'hdts', 'dvdcam', 'dvdts', 'cam', 'ts'] for x in fmt): raise Exception()
+
+                    if '1080p' in fmt: quality = '1080p'
+                    elif '720p' in fmt: quality = 'HD'
+                    else: raise Exception()
+
+                    url = common.parseDOM(i, "h2", attrs = { "class": "title" })[0]
+                    url = common.parseDOM(url, "a", ret="href")[0]
                     url = common.replaceHTMLCodes(url)
                     url = url.encode('utf-8')
 
-                    date = re.compile('(/\d{4}/\d{2}/\d{2}/)').findall(url)[0]
-                    date = re.sub('[^0-9]', '', str(date))
-                    if (abs(dt - int(date)) < 100) == False: raise Exception()
-
-                    cat = common.parseDOM(link, "a", attrs = { "rel": "category tag" })
-                    if not any(i.endswith(('3-D Movies', 'BDRip', 'BluRay')) for i in cat): raise Exception()
-
-                    t = re.sub('(\.|\(|\[|\s)(\d{4})(\.|\)|\]|\s)(.+)', '', name)
-                    t = cleantitle().movie(t)
-                    if not t == title: raise Exception()
-
-                    y = re.compile('[\.|\(|\[|\s](\d{4})[\.|\)|\]|\s]').findall(name)[-1]
-                    if not any(i == y for i in hdlr): raise Exception()
-
-                    fmt = re.sub('(.+)(\.|\(|\[|\s)(\d{4})(\.|\)|\]|\s)', '', name)
-                    fmt = re.split('\.|\(|\)|\[|\]|\s|\-', fmt)
-                    fmt = [i.lower() for i in fmt]
-
-                    if '1080p' in fmt: quality = '1080p'
-                    else: quality = 'HD'
-
-                    info = ''
-                    size = re.compile('Size: (.+? [M|G]B) ').findall(link)
+                    info = []
+                    size = re.compile('<strong>Size<.+?:(.+?B)<').findall(i)
                     if len(size) > 0:
                         size = size[-1]
-                        if size.endswith(' GB'): div = 1
+                        if size.endswith('GB'): div = 1
                         else: div = 1024
                         size = float(re.sub('[^0-9|/.|/,]', '', size))/div
-                        info += '%.2f GB | %s' % (size, quality)
-                    else:
-                        info += '%s' % quality
+                        info.append('%.2f GB' % size)
 
-                    if '3-D Movies' in cat:
-                        info += ' | 3D'
+                    if '3d' in fmt: info.append('3D')
 
-                    try:
-                        result = getUrl(url).result
-                        result = common.parseDOM(result, "ul")
-                        result = str(result)
-                    except:
-                        pass
+                    info = ' | '.join(info)
 
-                    result = common.parseDOM(result, "a", ret="href")
+                    links.append({'url': url, 'quality': quality, 'info': info})
+                except:
+                    pass
 
-                    for i in result:
-                        try:
-                            url = i
-                            url = common.replaceHTMLCodes(url)
-                            url = url.encode('utf-8')
+            links = links[:3]
 
-                            host = re.sub('http(|s)://|www[.]|/.+|[.].+$','', url)
-                            host = host.strip().lower()
-                            if not host in hosthdDict: raise Exception()
+            for i in links:
+                try:
+                    result = getUrl(i['url']).result
 
-                            info2 = '%s | %s' % (host, info)
-                            info2 = info2.upper()
+                    url = common.parseDOM(result, "a", attrs = { "rel": "nofollow" })
+                    url = [x for x in url if x.startswith('http')]
+                    url = [((urlparse.urlparse(x).netloc).replace('www.', '').rsplit('.', 1)[0].lower(), x) for x in url]
+                    url = [x for x in url if x[0] in hosthdDict]
 
-                            sources.append({'source': host, 'quality': quality, 'provider': 'Myvideolinks', 'url': url, 'info': info2})
-                        except:
-                            pass
+                    for u in url: sources.append({'source': u[0], 'quality': i['quality'], 'provider': 'Oneclickwatch', 'url': u[1], 'info': i['info']})
                 except:
                     pass
 
@@ -2711,9 +2803,7 @@ class tvrelease:
                         if size.endswith(' GB'): div = 1
                         else: div = 1024
                         size = float(re.sub('[^0-9|/.|/,]', '', size))/div
-                        info += '%.2f GB | %s' % (size, quality)
-                    else:
-                        info += '%s' % quality
+                        info += '%.2f GB' % size
 
                     result = getUrl(url).result
                     result = common.parseDOM(result, "td", attrs = { "class": "td_cols" })[0]
@@ -2731,10 +2821,7 @@ class tvrelease:
                             host = host.strip().lower()
                             if not host in hosthdDict: raise Exception()
 
-                            info2 = '%s | %s' % (host, info)
-                            info2 = info2.upper()
-
-                            sources.append({'source': host, 'quality': quality, 'provider': 'TVrelease', 'url': url, 'info': info2})
+                            sources.append({'source': host, 'quality': quality, 'provider': 'TVrelease', 'url': url, 'info': info})
                         except:
                             pass
                 except:
@@ -2794,7 +2881,7 @@ class directdl:
             query = urllib.quote_plus(url)
             query = self.base_link + self.search_link % query
 
-            cookie = base64.urlsafe_b64decode('UEhQU0VTU0lEPTJiNTFjZWZ2cXNkdGYzc3I1NTg5bmFxcmUw')
+            cookie = base64.urlsafe_b64decode('UEhQU0VTU0lEPTBqZzRvM25ob2RsOXNzM3QwczRmOGcxa2kx')
 
             result = getUrl(query, cookie=cookie).result
             result = json.loads(result)
@@ -2837,8 +2924,7 @@ class directdl:
                     size = link['size']
                     size = float(size)/1024
 
-                    info = '%.2f GB | %s' % (size, quality)
-                    info = info.upper()
+                    info = '%.2f GB' % size
 
                     result = link['links']
 
@@ -2852,10 +2938,7 @@ class directdl:
                             host = host.strip().lower()
                             if not host in hosthdDict: raise Exception()
 
-                            info2 = '%s | %s' % (host, info)
-                            info2 = info2.upper()
-
-                            sources.append({'source': host, 'quality': quality, 'provider': 'DirectDL', 'url': url, 'info': info2})
+                            sources.append({'source': host, 'quality': quality, 'provider': 'DirectDL', 'url': url, 'info': info})
                         except:
                             pass
                 except:
@@ -3111,14 +3194,13 @@ class furk:
                     info = i['video_info'].replace('\n','')
                     v = re.compile('Video: (.+?),').findall(info)[0]
                     a = re.compile('Audio: (.+?), .+?, (.+?),').findall(info)[0]
-                    q = quality
-                    if '3d' in fmt: q += ' | 3D'
+                    if '3d' in fmt: q = ' | 3D'
+                    else: q = ''
 
-                    info = '%.2f GB | %s | %s | %s | %s' % (size, q, v, a[0], a[1])
+                    info = '%.2f GB%s | %s | %s | %s' % (size, q, v, a[0], a[1])
                     info = re.sub('\(.+?\)', '', info)
                     info = info.replace('stereo', '2.0')
                     info = ' '.join(info.split())
-                    info = info.upper()
 
                     sources.append({'source': 'Furk', 'quality': quality, 'provider': 'Furk', 'url': url, 'info': info})
                 except:

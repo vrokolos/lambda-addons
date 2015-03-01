@@ -47,13 +47,11 @@ def get(url):
     if u == '180upload.com': url = _180upload(url)
     elif u == 'allmyvideos.net': url = allmyvideos(url)
     elif u == 'bestreams.net': url = bestreams(url)
-    elif u == 'billionuploads.com': url = billionuploads(url)
     elif u == 'cloudyvideos.com': url = cloudyvideos(url)
     elif u == 'cloudzilla.to': url = cloudzilla(url)
     elif u == 'daclips.in': url = daclips(url)
     elif u == 'datemule.com': url = datemule(url)
-    elif u == 'divxstage.eu': url = coolcdn(url)
-    elif u == 'divxstage.to': url = coolcdn(url)
+    elif u == 'faststream.in': url = fastvideo(url)
     elif u == 'fastvideo.in': url = fastvideo(url)
     elif u == 'filecloud.io': url = filecloud(url)
     elif u == 'filehoot.com': url = filehoot(url)
@@ -63,7 +61,6 @@ def get(url):
     elif u == 'gorillavid.in': url = gorillavid(url)
     elif u == 'gorillavid.com': url = gorillavid(url)
     elif u == 'grifthost.com': url = grifthost(url)
-    elif u == 'hostingbulk.com': url = hostingbulk(url)
     elif u == 'hugefiles.net': url = hugefiles(url)
     elif u == 'ipithos.to': url = ipithos(url)
     elif u == 'ishared.eu': url = ishared(url)
@@ -77,7 +74,6 @@ def get(url):
     elif u == 'movpod.net': url = movpod(url)
     elif u == 'movreel.com': url = movreel(url)
     elif u == 'movshare.net': url = coolcdn(url)
-    elif u == 'movzap.com': url = hostingbulk(url)
     elif u == 'mrfile.me': url = mrfile(url)
     elif u == 'nosvideo.com': url = nosvideo(url)
     elif u == 'novamov.com': url = coolcdn(url)
@@ -94,9 +90,11 @@ def get(url):
     elif u == 'thevideo.me': url = thevideo(url)
     elif u == 'uploadc.com': url = uploadc(url)
     elif u == 'uploadrocket.net': url = uploadrocket(url)
+    elif u == 'uptobox.com': url = uptobox(url)
     elif u == 'v-vids.com': url = v_vids(url)
     elif u == 'vidbull.com': url = vidbull(url)
     elif u == 'videomega.tv': url = videomega(url)
+    elif u == 'vidplay.net': url = vidplay(url)
     elif u == 'videoweed.es': url = coolcdn(url)
     elif u == 'vidspot.net': url = vidspot(url)
     elif u == 'vidto.me': url = vidto(url)
@@ -365,67 +363,17 @@ def bestreams(url):
         post = urllib.urlencode(post)
 
         import time
-        request = urllib2.Request(url, post)
-        request.add_header('User-Agent', 'Mozilla/5.0 (compatible; MSIE 9.0; Windows Phone OS 7.5; Trident/5.0; IEMobile/9.0)')
 
-        for i in range(0, 3):
+        for i in range(0, 5):
             try:
-                response = urllib2.urlopen(request, timeout=5)
-                result = response.read()
+                result = getUrl(url, mobile=True, referer=url, close=False, post=post).result
                 if 'Proceed to video' in result: raise Exception()
-                response.close()
 
                 url = common.parseDOM(result, "div", attrs = { "id": "main" })[0]
                 url = common.parseDOM(url, "a", ret="href")[0]
                 return url
             except:
                 time.sleep(1)
-    except:
-        return
-
-def billionuploads(url):
-    try:
-        import cookielib
-        cj = cookielib.CookieJar()
-
-        agent = 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0'
-        base = 'http://billionuploads.com'
-
-        class NoRedirection(urllib2.HTTPErrorProcessor):
-            def http_response(self, request, response):
-                return response
-
-        opener = urllib2.build_opener(NoRedirection, urllib2.HTTPCookieProcessor(cj))
-        opener.addheaders = [('User-Agent', agent)]
-        response = opener.open(base)
-        response = opener.open(base)
-        result = response.read()
-
-        z = []
-        decoded = re.compile('(?i)var z="";var b="([^"]+?)"').findall(result)[0]
-        for i in range(len(decoded)/2): z.append(int(decoded[i*2:i*2+2],16))
-        decoded = ''.join(map(unichr, z))
-
-        incapurl = re.compile('(?i)"GET","(/_Incapsula_Resource[^"]+?)"').findall(decoded)[0]
-        incapurl = base + incapurl
-
-        response = opener.open(incapurl)
-        response = opener.open(url)
-        result = response.read()
-
-        post = {}
-        f = common.parseDOM(result, "form", attrs = { "method": "post" })[-1]
-        k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
-        for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-        post.update({'method_free': 'Download or watch'})
-        post = urllib.urlencode(post)
-
-        response = opener.open(url, post)
-        result = response.read()
-        response.close()
-
-        url = common.parseDOM(result, "a", ret="href", attrs = { "class": "download" })[0]
-        return url
     except:
         return
 
@@ -445,7 +393,7 @@ def cloudyvideos(url):
 
         for i in range(0, 4):
             try:
-                response = urllib2.urlopen(request, timeout=5)
+                response = urllib2.urlopen(request, timeout=10)
                 result = response.read()
                 response.close()
                 btn = common.parseDOM(result, "input", ret="value", attrs = { "class": "graybt.+?" })[0]
@@ -682,21 +630,6 @@ def grifthost(url):
     except:
         return
 
-def hostingbulk(url):
-    try:
-        result = getUrl(url, mobile=True).result
-
-        result = re.compile('(eval.*?\)\)\))').findall(result)[-1]
-        result = jsunpack(result)
-
-        url = re.compile("'file' *, *'(.+?)'").findall(result)
-        url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
-        url += common.parseDOM(result, "embed", ret="src")
-        url = 'http://' + url[-1].split('://', 1)[-1]
-        return url
-    except:
-        return
-
 def hugefiles(url):
     try:
         result = getUrl(url).result
@@ -902,7 +835,7 @@ def movreel(url):
 
         for i in range(0, 3):
             try:
-                response = urllib2.urlopen(request, timeout=5)
+                response = urllib2.urlopen(request, timeout=10)
                 result = response.read()
                 response.close()
                 url = re.compile('(<a .+?</a>)').findall(result)
@@ -1139,6 +1072,25 @@ def uploadrocket(url):
     except:
         return
 
+def uptobox(url):
+    try:
+        result = getUrl(url).result
+
+        post = {}
+        f = common.parseDOM(result, "form", attrs = { "name": "F1" })[0]
+        k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
+        for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
+        post = urllib.urlencode(post)
+
+        result = getUrl(url, post=post).result
+
+        url = common.parseDOM(result, "div", attrs = { "align": ".+?" })
+        url = [i for i in url if 'button_upload' in i][0]
+        url = common.parseDOM(url, "a", ret="href")[0]
+        return url
+    except:
+        return
+
 def v_vids(url):
     try:
         result = getUrl(url).result
@@ -1180,6 +1132,18 @@ def videomega(url):
     except:
         return
 
+def vidplay(url):
+    try:
+        url = url.replace('/embed-', '/')
+        url = re.compile('//.+?/([\w]+)').findall(url)[0]
+        u = 'http://vidplay.net/vidembed-%s' % url
+
+        url = getUrl(u, output='geturl').result
+        if u == url: raise Exception()
+        return url
+    except:
+        return
+
 def vidspot(url):
     try:
         url = url.replace('/embed-', '/')
@@ -1211,6 +1175,7 @@ def vidto(url):
         url = re.compile("'file' *, *'(.+?)'").findall(result)
         url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
         url += common.parseDOM(result, "embed", ret="src")
+        url = [i for i in url if not i.endswith('.srt')]
         url = 'http://' + url[-1].split('://', 1)[-1]
         return url
     except:

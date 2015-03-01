@@ -1,4 +1,27 @@
 ------------------------
+Genesis v4.0.0 (2-Mar-15)
+------------------------
+
+- Added Vidplay resolver.
+- Added Uptobox resolver.
+- Added Oneclickwatch source.
+- Added HDTVshows source.
+- Re-work of tools section.
+- Re-work of host filtering and ranking.
+- NOTE: SD Hosts are now sorted by quality (HQ, MQ, LQ).
+- NOTE: Host priorities are reset because of new hosts.
+- Added auto-play in host selection dialog (library only).
+- Added trailer support in information dialogs.
+- Fixed issue with scene "Latest episodes".
+- Re-work of TVrage redirection.
+- Tweaked Genesis service.
+- Tweaked available resolvers.
+- Tweaked available sources.
+- Tweaked context menus.
+- Code cosmetics.
+
+
+------------------------
 Genesis v3.6.1 (17-Feb-15)
 ------------------------
 

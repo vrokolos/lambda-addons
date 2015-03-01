@@ -900,19 +900,15 @@ class root:
 
 class link:
     def __init__(self):
-        self.muchmovies_base = 'http://aws.umovies.me'
-        self.muchmovies_sort = 'http://aws.umovies.me/session/sort'
-        self.muchmovies_title = 'http://aws.umovies.me/movies?sort_by=title'
-        self.muchmovies_release = 'http://aws.umovies.me/movies?sort_by=release'
-        self.muchmovies_added = 'http://aws.umovies.me/movies?sort_by=date_added'
-        self.muchmovies_rating = 'http://aws.umovies.me/movies?sort_by=rating'
-        self.muchmovies_root = 'http://aws.umovies.me/movies'
-        self.muchmovies_search = 'http://aws.umovies.me/search'
-        self.muchmovies_genre = 'http://aws.umovies.me/genres'
-
-    def fix(self, url):
-        url = re.sub('http://www.muchmovies.org|http://www.buzzfilms.co|http://123movies.me|http://umovies.me', self.muchmovies_base, url)
-        return url
+        self.muchmovies_base = 'http://umovies.me'
+        self.muchmovies_sort = 'http://umovies.me/session/sort'
+        self.muchmovies_title = 'http://umovies.me/movies?sort_by=title'
+        self.muchmovies_release = 'http://umovies.me/movies?sort_by=release'
+        self.muchmovies_added = 'http://umovies.me/movies?sort_by=date_added'
+        self.muchmovies_rating = 'http://umovies.me/movies?sort_by=rating'
+        self.muchmovies_root = 'http://umovies.me/movies'
+        self.muchmovies_search = 'http://umovies.me/search'
+        self.muchmovies_genre = 'http://umovies.me/genres'
 
 class pages:
     def __init__(self):
@@ -1175,7 +1171,9 @@ class resolver:
 
     def muchmovies(self, url):
         try:
-            url = link().fix(url)
+            try: url = link().muchmovies_base + re.compile('//.+?(/.+)').findall(url)[0]
+            except: pass
+
             result = getUrl(url, mobile=True).result
 
             url = common.parseDOM(result, "a", ret="href", attrs = { "data-role": "button" })

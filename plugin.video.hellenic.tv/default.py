@@ -198,7 +198,7 @@ class main:
         elif action == 'ant1_sports':                 ant1().sports()
         elif action == 'novasports_shows':            novasports().shows()
         elif action == 'novasports_news':             novasports().news()
-        elif action == 'dailymotion_superleague':     dailymotion().superleague()
+        elif action == 'novasports_superleague':      novasports().superleague()
         elif action == 'dailymotion_superball':       dailymotion().superball()
         elif action == 'youtube_madgreekz':           youtube().madgreekz()
         elif action == 'mtvhitlisthellas':            mtvchart().mtvhitlisthellas()
@@ -818,6 +818,19 @@ class index:
             except:
                 pass
 
+        try:
+            next = episodeList[0]['next']
+            if next == '': raise Exception()
+            name, url, image = language(30362).encode("utf-8"), next, '%s/item_next.jpg' % addonArt
+            u = '%s?action=episodes&name=0&url=%s&image=0&genre=0&plot=0&show=0' % (sys.argv[0], urllib.quote_plus(url))
+            item = xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=image)
+            item.setInfo( type="Video", infoLabels={ "Label": name, "Title": name, "Plot": addonDesc } )
+            item.setProperty("Fanart_Image", addonFanart)
+            item.addContextMenuItems([], replaceItems=False)
+            xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=item,isFolder=True)
+        except:
+            pass
+
         xbmcplugin.setContent(int(sys.argv[1]), 'episodes')
         xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=True)
         for i in range(0, 200):
@@ -1110,7 +1123,7 @@ class root:
         rootList.append({'name': 'ANT1', 'image': 'logos_ant1.jpg', 'action': 'ant1_sports'})
         rootList.append({'name': 'Novasports', 'image': 'logos_novasports.jpg', 'action': 'novasports_shows'})
         rootList.append({'name': 'Novasports News', 'image': 'logos_novasports_news.jpg', 'action': 'novasports_news'})
-        rootList.append({'name': 'Super League', 'image': 'logos_superleague.jpg', 'action': 'dailymotion_superleague'})
+        rootList.append({'name': 'Super League', 'image': 'logos_superleague.jpg', 'action': 'novasports_superleague'})
         rootList.append({'name': 'SuperBALL', 'image': 'logos_superball.jpg', 'action': 'dailymotion_superball'})
         index().rootList(rootList)
 
@@ -2243,12 +2256,17 @@ class ant1:
         id = url.split("?")[-1].split("cid=")[-1].split("&")[0]
         dataUrl = self.info_link % id
         pageUrl = self.watch_link % id
+        proxyUrl = 'http://9proxy.in/b.php?b=20&u=%s' % dataUrl
         swfUrl = 'http://www.antenna.gr/webtv/images/fbplayer.swf'
 
         try:
             result = getUrl(dataUrl).result
-            rtmp = common.parseDOM(result, "FMS")[0]
             playpath = common.parseDOM(result, "appStream")[0]
+            if playpath.endswith('GR.flv'): result = getUrl(proxyUrl, referer=proxyUrl).result
+
+            playpath = common.parseDOM(result, "appStream")[0]
+            rtmp = common.parseDOM(result, "FMS")[0]
+
             url = '%s playpath=%s pageUrl=%s swfUrl=%s swfVfy=true timeout=10' % (rtmp, playpath, pageUrl, swfUrl)
             if playpath.startswith('http://'): url = playpath
             return url
@@ -2976,18 +2994,25 @@ class novasports:
     def __init__(self):
         self.list = []
         self.base_link = 'http://www.novasports.gr'
+        self.handler_link = 'http://www.novasports.gr/handlers/LiveWebTv/LiveWebTvMediaGallery.ashx?%s'
         self.episodes_link = 'http://www.novasports.gr/LiveWebTV.aspx%s'
-        self.series_link = 'http://www.novasports.gr/handlers/LiveWebTv/LiveWebTvMediaGallery.ashx?containerid=-1&mediafiletypeid=0&latest=true&isBroadcast=true&tabid=shows'
-        self.news_link = 'http://www.novasports.gr/handlers/LiveWebTv/LiveWebTvMediaGallery.ashx?containerid=-1&mediafiletypeid=2&latest=true&tabid=categories'
+        self.shows_link = 'http://www.novasports.gr/handlers/LiveWebTv/LiveWebTvMediaGallery.ashx?containerid=-1&mediafiletypeid=0&latest=true&isBroadcast=true&tabid=shows&page=1'
+        self.superleague_link = 'http://www.novasports.gr/handlers/LiveWebTv/LiveWebTvMediaGallery.ashx?mediafiletypeid=2&SearchQry=&IsPromo=False&IsBroadcast=False&latest=False&GetWeeks=False&Sport=1&Competition=1713&tabid=Tab_1713&page=1'
+        self.news_link = 'http://www.novasports.gr/handlers/LiveWebTv/LiveWebTvMediaGallery.ashx?containerid=-1&mediafiletypeid=2&latest=true&tabid=categories&page=1'
 
     def shows(self):
         name = 'Novasports'
-        self.list = self.episodes_list(name, self.series_link, '0', 'Greek', '0', name)
+        self.list = self.episodes_list(name, self.shows_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
 
     def news(self):
         name = 'Novasports News'
         self.list = self.episodes_list(name, self.news_link, '0', 'Greek', '0', name)
+        index().episodeList(self.list)
+
+    def superleague(self):
+        name = 'Super League'
+        self.list = self.episodes_list(name, self.superleague_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
 
     def episodes_list(self, name, url, image, genre, plot, show):
@@ -2997,6 +3022,17 @@ class novasports:
             episodes = common.parseDOM(result, "li")
         except:
             return
+
+        try:
+            next = common.parseDOM(result, "div", attrs = { "id": "paginator" })[0]
+            next = next.split('page_link active_page', 1)[-1]
+            next = common.parseDOM(next, "span", ret="onclick")[0]
+            next = re.compile("'(.+?)'").findall(next)[0]
+            next = self.handler_link % next
+            next = common.replaceHTMLCodes(next)
+            next = next.encode('utf-8')
+        except:
+            next = ''
 
         for episode in episodes:
             try:
@@ -3023,7 +3059,7 @@ class novasports:
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
-                self.list.append({'name': name, 'url': url, 'image': image, 'date': '0', 'genre': genre, 'plot': plot, 'title': title, 'show': show})
+                self.list.append({'name': name, 'url': url, 'image': image, 'date': '0', 'genre': genre, 'plot': plot, 'title': title, 'show': show, 'next': next})
             except:
                 pass
 
@@ -3032,7 +3068,7 @@ class novasports:
     def resolve(self, url):
         try:
             result = getUrl(url).result
-            url = re.compile("type: 'html5'.+?'file': '(.+?)'").findall(result)[0]
+            url = re.compile("type *: *'html5'.+?'file' *: *'(.+?)'").findall(result)[0]
             return url
         except:
             return
@@ -3270,13 +3306,6 @@ class dailymotion:
         self.playlist_link = 'https://api.dailymotion.com/user/%s/videos?fields=description,duration,id,owner.username,taken_time,thumbnail_large_url,title,views_total&sort=recent&family_filter=1'
         self.watch_link = 'http://www.dailymotion.com/video/%s'
         self.info_link = 'http://www.dailymotion.com/embed/video/%s'
-
-    def superleague(self):
-        name = 'Super League'
-        channel = 'greeksuperleague'
-        url = self.playlist_link % channel
-        self.list = self.episodes_list(name, url, '0', 'Greek', '0', name)
-        index().episodeList(self.list)
 
     def superball(self):
         name = 'Super Ball'
@@ -3570,10 +3599,16 @@ class livestream:
             result = getUrl(root).result
             url = common.parseDOM(result, "File")[0]
             url = url.split('[')[-1].split(']')[0]
-            url = 'http://www.youtube.com/watch?v=%s' % url
+            url = 'https://www.youtube.com/watch?v=%s' % url
 
             result = getUrl(url).result
-            url = re.compile('"hlsvp" *: *"(.+?)"').findall(result)[0]
+            regex = '"hlsvp" *: *"(.+?)"'
+            check = re.compile(regex).findall(result)
+            if len(check) == 0:
+                url = 'https://www.4proxy.us/index.php?hl=220&q=%s' % url
+                result = getUrl(url, referer=url).result
+
+            url = re.compile(regex).findall(result)[0]
             url = urllib.unquote(url).replace('\\/', '/')
             return url
         except:
@@ -3584,12 +3619,19 @@ class livestream:
             url = 'http://gr.euronews.com'
             post = urllib.urlencode({'action': 'getHexaglobeUrl'})
 
-            url = getUrl(url, post=post).result
+            u = getUrl(url, post=post).result
 
-            result = getUrl(url).result
-            result = json.loads(result)
+            url = getUrl(u).result
+            url = json.loads(url)
+            try: url = url['primary']['gr']['hls']
+            except: url = None
 
-            url = result['primary']['gr']['hls']
+            if url == None:
+                url = 'http://www.4proxy.de/index.php?hl=220&q=%s' % urllib.quote_plus(u)
+                url = getUrl(url, referer=url).result
+                url = json.loads(url)
+                url = url['primary']['gr']['hls']
+
             return url
         except:
             return
@@ -3604,10 +3646,16 @@ class livestream:
             result = getUrl(url).result
             url = common.parseDOM(result, "iframe", ret="src")[0]
             url = url.split("?v=")[-1].split("/")[-1].split("?")[0].split("&")[0]
-            url = 'http://www.youtube.com/watch?v=%s' % url
+            url = 'https://www.youtube.com/watch?v=%s' % url
 
             result = getUrl(url).result
-            url = re.compile('"hlsvp" *: *"(.+?)"').findall(result)[0]
+            regex = '"hlsvp" *: *"(.+?)"'
+            check = re.compile(regex).findall(result)
+            if len(check) == 0:
+                url = 'https://www.4proxy.us/index.php?hl=220&q=%s' % url
+                result = getUrl(url, referer=url).result
+
+            url = re.compile(regex).findall(result)[0]
             url = urllib.unquote(url).replace('\\/', '/')
             return url
         except:

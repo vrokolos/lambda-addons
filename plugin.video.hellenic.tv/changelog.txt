@@ -1,4 +1,18 @@
 ------------------------
+Hellenic TV v3.3.0 (2-Mar-15)
+------------------------
+
+- Unblock live stream of SKAI (Germany).
+- Unblock live stream of MAD TV (Germany).
+- Unblock live stream of EURONEWS GR (America/Australia).
+- Unblock on-demand videos of ANT1 (worldwide).
+- Unblock Superleague highlights (worldwide).
+- Added pagination in Novasports sections.
+- Tweaked available resolvers.
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.2.2 (3-Feb-15)
 ------------------------
 
