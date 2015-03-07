@@ -31,32 +31,43 @@ except:
 
 
 class getUrl(object):
-    def __init__(self, url, close=True, proxy=None, post=None, mobile=False, referer=None, cookie=None, output='', timeout='5'):
+    def __init__(self, url, close=True, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='5'):
         if not proxy == None:
             proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
             opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
             opener = urllib2.install_opener(opener)
         if output == 'cookie' or not close == True:
             import cookielib
-            cookie_handler = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
-            opener = urllib2.build_opener(cookie_handler, urllib2.HTTPBasicAuthHandler(), urllib2.HTTPHandler())
+            cookies = cookielib.LWPCookieJar()
+            handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
+            opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
-        if not post == None:
-            request = urllib2.Request(url, post)
+        try: headers.update(headers)
+        except: headers = {}
+        if 'User-Agent' in headers:
+            pass
+        elif not mobile == True:
+            headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0'
         else:
-            request = urllib2.Request(url,None)
-        if mobile == True:
-            request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; CPU; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7')
+            headers['User-Agent'] = 'Apple-iPhone/701.341'
+        if 'referer' in headers:
+            pass
+        elif referer == None:
+            headers['referer'] = url
         else:
-            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0')
-        if not referer == None:
-            request.add_header('Referer', referer)
-        if not cookie == None:
-            request.add_header('cookie', cookie)
-        request.add_header('Accept-Language', 'en-US')
+            headers['referer'] = referer
+        if not 'Accept-Language' in headers:
+            headers['Accept-Language'] = 'en-US'
+        if 'cookie' in headers:
+            pass
+        elif not cookie == None:
+            headers['cookie'] = cookie
+        request = urllib2.Request(url, data=post, headers=headers)
         response = urllib2.urlopen(request, timeout=int(timeout))
         if output == 'cookie':
-            result = str(response.headers.get('Set-Cookie'))
+            result = []
+            for c in cookies: result.append('%s=%s' % (c.name, c.value))
+            result = "; ".join(result)
         elif output == 'geturl':
             result = response.geturl()
         else:
@@ -88,13 +99,15 @@ class cleantitle:
 class icefilms:
     def __init__(self):
         self.base_link = 'https://ipv6.icefilms.info'
-        self.proxy_link_1 = 'http://proxy.cyberunlocker.com/browse.php?u=http://www.icefilms.info'
-        self.proxy_link_2 = 'http://9proxy.in/b.php?b=20&u=http://www.icefilms.info'
-        self.proxy_link_3 = 'https://icefilms.unblocked.pw'
         self.moviesearch_link = '/movies/a-z/%s'
         self.tvsearch_link = '/tv/a-z/%s'
         self.video_link = '/membersonly/components/com_iceplayer/video.php?vid=%s'
         self.resp_link = '/membersonly/components/com_iceplayer/video.phpAjaxResp.php'
+
+        self.link_1 = 'https://ipv6.icefilms.info'
+        self.link_2 = 'http://proxy.cyberunlocker.com/browse.php?u=http://www.icefilms.info'
+        self.link_3 = 'http://9proxy.in/b.php?b=20&u=http://www.icefilms.info'
+        self.link_4 = 'https://icefilms.unblocked.pw'
 
     def get_movie(self, imdb, title, year):
         try:
@@ -104,22 +117,18 @@ class icefilms:
             if not query[0].isalpha(): query = '1'
             query = self.moviesearch_link % query[0]
 
-            base_link = self.base_link
-            try: result = getUrl(base_link + query, referer=base_link).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if "submenu" in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + query, referer=base_link).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try: result = getUrl(base_link + query).result
                 except: result = ''
+                if "submenu" in result: break
 
             result = result.decode('iso-8859-1').encode('utf-8')
             result = re.compile('id=%s>.+?href=(.+?)>' % imdb).findall(result)[0]
 
-            url = self.base_link + result
-            url = 'http' + urllib.unquote_plus(url).rsplit('http', 1)[-1].split('&', 1)[0]
+            url = urlparse.urljoin(self.base_link, result)
+            url = 'http' + urllib.unquote_plus(url).rsplit('http')[-1].split('&', 1)[0]
             url = urlparse.urlparse(url).path + '?' + urlparse.urlparse(url).query
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
@@ -135,22 +144,18 @@ class icefilms:
             if not query[0].isalpha(): query = '1'
             query = self.tvsearch_link % query[0]
 
-            base_link = self.base_link
-            try: result = getUrl(base_link + query, referer=base_link).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if "submenu" in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + query, referer=base_link).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try: result = getUrl(base_link + query).result
                 except: result = ''
+                if "submenu" in result: break
 
             result = result.decode('iso-8859-1').encode('utf-8')
             result = re.compile('id=%s>.+?href=(.+?)>' % imdb).findall(result)[0]
 
-            url = self.base_link + result
-            url = 'http' + urllib.unquote_plus(url).rsplit('http', 1)[-1].split('&', 1)[0]
+            url = urlparse.urljoin(self.base_link, result)
+            url = 'http' + urllib.unquote_plus(url).rsplit('http')[-1].split('&', 1)[0]
             url = urlparse.urlparse(url).path
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
@@ -160,16 +165,12 @@ class icefilms:
 
     def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         try:
-            base_link = self.base_link
-            try: result = getUrl(base_link + url, referer=base_link).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if "ip.php" in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + url, referer=base_link).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try: result = getUrl(base_link + url).result
                 except: result = ''
+                if "ip.php" in result: break
 
             result = result.decode('iso-8859-1').encode('utf-8')
             result = urllib.unquote_plus(result)
@@ -189,16 +190,12 @@ class icefilms:
             t = url.split('v=', 1)[-1].rsplit('&', 1)[0] 
             url = self.video_link % t
 
-            base_link = self.base_link
-            try: result = getUrl(base_link + url, referer=base_link).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if "ripdiv" in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + url, referer=base_link).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try: result = getUrl(base_link + url).result
                 except: result = ''
+                if "ripdiv" in result: break
 
             result = result.decode('iso-8859-1').encode('utf-8')
             sec = re.compile('lastChild[.]value="(.+?)"').findall(result)[0]
@@ -252,16 +249,12 @@ class icefilms:
             post = url
             url = self.resp_link
 
-            base_link = self.base_link + url
-            try: result = getUrl(base_link, referer=base_link, post=post).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try: result = getUrl(base_link + url, post=post).result
+                except: result = ''
                 if "com_iceplayer" in result: break
-                base_link = proxy + url
-                try: result = getUrl(base_link, referer=base_link, post=post).result
-                except: pass
 
             url = result.split("?url=", 1)[-1].split("<", 1)[0]
             url = urllib.unquote_plus(url)
@@ -275,39 +268,33 @@ class icefilms:
 class primewire:
     def __init__(self):
         self.base_link = 'http://www.primewire.ag'
-        self.proxy_link_1 = 'http://proxy.cyberunlocker.com/browse.php?u=http://www.primewire.ag'
-        self.proxy_link_2 = 'http://9proxy.in/b.php?b=20&u=http://www.primewire.ag'
-        self.proxy_link_3 = 'https://primewire.unblocked.pw'
         self.key_link = '/index.php?search'
         self.moviesearch_link = '/index.php?search_keywords=%s&key=%s&search_section=1'
         self.tvsearch_link = '/index.php?search_keywords=%s&key=%s&search_section=2'
 
+        self.link_1 = 'http://www.primewire.ag'
+        self.link_2 = 'http://www.unblockaccess.com/browse.php?b=20&u=http://www.primewire.ag'
+        self.link_3 = 'http://9proxy.in/b.php?b=20&u=http://www.primewire.ag'
+        self.link_4 = 'https://primewire.unblocked.pw'
+
     def get_movie(self, imdb, title, year):
         try:
-            base_link = self.base_link
-            try: result = getUrl(base_link + self.key_link, referer=base_link, mobile=True).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if "searchform" in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + self.key_link, referer=base_link, mobile=True).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try: result = getUrl(base_link + self.key_link, mobile=True).result
                 except: result = ''
+                if "searchform" in result: break
 
             key = common.parseDOM(result, "input", ret="value", attrs = { "name": "key" })[0]
             query = self.moviesearch_link % (urllib.quote_plus(re.sub('\'', '', title)), key)
 
-            base_link = self.base_link
-            try: result = getUrl(base_link + query, referer=base_link, mobile=True).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if "searchform" in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + query, referer=base_link, mobile=True).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try: result = getUrl(base_link + query, mobile=True).result
                 except: result = ''
+                if "searchform" in result: break
 
             result = result.decode('iso-8859-1').encode('utf-8')
             result = common.parseDOM(result, "div", attrs = { "class": "index_item.+?" })
@@ -320,6 +307,7 @@ class primewire:
             match = [i[0] for i in result if title == cleantitle().movie(i[1])]
 
             match2 = [i[0] for i in result]
+            match2 = [urllib.unquote_plus(i).replace('&amp;', '&') for i in match2]
             match2 = [i.replace(base_link, '') for i in match2]
             match2 = uniqueList(match2).list
             if match2 == []: return
@@ -329,15 +317,15 @@ class primewire:
                     if len(match) > 0:
                         match3 = match[0]
                         break
-                    result = getUrl(base_link + i, referer=base_link, mobile=True).result
+                    result = getUrl(base_link + i, mobile=True).result
                     if str('tt' + imdb) in result:
                         match3 = i
                         break
                 except:
                     pass
 
-            url = self.base_link + match3
-            url = 'http' + urllib.unquote_plus(url).rsplit('http', 1)[-1].split('&', 1)[0]
+            url = urlparse.urljoin(self.base_link, match3)
+            url = 'http' + urllib.unquote_plus(url).rsplit('http')[-1].split('&', 1)[0]
             url = urlparse.urlparse(url).path
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
@@ -347,30 +335,22 @@ class primewire:
 
     def get_show(self, imdb, tvdb, show, show_alt, year):
         try:
-            base_link = self.base_link
-            try: result = getUrl(base_link + self.key_link, referer=base_link, mobile=True).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if "searchform" in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + self.key_link, referer=base_link, mobile=True).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try: result = getUrl(base_link + self.key_link, mobile=True).result
                 except: result = ''
+                if "searchform" in result: break
 
             key = common.parseDOM(result, "input", ret="value", attrs = { "name": "key" })[0]
             query = self.tvsearch_link % (urllib.quote_plus(re.sub('\'', '', show)), key)
 
-            base_link = self.base_link
-            try: result = getUrl(base_link + query, referer=base_link, mobile=True).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if "searchform" in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + query, referer=base_link, mobile=True).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try: result = getUrl(base_link + query, mobile=True).result
                 except: result = ''
+                if "searchform" in result: break
 
             result = result.decode('iso-8859-1').encode('utf-8')
             result = common.parseDOM(result, "div", attrs = { "class": "index_item.+?" })
@@ -383,6 +363,7 @@ class primewire:
             match = [i[0] for i in result if any(x == cleantitle().tv(i[1]) for x in shows)]
 
             match2 = [i[0] for i in result]
+            match2 = [urllib.unquote_plus(i).replace('&amp;', '&') for i in match2]
             match2 = [i.replace(base_link, '') for i in match2]
             match2 = uniqueList(match2).list
             if match2 == []: return
@@ -392,15 +373,15 @@ class primewire:
                     if len(match) > 0:
                         match3 = match[0]
                         break
-                    result = getUrl(base_link + i, referer=base_link, mobile=True).result
+                    result = getUrl(base_link + i, mobile=True).result
                     if str('tt' + imdb) in result:
                         match3 = i
                         break
                 except:
                     pass
 
-            url = self.base_link + match3
-            url = 'http' + urllib.unquote_plus(url).rsplit('http', 1)[-1].split('&', 1)[0]
+            url = urlparse.urljoin(self.base_link, match3)
+            url = 'http' + urllib.unquote_plus(url).rsplit('http')[-1].split('&', 1)[0]
             url = urlparse.urlparse(url).path
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
@@ -420,16 +401,12 @@ class primewire:
         try:
             sources = []
 
-            base_link = self.base_link
-            try: result = getUrl(base_link + url, referer=base_link, mobile=True).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if "choose_tabs" in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + url, referer=base_link, mobile=True).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try: result = getUrl(base_link + url, mobile=True).result
                 except: result = ''
+                if "choose_tabs" in result: break
 
             result = result.decode('iso-8859-1').encode('utf-8')
             links = common.parseDOM(result, "tbody")
@@ -477,39 +454,37 @@ class primewire:
 
 class movie25:
     def __init__(self):
-        self.base_link = 'http://www.movie25.cm'
-        self.proxy_link_1 = 'http://proxy.cyberunlocker.com/browse.php?u=http://www.movie25.cm'
-        self.proxy_link_2 = 'http://9proxy.in/b.php?b=20&u=http://www.movie25.cm'
-        self.proxy_link_3 = 'https://movie25.unblocked.pw'
+        self.base_link = 'http://www.movie25.ag'
         self.search_link = '/search.php?key=%s'
+
+        self.link_1 = 'http://www.movie25.ag'
+        self.link_2 = 'http://proxy.cyberunlocker.com/browse.php?u=http://www.movie25.ag'
+        self.link_3 = 'http://www.unblockaccess.com/browse.php?b=20&u=http://www.movie25.ag'
+        self.link_4 = 'http://9proxy.in/b.php?b=20&u=http://www.movie25.ag'
 
     def get_movie(self, imdb, title, year):
         try:
             query = self.search_link % urllib.quote_plus(title)
 
-            base_link = self.base_link
-            try: result = getUrl(base_link + query, referer=base_link).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if "movie_table" in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + query, referer=base_link).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try: result = getUrl(base_link + query).result
                 except: result = ''
+                if "movie_table" in result: break
 
             result = result.decode('iso-8859-1').encode('utf-8')
-            result = common.parseDOM(result, "div", attrs = { "class": "movie_table" })[0]
-            result = common.parseDOM(result, "li")
+            result = common.parseDOM(result, "div", attrs = { "class": "movie_table" })
 
             title = cleantitle().movie(title)
             years = ['(%s)' % str(year), '(%s)' % str(int(year)+1), '(%s)' % str(int(year)-1)]
-            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "a")[1]) for i in result]
+            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "a", ret="title")[1]) for i in result]
             result = [i for i in result if any(x in i[1] for x in years)]
 
             match = [i[0] for i in result if title == cleantitle().movie(i[1])]
 
             match2 = [i[0] for i in result]
+            match2 = [urllib.unquote_plus(i).replace('&amp;', '&') for i in match2]
             match2 = [i.replace(base_link, '') for i in match2]
             match2 = uniqueList(match2).list
             if match2 == []: return
@@ -519,15 +494,15 @@ class movie25:
                     if len(match) > 0:
                         match3 = match[0]
                         break
-                    result = getUrl(base_link + i, referer=base_link).result
+                    result = getUrl(base_link + i).result
                     if str('tt' + imdb) in result:
                         match3 = i
                         break
                 except:
                     pass
 
-            url = self.base_link + match3
-            url = 'http' + urllib.unquote_plus(url).rsplit('http', 1)[-1].split('&', 1)[0]
+            url = urlparse.urljoin(self.base_link, match3)
+            url = 'http' + urllib.unquote_plus(url).rsplit('http')[-1].split('&', 1)[0]
             url = urlparse.urlparse(url).path
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
@@ -539,16 +514,12 @@ class movie25:
         try:
             sources = []
 
-            base_link = self.base_link
-            try: result = getUrl(base_link + url, referer=base_link).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if '"links"' in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + url, referer=base_link).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try: result = getUrl(base_link + url).result
                 except: result = ''
+                if '"links"' in result: break
 
             result = result.decode('iso-8859-1').encode('utf-8')
             result = result.replace('\n','')
@@ -564,18 +535,19 @@ class movie25:
 
             for i in links:
                 try:
-                    url = common.parseDOM(i, "li", ret="onclick", attrs = { "id": "playing_button" })[0]
-                    url = re.compile("'(http.+?)'").findall(url)[-1]
-                    url = common.replaceHTMLCodes(url)
-                    url = url.encode('utf-8')
-
-                    host = urlparse.urlparse(url).netloc
-                    host = host.replace('www.', '').replace('embed.', '')
-                    host = host.rsplit('.', 1)[0]
-                    host = host.lower()
+                    host = common.parseDOM(i, "li", attrs = { "id": "link_name" })[0]
+                    host = host.strip().lower()
                     if not host in hostDict: raise Exception()
                     host = common.replaceHTMLCodes(host)
                     host = host.encode('utf-8')
+
+                    url = common.parseDOM(i, "a", ret="href")[0]
+                    url = urlparse.urljoin(self.base_link, url)
+                    url = 'http' + urllib.unquote_plus(url).rsplit('http')[-1].split('&amp;', 1)[0]
+                    url = urlparse.urlparse(url).path
+                    url = urlparse.urljoin(self.base_link, url)
+                    url = common.replaceHTMLCodes(url)
+                    url = url.encode('utf-8')
 
                     sources.append({'source': host, 'quality': quality, 'provider': 'Movie25', 'url': url})
                 except:
@@ -587,6 +559,23 @@ class movie25:
 
     def resolve(self, url):
         try:
+            url = urlparse.urlparse(url).path
+
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try: result = getUrl(base_link + url).result
+                except: result = ''
+                if "iframe" in result or "IFRAME" in result: break
+
+            result = result.decode('iso-8859-1').encode('utf-8')
+
+            url = common.parseDOM(result, "iframe", ret="src")
+            url += common.parseDOM(result, "IFRAME", ret="SRC")
+            url = re.compile('(http.+)').findall(url[0])[0]
+
+            url = 'http' + urllib.unquote_plus(url).rsplit('http')[-1].split('&amp;', 1)[0]
+
             import commonresolvers
             url = commonresolvers.get(url)
             return url
@@ -596,26 +585,24 @@ class movie25:
 class watchseries:
     def __init__(self):
         self.base_link = 'http://watchseries.ag'
-        self.proxy_link_1 = 'http://proxy.cyberunlocker.com/browse.php?u=http://watchseries.ag'
-        self.proxy_link_2 = 'http://9proxy.in/b.php?b=20&u=http://watchseries.ag'
-        self.proxy_link_3 = 'https://watchseries.unblocked.pw'
         self.search_link = '/json/search/%s'
         self.episode_link = '/json/episode/%s_s%s_e%s.html'
+
+        self.link_1 = 'http://watchseries.ag'
+        self.link_2 = 'http://proxy.cyberunlocker.com/browse.php?u=http://watchseries.ag'
+        self.link_3 = 'http://9proxy.in/b.php?b=20&u=http://watchseries.ag'
+        self.link_4 = 'https://watchseries.unblocked.pw'
 
     def get_show(self, imdb, tvdb, show, show_alt, year):
         try:
             query = self.search_link % urllib.quote_plus(show)
 
-            base_link = self.base_link
-            try: result = getUrl(base_link + query, referer=base_link, mobile=True).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if "Search" in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + query, referer=base_link, mobile=True).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try: result = getUrl(base_link + query, mobile=True).result
                 except: result = ''
+                if "Search" in result: break
 
             result = re.compile('"\d*":\s({.+?})').findall(result)
             result = [json.loads(i) for i in result]
@@ -629,6 +616,7 @@ class watchseries:
 
             match2 = [i[0] for i in result]
             match2 = [i for i in match2][::-1]
+            match2 = [i.replace(base_link, '') for i in match2]
             match2 = uniqueList(match2).list
             if match2 == []: return
 
@@ -637,7 +625,7 @@ class watchseries:
                     if len(match) > 0:
                         match3 = match[0]
                         break
-                    result = getUrl(base_link + i, referer=base_link, mobile=True).result
+                    result = getUrl(base_link + i, mobile=True).result
                     if str('tt' + imdb) in result:
                         match3 = i
                         break
@@ -663,16 +651,12 @@ class watchseries:
         try:
             sources = []
 
-            base_link = self.base_link
-            try: result = getUrl(base_link + url, referer=base_link, mobile=True).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if "episode" in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + url, referer=base_link, mobile=True).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try: result = getUrl(base_link + url, mobile=True).result
                 except: result = ''
+                if "episode" in result: break
 
             result = re.compile('"links":(\[.+?\])').findall(result)[0]
             result = json.loads(result)
@@ -682,7 +666,7 @@ class watchseries:
                 try:
                     url = i['url']
                     url = urlparse.urlparse(url).path
-                    url = '%s%s' % (self.base_link, url)
+                    url = urlparse.urljoin(self.base_link, url)
                     url = common.replaceHTMLCodes(url)
                     url = url.encode('utf-8')
 
@@ -707,28 +691,26 @@ class watchseries:
                 def http_response(self, request, response):
                     return response
 
-            def http_result(url):
-                opener = urllib2.build_opener(NoRedirection)
-                opener.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0')]
-                opener.addheaders = [('Referer', url)]
-                response = opener.open(url)
-                result = response.read()
-                response.close()
-                return result
-
             url = url.replace('/json/open/', '/open/')
-            try: result = http_result(url)
-            except: result = ''
+            url = urlparse.urlparse(url).path
 
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3, self.link_4]
+            for base_link in links:
+                try:
+                    opener = urllib2.build_opener(NoRedirection)
+                    opener.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0')]
+                    opener.addheaders = [('Referer', base_link + url)]
+                    response = opener.open(base_link + url)
+                    result = response.read()
+                    response.close()
+                except:
+                    result = ''
                 if "myButton" in result: break
-                base_link = proxy + urlparse.urlparse(url).path
-                try: result = http_result(base_link)
-                except: result = ''
 
             url = common.parseDOM(result, "a", ret="href", attrs = { "class": "myButton" })[0]
-            url = 'http' + urllib.unquote_plus(url).rsplit('http', 1)[-1].split('&', 1)[0]
+
+            url = 'http' + urllib.unquote_plus(url).rsplit('http')[-1].split('&amp;', 1)[0]
 
             import commonresolvers
             url = commonresolvers.get(url)
@@ -739,28 +721,25 @@ class watchseries:
 class iwatchonline:
     def __init__(self):
         self.base_link = 'http://www.iwatchonline.to'
-        self.proxy_link_1 = 'http://proxy.cyberunlocker.com/browse.php?u=http://www.iwatchonline.to'
-        self.proxy_link_2 = 'http://9proxy.in/b.php?b=20&u=http://www.iwatchonline.to'
-        self.proxy_link_3 = 'https://iwatchonline.unblocked.pw'
         self.search_link = '/advance-search'
         self.show_link = '/tv-shows/%s'
         self.episode_link = '/episode/%s-s%02de%02d'
+
+        self.link_1 = 'http://www.iwatchonline.to'
+        self.link_2 = 'http://www.unblockaccess.com/browse.php?b=20&u=http://www.iwatchonline.to'
+        self.link_3 = 'https://iwatchonline.unblocked.pw'
 
     def get_movie(self, imdb, title, year):
         try:
             query = self.search_link
             post = urllib.urlencode({'searchquery': title, 'searchin': '1'})
 
-            base_link = self.base_link
-            try: result = getUrl(base_link + query, referer=base_link, post=post).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if "widget search-page" in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + query, referer=base_link, post=post).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3]
+            for base_link in links:
+                try: result = getUrl(base_link + query, post=post).result
                 except: result = ''
+                if "widget search-page" in result: break
 
             result = common.parseDOM(result, "div", attrs = { "class": "widget search-page" })[0]
             result = common.parseDOM(result, "td")
@@ -771,8 +750,9 @@ class iwatchonline:
             result = [i for i in result if title == cleantitle().movie(i[1])]
             result = [i[0] for i in result if any(x in i[1] for x in years)][0]
 
-            url = result
-            url = 'http' + urllib.unquote_plus(url).rsplit('http', 1)[-1].split('&', 1)[0]
+
+            url = urlparse.urljoin(self.base_link, result)
+            url = 'http' + urllib.unquote_plus(url).rsplit('http')[-1].split('&', 1)[0]
             url = urlparse.urlparse(url).path
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
@@ -785,16 +765,12 @@ class iwatchonline:
             query = self.search_link
             post = urllib.urlencode({'searchquery': show, 'searchin': '2'})
 
-            base_link = self.base_link
-            try: result = getUrl(base_link + query, referer=base_link, post=post).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if "widget search-page" in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + query, referer=base_link, post=post).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3]
+            for base_link in links:
+                try: result = getUrl(base_link + query, post=post).result
                 except: result = ''
+                if "widget search-page" in result: break
 
             result = common.parseDOM(result, "div", attrs = { "class": "widget search-page" })[0]
             result = common.parseDOM(result, "td")
@@ -805,8 +781,9 @@ class iwatchonline:
             result = [i for i in result if any(x == cleantitle().tv(i[1]) for x in shows)]
             result = [i[0] for i in result if any(x in i[1] for x in years)][0]
 
-            url = result
-            url = 'http' + urllib.unquote_plus(url).rsplit('http', 1)[-1].split('&', 1)[0]
+
+            url = urlparse.urljoin(self.base_link, result)
+            url = 'http' + urllib.unquote_plus(url).rsplit('http')[-1].split('&', 1)[0]
             url = urlparse.urlparse(url).path
             url = url.rsplit('/', 1)[-1]
             url = self.show_link % url
@@ -828,16 +805,12 @@ class iwatchonline:
         try:
             sources = []
 
-            base_link = self.base_link
-            try: result = getUrl(base_link + url, referer=base_link).result
-            except: result = ''
-
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
-                if '"pt0"' in result: break
-                base_link = proxy
-                try: result = getUrl(base_link + url, referer=base_link).result
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3]
+            for base_link in links:
+                try: result = getUrl(base_link + url).result
                 except: result = ''
+                if '"pt0"' in result: break
 
             links = common.parseDOM(result, "tr", attrs = { "id": "pt.+?" })
 
@@ -858,9 +831,10 @@ class iwatchonline:
                     else: quality = 'SD'
 
                     url = common.parseDOM(i, "a", ret="href")[0]
-                    url = 'http' + urllib.unquote_plus(url).rsplit('http', 1)[-1].split('&', 1)[0]
+                    url = urlparse.urljoin(self.base_link, url)
+                    url = 'http' + urllib.unquote_plus(url).rsplit('http')[-1].split('&amp;', 1)[0]
                     url = urlparse.urlparse(url).path
-                    url = '%s%s' % (self.base_link, url)
+                    url = urlparse.urljoin(self.base_link, url)
                     url = common.replaceHTMLCodes(url)
                     url = url.encode('utf-8')
 
@@ -874,18 +848,18 @@ class iwatchonline:
 
     def resolve(self, url):
         try:
-            try: result = getUrl(url, referer=url).result
-            except: result = ''
+            url = urlparse.urlparse(url).path
 
-            proxies = [self.proxy_link_1, self.proxy_link_2, self.proxy_link_3]
-            for proxy in proxies:
+            result = ''
+            links = [self.link_1, self.link_2, self.link_3]
+            for base_link in links:
+                try: result = getUrl(base_link + url).result
+                except: result = ''
                 if "frame" in result: break
-                base_link = proxy + urlparse.urlparse(url).path
-                try: result = getUrl(base_link, referer=base_link).result
-                except: pass
 
             url = common.parseDOM(result, "iframe", ret="src", attrs = { "class": "frame" })[0]
-            url = 'http' + urllib.unquote_plus(url).rsplit('http', 1)[-1].split('&', 1)[0]
+
+            url = 'http' + urllib.unquote_plus(url).rsplit('http')[-1].split('&amp;', 1)[0]
 
             import commonresolvers
             url = commonresolvers.get(url)
@@ -1093,15 +1067,9 @@ class moviezone:
             'Accept': 'text/html, */*; q=0.01',
             'Content-Length': '200',
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0',
-            'Origin': self.base_link,
-            'Referer': url }
+            'Origin': self.base_link }
 
-            request = urllib2.Request(url, data=post, headers=headers)
-            response = urllib2.urlopen(request, timeout=5)
-            result = response.read()
-            response.close()
-
+            result = getUrl(url, post=post, headers=headers).result
             result = json.loads(result)
             result = result['content']
 
@@ -1286,15 +1254,15 @@ class g2g:
         try:
             sources = []
 
-            referer = self.base_link + url
-            result = getUrl(referer).result
+            url = self.base_link + url
+            result = getUrl(url).result
 
             url = common.parseDOM(result, "iframe", ret="src", attrs = { "allowfullscreen": ".+?" })[0]
-            result = getUrl(url, referer=referer).result
+            result = getUrl(url).result
 
             u = re.compile("'ggplayer'.+?='(http.+?)'").findall(result)[::-1]
-            result = getUrl(u[0], referer=referer).result
-            if len(u) > 1: result += getUrl(u[1], referer=referer).result
+            result = getUrl(u[0]).result
+            if len(u) > 1: result += getUrl(u[1]).result
 
             url = common.parseDOM(result, "iframe", ret="src")
 
@@ -1588,7 +1556,7 @@ class yify:
                 try:
                     url = self.base_link + self.pk_link
                     post = urllib.urlencode({'url': i, 'fv': '16'})
-                    result = getUrl(url, post=post, referer=base).result
+                    result = getUrl(url, post=post).result
                     result = json.loads(result)
 
                     try: sources.append({'source': 'YIFY', 'quality': 'HD', 'provider': 'YIFY', 'url': [i['url'] for i in result if i['width'] == 1280][0]})
@@ -1755,6 +1723,15 @@ class hdtvshows:
         except:
             return
 
+    def get_sources(self, url, hosthdDict, hostDict):
+        try:
+            sources = []
+            url = self.base_link + url
+            sources.append({'source': 'HDTVshows', 'quality': 'SD', 'provider': 'HDTVshows', 'url': url})
+            return sources
+        except:
+            return sources
+
     def get_cookie(self, username, password):
         try:
             query = self.base_link + '/login.php'
@@ -1767,32 +1744,15 @@ class hdtvshows:
             for i in result: post.update({i[0]: i[1]})
             post = urllib.urlencode(post)
 
-            import cookielib
-            cookies = cookielib.LWPCookieJar()
-            handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
-            opener = urllib2.build_opener(*handlers)
-            request = urllib2.Request(query, post)
-            response = opener.open(request)
-            response.close()
-
-            cookie = ['vodcms_code_one=%s' % i.value for i in cookies if i.name == 'vodcms_code_one'][0]
-            cookie = base64.urlsafe_b64encode(cookie)
+            cookie = getUrl(query, post=post, output='cookie').result
             return cookie
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
-        try:
-            sources = []
-            url = self.base_link + url
-            sources.append({'source': 'HDTVshows', 'quality': 'SD', 'provider': 'HDTVshows', 'url': url})
-            return sources
-        except:
-            return sources
-
     def resolve(self, url):
         try:
-            cookie = base64.urlsafe_b64decode('dm9kY21zX2NvZGVfb25lPWIxZDJ4eHpLOGxiemR1VE43R1J1SUNTajVYdlpzR0U1JTJCTXVJMDgxMGdXYnhodw==')
+            key = base64.urlsafe_b64decode('ZmdoZGdnaGdkcnR0eWY=')
+            cookie = self.get_cookie(key, key)
 
             result = getUrl(url, mobile=True, cookie=cookie).result
 
@@ -1870,18 +1830,13 @@ class vkbox:
             sources = []
 
             url = self.base_link + url
+            headers = {'User-Agent': 'android-async-http/1.4.1 (http://loopj.com/android-async-http)'}
 
-            import urlparse
             par = urlparse.parse_qs(urlparse.urlparse(url).query)
             try: num = int(par['h'][0]) + int(par['u'][0]) + int(par['y'][0])
             except: num = int(par['id'][0]) + 537
 
-            request = urllib2.Request(url)
-            request.add_header('User-Agent', 'android-async-http/1.4.1 (http://loopj.com/android-async-http)')
-            response = urllib2.urlopen(request, timeout=5)
-            result = response.read()
-            response.close()
-
+            result = getUrl(url, headers=headers).result
             result = json.loads(result)
             try: result = result['langs']
             except: pass
@@ -2076,6 +2031,117 @@ class moviestorm:
                 result = getUrl(url).result
                 url = common.parseDOM(result, "a", ret="href", attrs = { "class": "real_link" })[0]
 
+            import commonresolvers
+            url = commonresolvers.get(url)
+            return url
+        except:
+            return
+
+class watchfree:
+    def __init__(self):
+        self.base_link = 'http://www.watchfree.to'
+        self.moviesearch_link = '/?keyword=%s&search_section=1'
+        self.tvsearch_link = '/?keyword=%s&search_section=2'
+
+    def get_movie(self, imdb, title, year):
+        try:
+            query = self.base_link + self.moviesearch_link % urllib.quote_plus(title)
+
+            result = getUrl(query).result
+            result = result.decode('iso-8859-1').encode('utf-8')
+            result = common.parseDOM(result, "div", attrs = { "class": "item" })
+
+            title = 'watch' + cleantitle().movie(title)
+            years = ['(%s)' % str(year), '(%s)' % str(int(year)+1), '(%s)' % str(int(year)-1)]
+            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "a", ret="title")[0]) for i in result]
+            result = [i for i in result if '-movie-online-' in i[0]]
+            result = [i for i in result if title == cleantitle().movie(i[1])]
+            result = [i[0] for i in result if any(x in i[1] for x in years)][0]
+            result = result.split('-movie-online-', 1)[0]
+
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
+            url = common.replaceHTMLCodes(url)
+            url = url.encode('utf-8')
+            return url
+        except:
+            return
+
+    def get_show(self, imdb, tvdb, show, show_alt, year):
+        try:
+            query = self.base_link + self.tvsearch_link % urllib.quote_plus(show)
+
+            result = getUrl(query).result
+            result = result.decode('iso-8859-1').encode('utf-8')
+            result = common.parseDOM(result, "div", attrs = { "class": "item" })
+
+            shows = ['watch' + cleantitle().tv(show), 'watch' + cleantitle().tv(show_alt)]
+            years = ['(%s)' % str(year), '(%s)' % str(int(year)+1), '(%s)' % str(int(year)-1)]
+            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "a", ret="title")[0]) for i in result]
+            result = [i for i in result if '-tv-show-online-' in i[0]]
+            result = [i for i in result if any(x == cleantitle().tv(i[1]) for x in shows)]
+            result = [i[0] for i in result if any(x in i[1] for x in years)][0]
+            result = result.split('-tv-show-online-', 1)[0]
+
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
+            url = common.replaceHTMLCodes(url)
+            url = url.encode('utf-8')
+            return url
+        except:
+            return
+
+    def get_episode(self, url, imdb, tvdb, title, date, season, episode):
+        if url == None: return
+        url = url.replace('/watch-','/tv-')
+        url += '/season-%01d-episode-%01d' % (int(season), int(episode))
+        url = common.replaceHTMLCodes(url)
+        url = url.encode('utf-8')
+        return url
+
+    def get_sources(self, url, hosthdDict, hostDict):
+        try:
+            sources = []
+
+            url = self.base_link + url
+
+            result = getUrl(url).result
+            result = result.decode('iso-8859-1').encode('utf-8')
+
+            links = common.parseDOM(result, "table", attrs = { "class": "link_ite.+?" })
+
+            for i in links:
+                try:
+                    url = common.parseDOM(i, "a", ret="href")
+                    if len(url) > 1: raise Exception()
+                    url = url[0].split('gtfo=', 1)[-1].split('&', 1)[0]
+                    url = base64.urlsafe_b64decode(url.encode('utf-8'))
+                    url = common.replaceHTMLCodes(url)
+                    url = url.encode('utf-8')
+
+                    host = urlparse.urlparse(url).netloc
+                    host = host.replace('www.', '').replace('embed.', '')
+                    host = host.rsplit('.', 1)[0]
+                    host = host.lower()
+                    if not host in hostDict: raise Exception()
+                    host = common.replaceHTMLCodes(host)
+                    host = host.encode('utf-8')
+
+                    quality = common.parseDOM(i, "div", attrs = { "class": "quality" })
+                    if any(x in ['[CAM]', '[TS]'] for x in quality): quality = 'CAM'
+                    else:  quality = 'SD'
+                    quality = quality.encode('utf-8')
+
+                    sources.append({'source': host, 'quality': quality, 'provider': 'Watchfree', 'url': url})
+                except:
+                    pass
+
+            return sources
+        except:
+            return sources
+
+    def resolve(self, url):
+        try:
             import commonresolvers
             url = commonresolvers.get(url)
             return url
@@ -2310,141 +2376,6 @@ class wso:
 
             try: url = common.parseDOM(result, "a", ret="href", attrs = { "class": "wsoButton" })[0]
             except: pass
-
-            import commonresolvers
-            url = commonresolvers.get(url)
-            return url
-        except:
-            return
-
-class twomovies:
-    def __init__(self):
-        self.base_link = 'http://twomovies.us'
-        self.agent_link = 'TW96aWxsYS81LjAgKFdpbmRvd3MgTlQgNi4xOyBXT1c2NDsgVHJpZGVudC83LjA7IEFTOyBydjoxMS4wKSBsaWtlIEdlY2tv'
-        self.search_link = '/search/?criteria=imdb&search_query=tt%s'
-
-    def get_movie(self, imdb, title, year):
-        try:
-            query = self.base_link + self.search_link % imdb
-
-            headers = {'User-Agent': base64.urlsafe_b64decode(self.agent_link)}
-            request = urllib2.Request(self.base_link, headers=headers)
-            response = urllib2.urlopen(request, timeout=5)
-            cookie = str(response.headers.get('Set-Cookie'))
-
-            headers.update({'Referer': 'http://twomovies.us/', 'Cookie': cookie})
-            request = urllib2.Request(query, headers=headers)
-            response = urllib2.urlopen(request, timeout=5)
-            result = response.read(200 * 1024)
-            response.close()
-
-            result = common.parseDOM(result, "meta", ret="content", attrs = { "property": "og:url" })[0]
-
-            try: url = re.compile('//.+?(/.+)').findall(result)[0]
-            except: url = result
-            url = common.replaceHTMLCodes(url)
-            url = url.encode('utf-8')
-            return url
-        except:
-            return
-
-    def get_show(self, imdb, tvdb, show, show_alt, year):
-        try:
-            query = self.base_link + self.search_link % imdb
-
-            headers = {'User-Agent': base64.urlsafe_b64decode(self.agent_link)}
-            request = urllib2.Request(self.base_link, headers=headers)
-            response = urllib2.urlopen(request, timeout=5)
-            cookie = str(response.headers.get('Set-Cookie'))
-
-            headers.update({'Referer': 'http://twomovies.us/', 'Cookie': cookie})
-            request = urllib2.Request(query, headers=headers)
-            response = urllib2.urlopen(request, timeout=5)
-            result = response.read(200 * 1024)
-            response.close()
-
-            result = common.parseDOM(result, "meta", ret="content", attrs = { "property": "og:url" })[0]
-
-            try: url = re.compile('//.+?(/.+)').findall(result)[0]
-            except: url = result
-            url = common.replaceHTMLCodes(url)
-            url = url.encode('utf-8')
-            return url
-        except:
-            return
-
-    def get_episode(self, url, imdb, tvdb, title, date, season, episode):
-        if url == None: return
-        url = url.replace('/watch_tv_show/','/watch_episode/')
-        url += '/%01d/%01d/' % (int(season), int(episode))
-        url = common.replaceHTMLCodes(url)
-        url = url.encode('utf-8')
-        return url
-
-    def get_sources(self, url, hosthdDict, hostDict):
-        try:
-            sources = []
-
-            base = self.base_link + url
-            base += '?sort=date.desc#links'
-
-            headers = {'User-Agent': base64.urlsafe_b64decode(self.agent_link)}
-            request = urllib2.Request(self.base_link, headers=headers)
-            response = urllib2.urlopen(request, timeout=5)
-            cookie = str(response.headers.get('Set-Cookie'))
-
-            headers.update({'Referer': 'http://twomovies.us/', 'Cookie': cookie})
-            request = urllib2.Request(base, headers=headers)
-            response = urllib2.urlopen(request, timeout=5)
-            result = response.read(200 * 1024)
-            response.close()
-
-            links = common.parseDOM(result, "tr", attrs = { "id": "link_row_.+?" })
-
-            for i in links:
-                try:
-                    url = common.parseDOM(i, "a", ret="href")[0]
-                    url = common.replaceHTMLCodes(url)
-                    url = url.encode('utf-8')
-
-                    host = common.parseDOM(i, "a", attrs = { "onclick": ".+?" })[0]
-                    host = host.split('www.', 1)[-1].rsplit('.')[0]
-                    host = host.strip().lower()
-                    if not host in hostDict: raise Exception()
-                    host = common.replaceHTMLCodes(host)
-                    host = host.encode('utf-8')
-
-                    q = common.parseDOM(i, "font", attrs = { "class": "date2" })
-                    if not '/watch_movie/' in base: quality = 'SD'
-                    elif len(q) == 0: raise Exception()
-                    elif q[0].lower() in ['(cam)', '(ts)']: quality = 'CAM'
-                    else: quality = 'SD'
-
-                    sources.append({'source': host, 'quality': quality, 'provider': 'Twomovies', 'url': url})
-                except:
-                    pass
-
-            return sources
-        except:
-            return sources
-
-    def resolve(self, url):
-        try:
-            headers = {'User-Agent': base64.urlsafe_b64decode(self.agent_link)}
-            request = urllib2.Request(self.base_link, headers=headers)
-            response = urllib2.urlopen(request, timeout=5)
-            cookie = str(response.headers.get('Set-Cookie'))
-            cookie += '; links_tos=1'
-
-            headers.update({'Referer': 'http://twomovies.us/', 'Cookie': cookie})
-            request = urllib2.Request(url, headers=headers)
-            response = urllib2.urlopen(request, timeout=5)
-            result = response.read(200 * 1024)
-            response.close()
-
-            url = common.parseDOM(result, "iframe", ret="src")
-            url += common.parseDOM(result, "IFRAME", ret="SRC")
-            url = url[0]
 
             import commonresolvers
             url = commonresolvers.get(url)

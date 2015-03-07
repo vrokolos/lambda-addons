@@ -1,4 +1,16 @@
 ------------------------
+Hellenic TV v3.3.1 (7-Mar-15)
+------------------------
+
+- Re-work of live TV section.
+- Updated live TV channels.
+- Fixed issues with EPG Source.
+- Fixed issues with ALPHA resolver.
+- Tweaked available resolvers.
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.3.0 (2-Mar-15)
 ------------------------
 

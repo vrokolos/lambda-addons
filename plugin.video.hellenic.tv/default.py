@@ -55,7 +55,6 @@ episodeImage        = os.path.join(addonArt,'image_episode.jpg')
 musicImage          = os.path.join(addonArt,'image_music.jpg')
 addonArchives       = os.path.join(addonPath,'resources/archives.db')
 addonChannels       = os.path.join(addonPath,'resources/channels.xml')
-addonEPG            = os.path.join(addonPath,'xmltv.xml')
 addonSettings       = os.path.join(dataPath,'settings.db')
 addonCache          = os.path.join(dataPath,'cache.db')
 
@@ -105,7 +104,6 @@ class main:
 
 
         if action == None:                            root().get()
-        elif action == 'container_refresh':           index().container_refresh()
         elif action == 'cache_clear_list':            index().cache_clear_list()
         elif action == 'item_play':                   contextMenu().item_play()
         elif action == 'item_random_play':            contextMenu().item_random_play()
@@ -126,7 +124,7 @@ class main:
         elif action == 'favourite_tv_from_search':    contextMenu().favourite_add('TV Show', url, name, '', '', image, genre, plot)
         elif action == 'favourite_cartoons_add':      contextMenu().favourite_add('Cartoons', url, name, title, year, image, genre, plot, refresh=True)
         elif action == 'favourite_delete':            contextMenu().favourite_delete(name, url)
-        elif action == 'epg_menu':                    contextMenu().epg(channel)
+        elif action == 'livetv_refresh':              contextMenu().livetv_refresh()
         elif action == 'root_livetv':                 channels().get()
         elif action == 'root_radios':                 root().radios()
         elif action == 'root_radios_alt':             root().radios_alt()
@@ -214,32 +212,43 @@ class main:
         elif action == 'play':                        resolver().run(url)
 
 class getUrl(object):
-    def __init__(self, url, close=True, proxy=None, post=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
+    def __init__(self, url, close=True, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
         if not proxy == None:
             proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
             opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
             opener = urllib2.install_opener(opener)
         if output == 'cookie' or not close == True:
             import cookielib
-            cookie_handler = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
-            opener = urllib2.build_opener(cookie_handler, urllib2.HTTPBasicAuthHandler(), urllib2.HTTPHandler())
+            cookies = cookielib.LWPCookieJar()
+            handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
+            opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
-        if not post == None:
-            request = urllib2.Request(url, post)
+        try: headers.update(headers)
+        except: headers = {}
+        if 'User-Agent' in headers:
+            pass
+        elif not mobile == True:
+            headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0'
         else:
-            request = urllib2.Request(url,None)
-        if mobile == True:
-            request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; CPU; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7')
+            headers['User-Agent'] = 'Apple-iPhone/701.341'
+        if 'referer' in headers:
+            pass
+        elif referer == None:
+            headers['referer'] = url
         else:
-            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0')
-        if not referer == None:
-            request.add_header('Referer', referer)
-        if not cookie == None:
-            request.add_header('cookie', cookie)
-        request.add_header('Accept-Language', 'el-GR')
+            headers['referer'] = referer
+        if not 'Accept-Language' in headers:
+            headers['Accept-Language'] = 'el-GR'
+        if 'cookie' in headers:
+            pass
+        elif not cookie == None:
+            headers['cookie'] = cookie
+        request = urllib2.Request(url, data=post, headers=headers)
         response = urllib2.urlopen(request, timeout=int(timeout))
         if output == 'cookie':
-            result = str(response.headers.get('Set-Cookie'))
+            result = []
+            for c in cookies: result.append('%s=%s' % (c.name, c.value))
+            result = "; ".join(result)
         elif output == 'geturl':
             result = response.geturl()
         else:
@@ -274,18 +283,19 @@ class player(xbmc.Player):
         item = xbmcgui.ListItem(path=url)
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 
-    def live(self, name, epg, url):
+    def live(self, name, title, epg, image, url):
         name = re.sub('\s[(]\d{1}[)]$','', name)
 
         date = datetime.datetime.now().strftime("%Y-%m-%d")
 
-        image = '%s/%s.png' % (addonLogos, name)
-        if not xbmcvfs.exists(image): image = '%s/na.png' % addonLogos
+        if image == '0': 
+            image = '%s/%s.png' % (addonLogos, re.sub('\s[(]\d{1}[)]$','', name))
+            if not xbmcvfs.exists(image): image = '%s/na.png' % addonLogos
 
+        if title == '0': title = name
         if not xbmc.getInfoLabel('listItem.plot') == '' : epg = xbmc.getInfoLabel('listItem.plot')
-        title = epg.split('\n')[0].split('-', 1)[-1].rsplit('[', 1)[0].strip()
 
-        meta = {'title': title, 'tvshowtitle': name, 'studio': name, 'premiered': date, 'director': name, 'writer': name, 'plot': epg, 'genre': 'Live TV', 'duration': '1440'}
+        meta = {'title': title, 'tvshowtitle': name, 'studio': name, 'premiered': date, 'director': name, 'writer': name, 'plot': epg, 'genre': 'TV'}
 
         item = xbmcgui.ListItem(path=url, iconImage=image, thumbnailImage=image)
         item.setInfo( type="Video", infoLabels = meta )
@@ -316,9 +326,9 @@ class player(xbmc.Player):
         return
 
 class index:
-    def infoDialog(self, str, header=addonName):
-        try: xbmcgui.Dialog().notification(header, str, addonIcon, 3000, sound=False)
-        except: xbmc.executebuiltin("Notification(%s,%s, 3000, %s)" % (header, str, addonIcon))
+    def infoDialog(self, str, header=addonName, time=3000):
+        try: xbmcgui.Dialog().notification(header, str, addonIcon, time, sound=False)
+        except: xbmc.executebuiltin("Notification(%s,%s, %s, %s)" % (header, str, time, addonIcon))
 
     def okDialog(self, str1, str2, header=addonName):
         xbmcgui.Dialog().ok(header, str1, str2)
@@ -487,27 +497,32 @@ class index:
         total = len(channelList)
         for i in channelList:
             try:
-                name, epg = i['name'], i['epg']
+                name, title, epg, image = i['name'], i['title'], i['epg'], i['image']
 
-                image = '%s/%s.png' % (addonLogos, re.sub('\s[(]\d{1}[)]$','', name))
-                if not xbmcvfs.exists(image): image = '%s/na.png' % addonLogos
+                label = '[B]%s[/B]' % name
+                if not title == '0': 
+                    label += ' : %s' % title
+
+                if image == '0': 
+                    image = '%s/%s.png' % (addonLogos, re.sub('\s[(]\d{1}[)]$','', name))
+                    if not xbmcvfs.exists(image): image = '%s/na.png' % addonLogos
 
                 fanart = addonFanart
 
                 meta = {'title': name, 'tvshowtitle': name, 'studio': name, 'premiered': date, 'director': name, 'writer': name, 'plot': epg, 'genre': 'Live TV', 'duration': '1440'}
+                meta = {'title': name, 'tvshowtitle': name, 'studio': name, 'premiered': date, 'director': name, 'writer': name, 'plot': epg, 'genre': 'TV'}
 
                 sysname, sysurl = urllib.quote_plus(name), urllib.quote_plus(name.replace(' ','_'))
 
                 u = '%s?action=play_live&channel=%s' % (sys.argv[0], sysurl)
 
                 cm = []
-                cm.append((language(30405).encode("utf-8"), 'RunPlugin(%s?action=epg_menu&channel=%s)' % (sys.argv[0], sysname)))
-                cm.append((language(30406).encode("utf-8"), 'RunPlugin(%s?action=container_refresh)' % (sys.argv[0])))
-                cm.append((language(30414).encode("utf-8"), 'RunPlugin(%s?action=view_livetv)' % (sys.argv[0])))
-                if not name in favourites: cm.append((language(30410).encode("utf-8"), 'RunPlugin(%s?action=favourite_livetv_add&channel=%s)' % (sys.argv[0], sysname)))
-                else: cm.append((language(30411).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysname)))
+                cm.append((language(30405).encode("utf-8"), 'RunPlugin(%s?action=livetv_refresh)' % (sys.argv[0])))
+                cm.append((language(30413).encode("utf-8"), 'RunPlugin(%s?action=view_livetv)' % (sys.argv[0])))
+                if not name in favourites: cm.append((language(30409).encode("utf-8"), 'RunPlugin(%s?action=favourite_livetv_add&channel=%s)' % (sys.argv[0], sysname)))
+                else: cm.append((language(30410).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysname)))
 
-                item = xbmcgui.ListItem(name, iconImage=image, thumbnailImage=image)
+                item = xbmcgui.ListItem(label, iconImage=image, thumbnailImage=image)
                 item.setProperty("Fanart_Image", fanart)
                 item.setInfo(type="Video", infoLabels = meta)
                 item.setProperty("Video", "true")
@@ -552,9 +567,9 @@ class index:
                 u = '%s?action=play_radio&url=%s' % (sys.argv[0], sysurl)
 
                 cm = []
-                if type == 'video': cm.append((language(30415).encode("utf-8"), 'RunPlugin(%s?action=view_radios)' % (sys.argv[0])))
-                if not url in favourites: cm.append((language(30412).encode("utf-8"), 'RunPlugin(%s?action=favourite_radio_add&name=%s&url=%s&image=%s)' % (sys.argv[0], sysname, sysurl, sysimage)))
-                else: cm.append((language(30413).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
+                if type == 'video': cm.append((language(30414).encode("utf-8"), 'RunPlugin(%s?action=view_radios)' % (sys.argv[0])))
+                if not url in favourites: cm.append((language(30411).encode("utf-8"), 'RunPlugin(%s?action=favourite_radio_add&name=%s&url=%s&image=%s)' % (sys.argv[0], sysname, sysurl, sysimage)))
+                else: cm.append((language(30412).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
 
                 item = xbmcgui.ListItem(name, iconImage=image, thumbnailImage=image)
                 item.setProperty("Fanart_Image", addonFanart)
@@ -611,15 +626,15 @@ class index:
                 cm.append((language(30403).encode("utf-8"), 'RunPlugin(%s?action=item_queue)' % (sys.argv[0])))
                 cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=playlist_open)' % (sys.argv[0])))
                 if action == 'movies_favourites':
-                    cm.append((language(30409).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
+                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
                 elif action == 'movies_search':
-                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=favourite_movie_from_search&name=%s&url=%s&image=%s&title=%s&year=%s&genre=%s&plot=%s)' % (sys.argv[0], sysname, sysurl, sysimage, systitle, sysyear, sysgenre, sysplot)))
+                    cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=favourite_movie_from_search&name=%s&url=%s&image=%s&title=%s&year=%s&genre=%s&plot=%s)' % (sys.argv[0], sysname, sysurl, sysimage, systitle, sysyear, sysgenre, sysplot)))
                 else:
-                    if not url in favourites: cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=favourite_movie_add&name=%s&url=%s&image=%s&title=%s&year=%s&genre=%s&plot=%s)' % (sys.argv[0], sysname, sysurl, sysimage, systitle, sysyear, sysgenre, sysplot)))
-                    else: cm.append((language(30409).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
+                    if not url in favourites: cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=favourite_movie_add&name=%s&url=%s&image=%s&title=%s&year=%s&genre=%s&plot=%s)' % (sys.argv[0], sysname, sysurl, sysimage, systitle, sysyear, sysgenre, sysplot)))
+                    else: cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
                 if not action == 'movies':
-                    cm.append((language(30416).encode("utf-8"), 'RunPlugin(%s?action=view_movies)' % (sys.argv[0])))
-                cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
+                    cm.append((language(30415).encode("utf-8"), 'RunPlugin(%s?action=view_movies)' % (sys.argv[0])))
+                cm.append((language(30406).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
 
                 item = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=image)
                 item.setProperty("Fanart_Image", fanart)
@@ -680,13 +695,13 @@ class index:
                 cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=playlist_open)' % (sys.argv[0])))
 
                 if action == 'cartoons_favourites':
-                    cm.append((language(30409).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
+                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
                 else:
-                    if not url in favourites: cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=favourite_cartoons_add&name=%s&url=%s&image=%s&title=%s&year=%s&genre=%s&plot=%s)' % (sys.argv[0], sysname, sysurl, sysimage, systitle, sysyear, sysgenre, sysplot)))
-                    else: cm.append((language(30409).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
+                    if not url in favourites: cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=favourite_cartoons_add&name=%s&url=%s&image=%s&title=%s&year=%s&genre=%s&plot=%s)' % (sys.argv[0], sysname, sysurl, sysimage, systitle, sysyear, sysgenre, sysplot)))
+                    else: cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
                 if not action == 'movies':
-                    cm.append((language(30419).encode("utf-8"), 'RunPlugin(%s?action=view_cartoons)' % (sys.argv[0])))
-                cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
+                    cm.append((language(30418).encode("utf-8"), 'RunPlugin(%s?action=view_cartoons)' % (sys.argv[0])))
+                cm.append((language(30406).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
 
                 item = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=image)
                 item.setProperty("Fanart_Image", fanart)
@@ -746,15 +761,15 @@ class index:
                 cm.append((language(30403).encode("utf-8"), 'RunPlugin(%s?action=item_queue)' % (sys.argv[0])))
                 cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=playlist_open)' % (sys.argv[0])))
                 if action == 'shows_favourites':
-                    cm.append((language(30409).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
+                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
                 elif action == 'shows_search':
-                    cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=favourite_tv_from_search&name=%s&url=%s&image=%s&genre=%s&plot=%s)' % (sys.argv[0], sysname, sysurl, sysimage, sysgenre, sysplot)))
+                    cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=favourite_tv_from_search&name=%s&url=%s&image=%s&genre=%s&plot=%s)' % (sys.argv[0], sysname, sysurl, sysimage, sysgenre, sysplot)))
                 elif action == 'shows':
-                    if not url in favourites: cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=favourite_tv_add&name=%s&url=%s&image=%s&genre=%s&plot=%s)' % (sys.argv[0], sysname, sysurl, sysimage, sysgenre, sysplot)))
-                    else: cm.append((language(30409).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
+                    if not url in favourites: cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=favourite_tv_add&name=%s&url=%s&image=%s&genre=%s&plot=%s)' % (sys.argv[0], sysname, sysurl, sysimage, sysgenre, sysplot)))
+                    else: cm.append((language(30408).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
 
-                cm.append((language(30417).encode("utf-8"), 'RunPlugin(%s?action=view_tvshows)' % (sys.argv[0])))
-                cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
+                cm.append((language(30416).encode("utf-8"), 'RunPlugin(%s?action=view_tvshows)' % (sys.argv[0])))
+                cm.append((language(30406).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
 
                 item = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=image)
                 item.setProperty("Fanart_Image", fanart)
@@ -805,8 +820,8 @@ class index:
                 cm.append((language(30401).encode("utf-8"), 'RunPlugin(%s?action=item_play)' % (sys.argv[0])))
                 cm.append((language(30403).encode("utf-8"), 'RunPlugin(%s?action=item_queue)' % (sys.argv[0])))
                 cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=playlist_open)' % (sys.argv[0])))
-                cm.append((language(30418).encode("utf-8"), 'RunPlugin(%s?action=view_episodes)' % (sys.argv[0])))
-                cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
+                cm.append((language(30417).encode("utf-8"), 'RunPlugin(%s?action=view_episodes)' % (sys.argv[0])))
+                cm.append((language(30406).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
 
                 item = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=image)
                 item.setProperty("Fanart_Image", fanart)
@@ -859,8 +874,15 @@ class contextMenu:
     def playlist_open(self):
         xbmc.executebuiltin('ActivateWindow(VideoPlaylist)')
 
-    def settings_open(self, id=addonId):
-        xbmc.executebuiltin('Addon.OpenSettings(%s)' % id)
+    def settings_open(self, id=addonId, cat=None):
+        try:
+            xbmc.executebuiltin('Addon.OpenSettings(%s)' % id)
+            if cat == None: raise Exception()
+            f1, f2 = re.compile('(\d*)\.(\d*)').findall(str(cat))[0]
+            xbmc.executebuiltin('SetFocus(%i)' % (int(f1) + 100))
+            xbmc.executebuiltin('SetFocus(%i)' % (int(f2) + 200))
+        except:
+            return
 
     def view(self, content):
         try:
@@ -922,43 +944,15 @@ class contextMenu:
         except:
             return
 
-    def epg(self, channel):
+    def livetv_refresh(self):
         try:
-            epgList = []
-            channel = re.sub('\s[(]\d{1}[)]$','', channel)
-
-            now = datetime.datetime.now()
-            now = '%04d' % now.year + '%02d' % now.month + '%02d' % now.day + '%02d' % now.hour + '%02d' % now.minute + '%02d' % now.second
-
-            file = xbmcvfs.File(addonEPG)
-            result = file.read()
-            file.close()
-
-            programmes = re.compile('(<programme.+?</programme>)').findall(result)
+            dbcon = database.connect(addonCache)
+            dbcur = dbcon.cursor()
+            dbcur.execute("DELETE FROM rel_list WHERE func = 'channels.channel_list'")
+            dbcon.commit()
+            xbmc.executebuiltin('Container.Refresh')
         except:
             return
-        for programme in programmes:
-            try:
-                match = common.parseDOM(programme, "programme", ret="channel")[0]
-                if not channel == match: raise Exception()
-
-                start = common.parseDOM(programme, "programme", ret="start")[0]
-                start = re.split('\s+', start)[0]
-                stop = common.parseDOM(programme, "programme", ret="stop")[0]
-                stop = re.split('\s+', stop)[0]
-                if not (int(start) <= int(now) <= int(stop) or int(start) >= int(now)): raise Exception()
-
-                start = datetime.datetime(*time.strptime(start, "%Y%m%d%H%M%S")[:6])
-                title = common.parseDOM(programme, "title")[0]
-                title = common.replaceHTMLCodes(title)
-                if channel == title : title = 'ΜΗ ΔΙΑΘΕΣΙΜΟ ΠΡΟΓΡΑΜΜΑ'.decode('iso-8859-7')
-                epg = "%s    %s" % (str(start), title)
-                epgList.append(epg)
-            except:
-                pass
-
-        select = index().selectDialog(epgList, header='%s - %s' % (language(30351).encode("utf-8"), channel))
-        return
 
 
 class root:
@@ -1150,7 +1144,7 @@ class favourites:
             match = dbcur.fetchall()
             match = [(i[0]) for i in match]
 
-            self.list = channels().channel_list()
+            self.list = channels().get(idx=False)
             self.list = [i for i in self.list if i['name'] in match]
             self.list = sorted(self.list, key=itemgetter('name'))
 
@@ -1255,18 +1249,28 @@ class favourites:
 class channels:
     def __init__(self):
         self.list = []
-        self.epg = {}
-        if not (xbmcvfs.exists(addonEPG) and index().getProperty("htv_Service_Running") == ''):
-            index().infoDialog(language(30306).encode("utf-8"))
 
-    def get(self):
-        self.list = self.channel_list()
-        index().channelList(self.list)
+        self.channelMap = {'MEGA':'10', 'ANT1':'7', 'ALPHA':'5', 'STAR':'12', 'SKAI':'11', 'MACEDONIA TV':'8', 'NERIT':'4', 'NERIT PLUS':'352', 'RIK SAT':'83', 'BLUE SKY':'200', 'E TV':'326', 'EXTRA CHANNEL':'191', 'CHANNEL 9':'199', 'KONTRA CHANNEL':'194', 'ART CHANNEL':'248', 'AB CHANNEL':'249', 'TV 100':'229', 'DELTA TV':'236', 'DIKTYO TV':'235', 'STAR CENTRAL GR':'230', 'ALFA TV':'372', 'ATTICA TV':'190', 'BEST TV':'332', 'IONIAN CHANNEL':'360', 'SUPER B':'368', 'COSMOS TV':'370', 'KANALI 6':'377', 'R CHANNEL':'380', 'THRAKI NET':'382', 'ASTRA TV':'400', 'ACTION24':'189', 'BOYLH TV':'1', 'SBC':'228', 'NICKELODEON':'193', 'MAD TV':'9', 'MTV GREECE':'138', '4E':'222', 'TV AIGAIO':'330', 'CORFU TV':'331', 'KRITI TV':'227', 'EPIRUS TV1':'234', 'KOSMOS':'334', 'EURONEWS':'119', 'MEGA CYPRUS':'306', 'ANT1 CYPRUS':'258', 'SIGMA':'305', 'TV PLUS':'289', 'EXTRA TV':'290', 'CAPITAL':'282', 'RIK 1':'274', 'RIK 2':'277'}
+
+        self.entertainmentMap = ['ET3', 'CAPITAL']
+        self.childrenMap = ['NICKELODEON', 'NICKELODEON+', 'SMILE']
+        self.sportMap = ['CY SPORTS', 'ODIE TV']
+        self.musicMap = ['MAD TV', 'MAD TV CYPRUS']
+        self.movieMap = ['GREEK CINEMA']
+        self.newsMap = ['SBC']
+
+        self.dt_link = 'http://www.tvcontrol.gr/app_api/functions.php?method=DateTime_Get'
+        self.packet_1_link = 'http://www.tvcontrol.gr/json/now-next/packet_1.json'
+        self.packet_2_link = 'http://www.tvcontrol.gr/json/now-next/packet_2.json'
+        self.packet_9_link = 'http://www.tvcontrol.gr/json/now-next/packet_9.json'
+
+    def get(self, idx=True):
+        self.list = index().cache(self.channel_list, 0.02)
+        if idx == True: index().channelList(self.list)
+        return self.list
 
     def channel_list(self):
         try:
-            self.epg_list()
-
             file = xbmcvfs.File(addonChannels)
             result = file.read()
             file.close()
@@ -1274,6 +1278,28 @@ class channels:
             channels = common.parseDOM(result, "channel", attrs = { "active": "True" })
         except:
             return
+
+        try:
+            result = getUrl(self.dt_link).result
+            result = json.loads(result)
+            dt = int(result['DateTimeInt'])
+
+            self.programmes = []
+
+            def programmes_thread(url):
+                self.programmes += json.loads(getUrl(url).result)
+
+            threads = []
+            url = [self.packet_1_link, self.packet_2_link, self.packet_9_link]
+            for u in url: threads.append(Thread(programmes_thread, u))
+            [i.start() for i in threads]
+            [i.join() for i in threads]
+
+            programmes = self.programmes
+            programmes = [i for x, i in enumerate(programmes) if i not in programmes[x + 1:]]
+            programmes = [i for i in programmes if int(i['stop_date_local']) > dt]
+        except:
+            pass
 
         for channel in channels:
             try:
@@ -1285,54 +1311,70 @@ class channels:
                 url = common.parseDOM(channel, "url")[0]
                 url = common.replaceHTMLCodes(url)
 
-                n = re.sub('\s[(]\d{1}[)]$','', name)
-                epg = '[B][ΤΩΡΑ] - %s[/B]\nΔεν υπάρχουν πληροφορίες.'.decode('iso-8859-7') % n.upper()
-                try: epg = self.epg[n]
-                except: pass
-                epg = common.replaceHTMLCodes(epg)
+                try:
+                    if name in self.entertainmentMap: title = 'Ψυχαγωγικό πρόγραμμα'.decode('iso-8859-7')
+                    elif name in self.childrenMap: title = 'Παιδικό πρόγραμμα'.decode('iso-8859-7')
+                    elif name in self.sportMap: title = 'Αθλητικό πρόγραμμα'.decode('iso-8859-7')
+                    elif name in self.musicMap: title = 'Μουσικό πρόγραμμα'.decode('iso-8859-7')
+                    elif name in self.newsMap: title = 'Ενημερωτικό πρόγραμμα'.decode('iso-8859-7')
+                    elif name in self.movieMap: title = 'Ελληνική ταινία'.decode('iso-8859-7')
+                    else: title = '0'
 
-                self.list.append({'name': name, 'epg': epg, 'url': url, 'type': type})
+                    epg = '[B]ΤΩΡΑ[/B]\nΔεν υπάρχουν πληροφορίες\n\n[B]ΕΠΟΜΕΝΟ[/B]\nΔεν υπάρχουν πληροφορίες'.decode('iso-8859-7')
+
+                    image = '0'
+
+                    n = re.sub('\s[(]\d{1}[)]$','', name)
+                    p = [i for i in programmes if i['channel_id'] == self.channelMap[n]]
+                    p = sorted(p, key=itemgetter('start_date_local'))[:2]
+
+                    title = p[0]['constructed_titlegr']
+
+                    image = p[0]['imgsrc']
+                    if image == '': image = '0'
+
+                    start, stop = p[0]['start_date_local'], p[0]['stop_date_local']
+                    start, stop = self.dt_processor(start), self.dt_processor(stop)
+                    start = '%s:%s' % (start[8:][:4][:2], start[8:][:4][2:])
+                    stop = '%s:%s' % (stop[8:][:4][:2], stop[8:][:4][2:])
+
+                    epg = '[B]%s[/B]\n%s'.decode('iso-8859-7') % (start, title)
+                    try: epg += '\n\n[B]%s[/B]\n%s'.decode('iso-8859-7') % (stop, p[1]['constructed_titlegr'])
+                    except: epg += '\n\n[B]ΕΠΟΜΕΝΟ[/B]\nΔεν υπάρχουν πληροφορίες'.decode('iso-8859-7') % stop
+                    epg = common.replaceHTMLCodes(epg)
+                except:
+                    pass
+
+                self.list.append({'name': name, 'title': title, 'epg': epg, 'image': image, 'url': url, 'type': type})
             except:
                 pass
 
         return self.list
 
-    def epg_list(self):
-        try:
-            now = datetime.datetime.now()
-            now = '%04d' % now.year + '%02d' % now.month + '%02d' % now.day + '%02d' % now.hour + '%02d' % now.minute + '%02d' % now.second
+    def dt_processor(self, dt):
+        dt1 = datetime.datetime.utcnow() + datetime.timedelta(hours = 2)
+        d = datetime.datetime(dt1.year, 4, 1)
+        dston = d - datetime.timedelta(days=d.weekday() + 1)
+        d = datetime.datetime(dt1.year, 11, 1)
+        dstoff = d - datetime.timedelta(days=d.weekday() + 1)
+        if dston <=  dt1 < dstoff: dt1 = dt1 + datetime.timedelta(hours = 1)
+        dt1 = datetime.datetime(dt1.year, dt1.month, dt1.day, dt1.hour)
 
-            file = open(addonEPG,'r')
-            read = file.read()
-            file.close()
-            programmes = re.compile('(<programme.+?</programme>)').findall(read)
-        except:
-            return
+        dt2 = datetime.datetime.now()
+        dt2 = datetime.datetime(dt2.year, dt2.month, dt2.day, dt2.hour)
 
-        for programme in programmes:
-            try:
-                start = re.compile('start="(.+?)"').findall(programme)[0]
-                start = re.split('\s+', start)[0]
+        dt3 = datetime.datetime.utcnow()
+        dt3 = datetime.datetime(dt3.year, dt3.month, dt3.day, dt3.hour)
+        dt = datetime.datetime(*time.strptime(dt, "%Y%m%d%H%M%S")[:6])
+        if dt2 >= dt1 :
+            dtd = (dt2 - dt1).seconds/60/60
+            dt = dt + datetime.timedelta(hours = int(dtd))
+        else:
+            dtd = (dt1 - dt2).seconds/60/60
+            dt = dt - datetime.timedelta(hours = int(dtd))
 
-                stop = re.compile('stop="(.+?)"').findall(programme)[0]
-                stop = re.split('\s+', stop)[0]
-                if not int(start) <= int(now) <= int(stop): raise Exception()
-
-                channel = common.parseDOM(programme, "programme", ret="channel")[0]
-
-                title = common.parseDOM(programme, "title")[0]
-                title = common.replaceHTMLCodes(title)
-                title = title.encode('utf-8')
-
-                desc = common.parseDOM(programme, "desc")[0]
-                desc = common.replaceHTMLCodes(desc)
-                desc = desc.encode('utf-8')
-
-                epg = "[B][%s] - %s[/B]\n%s" % ('ΤΩΡΑ'.decode('iso-8859-7').encode('utf-8'), title, desc)
-
-                self.epg.update({channel: epg})
-            except:
-                pass
+        dt = dt.strftime("%Y%m%d%H%M%S")
+        return dt
 
 class archives:
     def __init__(self):
@@ -1546,7 +1588,7 @@ class resolver:
             player().run(url)
             return url
         except:
-            index().infoDialog(language(30307).encode("utf-8"))
+            index().infoDialog(language(30306).encode("utf-8"))
             return
 
     def radio(self, url):
@@ -1557,20 +1599,21 @@ class resolver:
             player().radio(name, url, image)
             return url
         except:
-            index().infoDialog(language(30307).encode("utf-8"))
+            index().infoDialog(language(30306).encode("utf-8"))
             return
 
     def live(self, channel):
         try:
-            ch = channel.replace('_',' ')
-            data = channels().channel_list()
-
-            i = [i for i in data if ch == i['name']][0]
-            name, epg, url, type = i['name'], i['epg'], i['url'], i['type']
-
             dialog = xbmcgui.DialogProgress()
             dialog.create(addonName.encode("utf-8"), language(30341).encode("utf-8"))
             dialog.update(0)
+
+            ch = channel.replace('_',' ')
+
+            data = channels().get(idx=False)
+
+            i = [i for i in data if ch == i['name']][0]
+            name, title, epg, image, url, type = i['name'], i['title'], i['epg'], i['image'], i['url'], i['type']
 
             try: url = getattr(livestream(), type)(url)
             except: pass
@@ -1578,10 +1621,10 @@ class resolver:
 
             dialog.close()
 
-            player().live(name, epg, url)
+            player().live(name, title, epg, image, url)
             return url
         except:
-            index().infoDialog(language(30307).encode("utf-8"))
+            index().infoDialog(language(30306).encode("utf-8"))
             return
 
     def sources_resolve(self, url):
@@ -2262,7 +2305,7 @@ class ant1:
         try:
             result = getUrl(dataUrl).result
             playpath = common.parseDOM(result, "appStream")[0]
-            if playpath.endswith('GR.flv'): result = getUrl(proxyUrl, referer=proxyUrl).result
+            if playpath.endswith('GR.flv'): result = getUrl(proxyUrl).result
 
             playpath = common.parseDOM(result, "appStream")[0]
             rtmp = common.parseDOM(result, "FMS")[0]
@@ -2392,9 +2435,21 @@ class alpha:
             except:
                 pass
 
-            url = re.compile('playlist:.+?"(rtmp[:].+?)"').findall(result)[0]
-            url += ' timeout=10'
-            return url
+            try:
+                url = re.compile('playlist:.+?"(rtmp[:].+?)"').findall(result)[0]
+                url += ' timeout=10'
+                return url
+            except:
+                pass
+
+            try:
+                url = common.parseDOM(result, "embed", ret="src")
+                url = [i for i in url if 'youtube' in i][0]
+                import commonresolvers
+                url = commonresolvers.youtube(url)
+                return url
+            except:
+                pass
         except:
             return
 
@@ -3606,7 +3661,7 @@ class livestream:
             check = re.compile(regex).findall(result)
             if len(check) == 0:
                 url = 'https://www.4proxy.us/index.php?hl=220&q=%s' % url
-                result = getUrl(url, referer=url).result
+                result = getUrl(url).result
 
             url = re.compile(regex).findall(result)[0]
             url = urllib.unquote(url).replace('\\/', '/')
@@ -3628,7 +3683,7 @@ class livestream:
 
             if url == None:
                 url = 'http://www.4proxy.de/index.php?hl=220&q=%s' % urllib.quote_plus(u)
-                url = getUrl(url, referer=url).result
+                url = getUrl(url).result
                 url = json.loads(url)
                 url = url['primary']['gr']['hls']
 
@@ -3653,7 +3708,7 @@ class livestream:
             check = re.compile(regex).findall(result)
             if len(check) == 0:
                 url = 'https://www.4proxy.us/index.php?hl=220&q=%s' % url
-                result = getUrl(url, referer=url).result
+                result = getUrl(url).result
 
             url = re.compile(regex).findall(result)[0]
             url = urllib.unquote(url).replace('\\/', '/')
@@ -3676,19 +3731,19 @@ class livestream:
 
     def dailymotion(self, url):
         try:
+            url = re.compile('/video/([\w]+)').findall(url)[0]
+            url = 'http://www.dailymotion.com/sequence/full/%s' % url
+
             result = getUrl(url).result
-            url = re.compile('"flashvars".+?value="(.+?)"').findall(result)[0]
+            url = re.compile('[\'|\"]autoURL[\'|\"] *: *[\'|\"](.+?)[\'|\"]').findall(result)[0]
+
+            import urlparse
             url = urllib.unquote(url).decode('utf-8').replace('\\/', '/')
-            quality = None
-            try: quality = re.compile('"ldURL":"(.+?)"').findall(url)[0]
-            except: pass
-            try: quality = re.compile('"sdURL":"(.+?)"').findall(url)[0]
-            except: pass
-            try: quality = re.compile('"hqURL":"(.+?)"').findall(url)[0]
-            except: pass
-            quality += '&redirect=0'
-            url = getUrl(quality).result
-            url = '%s live=1 timeout=10' % url
+            protocol = urlparse.parse_qs(urlparse.urlparse(url).query)['protocol'][0]
+            url = url.replace('protocol=%s' % protocol, 'protocol=hls')
+            url += '&redirect=0'
+
+            url = getUrl(url).result
             return url
         except:
             return
@@ -3721,8 +3776,13 @@ class livestream:
                 id = re.compile('ustream.tv/embed/(.+?)"').findall(result)[0]
             except:
                 id = url.split("/embed/")[-1]
-            #url = 'http://iphone-streaming.ustream.tv/uhls/%s/streams/live/iphone/playlist.m3u8' % id
-            url = 'http://sjc-uhls-proxy-beta01.ustream.tv/watch/playlist.m3u8?cid=%s' % id
+
+            url = 'http://sjc-uhls-proxy.ustream.tv/watch/playlist.m3u8?cid=%s' % id
+            result = getUrl(url).result
+            if not "EXT-X-STREAM-INF" in result:
+                url = 'http://sjc-uhls-proxy-beta01.ustream.tv/watch/playlist.m3u8?cid=%s' % id
+                result = getUrl(url).result
+
             for i in range(1, 51):
                 result = getUrl(url).result
                 if "EXT-X-STREAM-INF" in result: return url

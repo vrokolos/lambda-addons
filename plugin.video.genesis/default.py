@@ -212,32 +212,43 @@ class main:
         elif action == 'play':                        resolver().run(name, title, year, imdb, tvdb, season, episode, show, show_alt, date, genre, url)
 
 class getUrl(object):
-    def __init__(self, url, close=True, proxy=None, post=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
+    def __init__(self, url, close=True, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
         if not proxy == None:
             proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
             opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
             opener = urllib2.install_opener(opener)
         if output == 'cookie' or not close == True:
             import cookielib
-            cookie_handler = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
-            opener = urllib2.build_opener(cookie_handler, urllib2.HTTPBasicAuthHandler(), urllib2.HTTPHandler())
+            cookies = cookielib.LWPCookieJar()
+            handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
+            opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
-        if not post == None:
-            request = urllib2.Request(url, post)
+        try: headers.update(headers)
+        except: headers = {}
+        if 'User-Agent' in headers:
+            pass
+        elif not mobile == True:
+            headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0'
         else:
-            request = urllib2.Request(url,None)
-        if mobile == True:
-            request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; CPU; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7')
+            headers['User-Agent'] = 'Apple-iPhone/701.341'
+        if 'referer' in headers:
+            pass
+        elif referer == None:
+            headers['referer'] = url
         else:
-            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0')
-        if not referer == None:
-            request.add_header('Referer', referer)
-        if not cookie == None:
-            request.add_header('cookie', cookie)
-        request.add_header('Accept-Language', 'en-US')
+            headers['referer'] = referer
+        if not 'Accept-Language' in headers:
+            headers['Accept-Language'] = 'en-US'
+        if 'cookie' in headers:
+            pass
+        elif not cookie == None:
+            headers['cookie'] = cookie
+        request = urllib2.Request(url, data=post, headers=headers)
         response = urllib2.urlopen(request, timeout=int(timeout))
         if output == 'cookie':
-            result = str(response.headers.get('Set-Cookie'))
+            result = []
+            for c in cookies: result.append('%s=%s' % (c.name, c.value))
+            result = "; ".join(result)
         elif output == 'geturl':
             result = response.geturl()
         else:
@@ -467,11 +478,25 @@ class player(xbmc.Player):
                 pass
 
             try:
-                if not self.folderPath.startswith(sys.argv[0]): raise Exception()
                 if (link().trakt_user == '' or link().trakt_password == ''): raise Exception()
+
+                try: trakt_script_scrobble = xbmcaddon.Addon('script.trakt').getSetting("scrobble_movie")
+                except: trakt_script_scrobble = ''
+                try: trakt_script_http = xbmcaddon.Addon('script.trakt').getSetting("ExcludeHTTP")
+                except: trakt_script_http = ''
+                try: trakt_script_user = xbmcaddon.Addon('script.trakt').getSetting("username")
+                except: trakt_script_user = ''
+
+                if trakt_script_user == link().trakt_user and trakt_script_scrobble == 'true' and trakt_script_http == 'false': raise Exception()
+
                 imdb = self.imdb
                 if not imdb.startswith('tt'): imdb = 'tt' + imdb
                 getTrakt().result(link().trakt_history, post={"movies": [{"ids": {"imdb": imdb}}]})
+            except:
+                pass
+
+            try:
+                if (link().trakt_user == '' or link().trakt_password == ''): raise Exception()
                 getTrakt().sync('movies')
             except:
                 pass
@@ -495,10 +520,24 @@ class player(xbmc.Player):
                 pass
 
             try:
-                if not self.folderPath.startswith(sys.argv[0]): raise Exception()
                 if (link().trakt_user == '' or link().trakt_password == ''): raise Exception()
+
+                try: trakt_script_scrobble = xbmcaddon.Addon('script.trakt').getSetting("scrobble_episode")
+                except: trakt_script_scrobble = ''
+                try: trakt_script_http = xbmcaddon.Addon('script.trakt').getSetting("ExcludeHTTP")
+                except: trakt_script_http = ''
+                try: trakt_script_user = xbmcaddon.Addon('script.trakt').getSetting("username")
+                except: trakt_script_user = ''
+
+                if trakt_script_user == link().trakt_user and trakt_script_scrobble == 'true' and trakt_script_http == 'false': raise Exception()
+
                 season, episode = int('%01d' % int(self.season)), int('%01d' % int(self.episode))
                 getTrakt().result(link().trakt_history, post={"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": self.tvdb}}]})
+            except:
+                pass
+
+            try:
+                if (link().trakt_user == '' or link().trakt_password == ''): raise Exception()
                 getTrakt().sync('shows')
             except:
                 pass
@@ -5150,11 +5189,11 @@ class resolver:
         else: content = 'episode'
 
         if content == 'movie':
-            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('movie25', 'true'), ('iwatchonline', 'true'), ('movietube', 'true'), ('moviezone', 'true'), ('zumvo', 'true'), ('view47', 'true'), ('g2g', 'true'), ('muchmovies', 'true'), ('sweflix', 'true'), ('movieshd', 'true'), ('onlinemovies', 'true'), ('yify', 'true'), ('vkbox', 'true'), ('moviestorm', 'true'), ('merdb', 'true'), ('wso', 'true'), ('twomovies', 'true'), ('einthusan', 'true'), ('oneclickwatch', 'true'), ('noobroom', 'true'), ('furk', 'true')]
-            sourceDict = [('icefilms', getSetting("icefilms")), ('primewire', getSetting("primewire")), ('movie25', getSetting("movie25")), ('iwatchonline', getSetting("iwatchonline")), ('movietube', getSetting("movietube")), ('moviezone', getSetting("moviezone")), ('zumvo', getSetting("zumvo")), ('view47', getSetting("view47")), ('g2g', getSetting("g2g")), ('muchmovies', getSetting("muchmovies")), ('sweflix', getSetting("sweflix")), ('movieshd', getSetting("movieshd")), ('onlinemovies', getSetting("onlinemovies")), ('yify', getSetting("yify")), ('vkbox', getSetting("vkbox")), ('moviestorm', getSetting("moviestorm")), ('merdb', getSetting("merdb")), ('wso', getSetting("wso")), ('twomovies', getSetting("twomovies")), ('einthusan', getSetting("einthusan")), ('oneclickwatch', getSetting("oneclickwatch")), ('noobroom', getSetting("noobroom")), ('furk', getSetting("furk"))]
+            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('movie25', 'true'), ('iwatchonline', 'true'), ('movietube', 'true'), ('moviezone', 'true'), ('zumvo', 'true'), ('view47', 'true'), ('g2g', 'true'), ('muchmovies', 'true'), ('sweflix', 'true'), ('movieshd', 'true'), ('onlinemovies', 'true'), ('yify', 'true'), ('vkbox', 'true'), ('moviestorm', 'true'), ('watchfree', 'true'), ('merdb', 'true'), ('wso', 'true'), ('einthusan', 'true'), ('oneclickwatch', 'true'), ('noobroom', 'true'), ('furk', 'true')]
+            sourceDict = [('icefilms', getSetting("icefilms")), ('primewire', getSetting("primewire")), ('movie25', getSetting("movie25")), ('iwatchonline', getSetting("iwatchonline")), ('movietube', getSetting("movietube")), ('moviezone', getSetting("moviezone")), ('zumvo', getSetting("zumvo")), ('view47', getSetting("view47")), ('g2g', getSetting("g2g")), ('muchmovies', getSetting("muchmovies")), ('sweflix', getSetting("sweflix")), ('movieshd', getSetting("movieshd")), ('onlinemovies', getSetting("onlinemovies")), ('yify', getSetting("yify")), ('vkbox', getSetting("vkbox")), ('moviestorm', getSetting("moviestorm")), ('watchfree', getSetting("watchfree")), ('merdb', getSetting("merdb")), ('wso', getSetting("wso")), ('einthusan', getSetting("einthusan")), ('oneclickwatch', getSetting("oneclickwatch")), ('noobroom', getSetting("noobroom")), ('furk', getSetting("furk"))]
         else:
-            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('watchseries', 'true'), ('iwatchonline', 'true'), ('movietube', 'true'), ('ororo', 'true'), ('hdtvshows', 'true'), ('vkbox', 'true'), ('clickplay', 'true'), ('moviestorm', 'true'), ('merdb', 'true'), ('wso', 'true'), ('twomovies', 'true'), ('animeultima', 'true'), ('oneclickwatch', 'true'), ('tvrelease', 'true'), ('directdl', 'true'), ('noobroom', 'true'), ('furk', 'true')]
-            sourceDict = [('icefilms', getSetting("icefilms_tv")), ('primewire', getSetting("primewire_tv")), ('watchseries', getSetting("watchseries_tv")), ('iwatchonline', getSetting("iwatchonline_tv")), ('movietube', getSetting("movietube_tv")), ('ororo', getSetting("ororo_tv")), ('hdtvshows', getSetting("hdtvshows_tv")), ('vkbox', getSetting("vkbox_tv")), ('clickplay', getSetting("clickplay_tv")), ('moviestorm', getSetting("moviestorm_tv")), ('merdb', getSetting("merdb_tv")), ('wso', getSetting("wso_tv")), ('twomovies', getSetting("twomovies_tv")), ('animeultima', getSetting("animeultima_tv")), ('tvrelease', getSetting("tvrelease_tv")), ('oneclickwatch', getSetting("oneclickwatch_tv")), ('directdl', getSetting("directdl_tv")), ('noobroom', getSetting("noobroom_tv")), ('furk', getSetting("furk_tv"))]
+            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('watchseries', 'true'), ('iwatchonline', 'true'), ('movietube', 'true'), ('ororo', 'true'), ('hdtvshows', 'true'), ('vkbox', 'true'), ('clickplay', 'true'), ('moviestorm', 'true'), ('watchfree', 'true'), ('merdb', 'true'), ('wso', 'true'), ('animeultima', 'true'), ('oneclickwatch', 'true'), ('tvrelease', 'true'), ('directdl', 'true'), ('noobroom', 'true'), ('furk', 'true')]
+            sourceDict = [('icefilms', getSetting("icefilms_tv")), ('primewire', getSetting("primewire_tv")), ('watchseries', getSetting("watchseries_tv")), ('iwatchonline', getSetting("iwatchonline_tv")), ('movietube', getSetting("movietube_tv")), ('ororo', getSetting("ororo_tv")), ('hdtvshows', getSetting("hdtvshows_tv")), ('vkbox', getSetting("vkbox_tv")), ('clickplay', getSetting("clickplay_tv")), ('moviestorm', getSetting("moviestorm_tv")), ('watchfree', getSetting("watchfree_tv")), ('merdb', getSetting("merdb_tv")), ('wso', getSetting("wso_tv")), ('animeultima', getSetting("animeultima_tv")), ('tvrelease', getSetting("tvrelease_tv")), ('oneclickwatch', getSetting("oneclickwatch_tv")), ('directdl', getSetting("directdl_tv")), ('noobroom', getSetting("noobroom_tv")), ('furk', getSetting("furk_tv"))]
 
 
         global global_sources

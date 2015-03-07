@@ -111,32 +111,43 @@ def get(url):
 
 
 class getUrl(object):
-    def __init__(self, url, close=True, proxy=None, post=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
+    def __init__(self, url, close=True, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
         if not proxy == None:
             proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
             opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
             opener = urllib2.install_opener(opener)
         if output == 'cookie' or not close == True:
             import cookielib
-            cookie_handler = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
-            opener = urllib2.build_opener(cookie_handler, urllib2.HTTPBasicAuthHandler(), urllib2.HTTPHandler())
+            cookies = cookielib.LWPCookieJar()
+            handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
+            opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
-        if not post == None:
-            request = urllib2.Request(url, post)
+        try: headers.update(headers)
+        except: headers = {}
+        if 'User-Agent' in headers:
+            pass
+        elif not mobile == True:
+            headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0'
         else:
-            request = urllib2.Request(url,None)
-        if mobile == True:
-            request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; CPU; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7')
+            headers['User-Agent'] = 'Apple-iPhone/701.341'
+        if 'referer' in headers:
+            pass
+        elif referer == None:
+            headers['referer'] = url
         else:
-            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0')
-        if not referer == None:
-            request.add_header('Referer', referer)
-        if not cookie == None:
-            request.add_header('cookie', cookie)
-        request.add_header('Accept-Language', 'en-US')
+            headers['referer'] = referer
+        if not 'Accept-Language' in headers:
+            headers['Accept-Language'] = 'en-US'
+        if 'cookie' in headers:
+            pass
+        elif not cookie == None:
+            headers['cookie'] = cookie
+        request = urllib2.Request(url, data=post, headers=headers)
         response = urllib2.urlopen(request, timeout=int(timeout))
         if output == 'cookie':
-            result = str(response.headers.get('Set-Cookie'))
+            result = []
+            for c in cookies: result.append('%s=%s' % (c.name, c.value))
+            result = "; ".join(result)
         elif output == 'geturl':
             result = response.geturl()
         else:
@@ -200,7 +211,7 @@ def captcha(data):
 
         if len(solvemedia) > 0:
             url = solvemedia[0]
-            result = getUrl(url).result
+            result = getUrl(url, referer='').result
 
             response = common.parseDOM(result, "iframe", ret="src")
             response += common.parseDOM(result, "img", ret="src")
@@ -353,7 +364,7 @@ def bestreams(url):
         url = re.compile('//.+?/([\w]+)').findall(url)[0]
         url = 'http://bestreams.net/%s' % url
 
-        result = getUrl(url, mobile=True, referer=url, close=False).result
+        result = getUrl(url, mobile=True, close=False).result
 
         post = {}
         f = common.parseDOM(result, "Form", attrs = { "method": "POST" })[-1]
@@ -366,7 +377,7 @@ def bestreams(url):
 
         for i in range(0, 5):
             try:
-                result = getUrl(url, mobile=True, referer=url, close=False, post=post).result
+                result = getUrl(url, mobile=True, close=False, post=post).result
                 if 'Proceed to video' in result: raise Exception()
 
                 url = common.parseDOM(result, "div", attrs = { "id": "main" })[0]
@@ -461,7 +472,7 @@ def fastvideo(url):
         url = re.compile('//.+?/([\w]+)').findall(url)[0]
         url = 'http://fastvideo.in/embed-%s.html' % url
 
-        result = getUrl(url, mobile=True, referer=url).result
+        result = getUrl(url, mobile=True).result
         url = re.compile('file *: *"(http.+?)"').findall(result)[-1]
         return url
     except:
@@ -499,7 +510,7 @@ def filehoot(url):
         url = re.compile('//.+?/([\w]+)').findall(url)[0]
         url = 'http://filehoot.com/embed-%s.html' % url
 
-        result = getUrl(url, mobile=True, referer=url).result
+        result = getUrl(url, mobile=True).result
         url = re.compile('file *: *"(http.+?)"').findall(result)[0]
         return url
     except:
@@ -508,18 +519,16 @@ def filehoot(url):
 def filenuke(url):
     try:
         result = getUrl(url).result
-
         post = {}
         try: f = common.parseDOM(result, "form", attrs = { "method": "POST" })[0]
         except: f = ''
-        k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
+        k = common.parseDOM(f, "input", ret="name")
         for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-        post.update({'method_free': 'Free', 'usr_login': '', 'op': 'download1', 'referer': url})
         post = urllib.urlencode(post)
 
         result = getUrl(url, post=post).result
 
-        url = re.compile("var\s+lnk1 *= *'(http.+?)'").findall(result)[0]
+        url = re.compile("var\s+lnk\d* *= *'(http.+?)'").findall(result)[0]
         url += '|User-Agent=%s' % urllib.quote_plus('Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0')
         return url
     except:
@@ -642,7 +651,7 @@ def hugefiles(url):
         post.update(captcha(result))
         post = urllib.urlencode(post)
 
-        result = getUrl(url, post=post, referer=url).result
+        result = getUrl(url, post=post).result
 
         url = re.compile('fileUrl\s*=\s*[\'|\"](.+?)[\'|\"]').findall(result)[0]
         return url
@@ -755,7 +764,7 @@ def mooshare(url):
         url = re.compile('//.+?/([\w]+)').findall(url)[0]
         url = 'http://mooshare.biz/embed-%s.html?play=1&confirm=Close+Ad+and+Watch+as+Free+User' % url
 
-        result = getUrl(url, referer=url).result
+        result = getUrl(url).result
         url = re.compile('file *: *"(http.+?)"').findall(result)[-1]
         return url
     except:
@@ -1123,7 +1132,7 @@ def videomega(url):
         url = urlparse.parse_qs(url)['ref'][0]
         url = 'http://videomega.tv/cdn.php?ref=%s' % url
 
-        result = getUrl(url, referer=url).result
+        result = getUrl(url).result
 
         url = re.compile('document.write.unescape."(.+?)"').findall(result)[-1]
         url = urllib.unquote_plus(url)

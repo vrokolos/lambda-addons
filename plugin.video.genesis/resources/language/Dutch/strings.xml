@@ -60,9 +60,9 @@
 	<string id="30102">Films</string>
 	<string id="30103">Series</string>
 	<string id="30104">Automatisch je abonnementen updaten</string>
-	<string id="30105">Show notifications during update</string>
-	<string id="30106">Check movie before adding it</string>
-	<string id="30107">Check first episode of season before adding it</string>
+	<string id="30105">Laat berichtgevingen zien tijdens updaten</string>
+	<string id="30106">Controleer film voordat deze toegevoegd word</string>
+	<string id="30107">Controleer eerste aflevering van seizoen voordat deze toegevoegd word</string>
 	<string id="30108">Update Bibliotheek na toevoegen van content</string>
 	<string id="30109">Voorkom het creëren van dubbele content</string>
 	<string id="30120">Accounts</string>
@@ -85,14 +85,14 @@
 	<string id="30307">Ondertiteling niet beschikbaar</string>
 	<string id="30308">Stream niet beschikbaar</string>
 	<string id="30309">Begonnen in</string>
-	<string id="30310">Adding to library...</string>
-	<string id="30311">Importing movies</string>
-	<string id="30312">Importing TV shows</string>
-	<string id="30313">Updating TV shows</string>
-	<string id="30314">Finished in</string>
-	<string id="30315">Working...</string>
-	<string id="30316">Failed!</string>
-	<string id="30317">Done!</string>
+	<string id="30310">Toevoegen aan bibliotheek...</string>
+	<string id="30311">Films importeren</string>
+	<string id="30312">Series importeren</string>
+	<string id="30313">Series updaten</string>
+	<string id="30314">Klaar in</string>
+	<string id="30315">Verwerken...</string>
+	<string id="30316">Niet geslaagd!</string>
+	<string id="30317">Klaar!</string>
 	<!-- YesNo -->
 	<string id="30341">Je hebt geen Download-map ingesteld.</string>
 	<string id="30342">Wil je dat nu doen?</string>

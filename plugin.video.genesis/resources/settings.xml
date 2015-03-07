@@ -13,7 +13,7 @@
 		<setting type="lsep" label="30017"/>
 		<setting id="downloads" type="folder" label="30018" default=""/>
 
-		<setting id="sources_version" type="text" default="1.0.0" visible="false"/>
+		<setting id="sources_version" type="text" default="4.0.0" visible="false"/>
 	</category>
 
 	<category label="30020">
@@ -44,9 +44,9 @@
 		<setting id="yify" type="bool" label="YIFY" default="true"/>
 		<setting id="vkbox" type="bool" label="VKBox" default="true"/>
 		<setting id="moviestorm" type="bool" label="Moviestorm" default="true"/>
+		<setting id="watchfree" type="bool" label="Watchfree" default="true"/>
 		<setting id="merdb" type="bool" label="MerDB" default="true"/>
 		<setting id="wso" type="bool" label="WSO" default="true"/>
-		<setting id="twomovies" type="bool" label="Twomovies" default="true"/>
 		<setting id="einthusan" type="bool" label="Einthusan (India)" default="true"/>
 		<setting id="oneclickwatch" type="bool" label="Oneclickwatch" default="true"/>
 		<setting id="noobroom" type="bool" label="Noobroom" default="false"/>
@@ -64,9 +64,9 @@
 		<setting id="vkbox_tv" type="bool" label="VKBox" default="true"/>
 		<setting id="clickplay_tv" type="bool" label="Clickplay" default="true"/>
 		<setting id="moviestorm_tv" type="bool" label="Moviestorm" default="true"/>
+		<setting id="watchfree_tv" type="bool" label="Watchfree" default="true"/>
 		<setting id="merdb_tv" type="bool" label="MerDB" default="true"/>
 		<setting id="wso_tv" type="bool" label="WSO" default="true"/>
-		<setting id="twomovies_tv" type="bool" label="Twomovies" default="true"/>
 		<setting id="animeultima_tv" type="bool" label="Animeultima" default="true"/>
 		<setting id="tvrelease_tv" type="bool" label="TVrelease" default="true"/>
 		<setting id="oneclickwatch_tv" type="bool" label="Oneclickwatch" default="true"/>

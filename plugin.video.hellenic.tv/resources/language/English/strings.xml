@@ -13,12 +13,9 @@
 	<string id="30303">Added to Favourites</string>
 	<string id="30304">Removed from Favourites</string>
 	<string id="30305">Cache cleared</string>
-	<string id="30306">EPG retrieval is in progress</string>
-	<string id="30307">No stream available</string>
+	<string id="30306">No stream available</string>
 	<!-- Progress -->
 	<string id="30341">Opening stream</string>
-	<!-- Select -->
-	<string id="30351">EPG</string>
 	<!-- Misc -->
 	<string id="30361">Search</string>
 	<string id="30362">Next Page...</string>
@@ -27,21 +24,20 @@
 	<string id="30402">Random Play</string>
 	<string id="30403">Queue item</string>
 	<string id="30404">Now playing...</string>
-	<string id="30405">EPG Information</string>
-	<string id="30406">Refresh info</string>
-	<string id="30407">Add-on settings</string>
-	<string id="30408">Add to favourites</string>
-	<string id="30409">Remove from favourites</string>
-	<string id="30410">Add to "My TV"</string>
-	<string id="30411">Remove from "My TV"</string>
-	<string id="30412">Add to "My Radios"</string>
-	<string id="30413">Remove from "My Radios"</string>
-	<string id="30414">Set TV view</string>
-	<string id="30415">Set Radio view</string>
-	<string id="30416">Set Movies view</string>
-	<string id="30417">Set TV Shows view</string>
-	<string id="30418">Set Episodes view</string>
-	<string id="30419">Set Cartoons view</string>
+	<string id="30405">Refresh info</string>
+	<string id="30406">Add-on settings</string>
+	<string id="30407">Add to favourites</string>
+	<string id="30408">Remove from favourites</string>
+	<string id="30409">Add to "My TV"</string>
+	<string id="30410">Remove from "My TV"</string>
+	<string id="30411">Add to "My Radios"</string>
+	<string id="30412">Remove from "My Radios"</string>
+	<string id="30413">Set TV view</string>
+	<string id="30414">Set Radio view</string>
+	<string id="30415">Set Movies view</string>
+	<string id="30416">Set TV Shows view</string>
+	<string id="30417">Set Episodes view</string>
+	<string id="30418">Set Cartoons view</string>
 	<!-- Description -->
 	<string id="30450">Greek television</string>
 	<!-- Labels -->

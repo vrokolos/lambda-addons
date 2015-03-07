@@ -1,4 +1,17 @@
 ------------------------
+Genesis v4.0.1 (7-Mar-15)
+------------------------
+
+- Added Watchfree source.
+- Tweaked playback functions (Trakt addon v3).
+- Fixed issues with available resolvers.
+- Fixed issues with available sources.
+- Removed Twomovies source.
+- Updated translations.
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.0.0 (2-Mar-15)
 ------------------------
 

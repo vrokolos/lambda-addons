@@ -41,6 +41,12 @@
 			<base>http://www.maktv.gr/Live</base>
 		</channel>
 		<channel active="True">
+			<name>ART CHANNEL</name>
+			<type>ustream</type>
+			<url>http://www.ustream.tv/embed/19497099</url>
+			<base>http://www.arttv.info/</base>
+		</channel>
+		<channel active="True">
 			<name>BOYLH TV</name>
 			<type>hls</type>
 			<url>http://streamer-cache.grnet.gr/parliament/parltv.sdp/master.m3u8</url>
@@ -49,13 +55,13 @@
 		<channel active="True">
 			<name>NERIT</name>
 			<type>hls</type>
-			<url>http://nerit1-lh.akamaihd.net/i/live_1@120689/master.m3u8</url>
+			<url>http://nerit1-lh.akamaihd.net/i/nerit_1@42604/master.m3u8</url>
 			<base>http://webtv.nerit.gr/nerit1-live/</base>
 		</channel>
 		<channel active="True">
 			<name>NERIT PLUS</name>
 			<type>hls</type>
-			<url>http://nerit2-lh.akamaihd.net/i/live_1@121149/master.m3u8</url>
+			<url>http://nerit2-lh.akamaihd.net/i/neritplus_1@45603/master.m3u8</url>
 			<base>http://webtv.nerit.gr/neritplus-live/</base>
 		</channel>
 		<channel active="True">
@@ -102,17 +108,6 @@
 	</area>
 	<area name="THEMATIC">
 		<channel active="True">
-			<name>MAD TV</name>
-			<type>madtv</type>
-			<url>http://www.mad.tv/players/madtv/</url>
-			<base>http://www.mad.tv/</base>
-		</channel>
-		<channel active="True">
-			<name>MAD TV CYPRUS</name>
-			<url>rtmp://144.76.2.213/live/livestream swfUrl=http://jwplayer.mediaserve.com/player.swf live=1 timeout=10</url>
-			<base>http://www.madtv.com.cy/</base>
-		</channel>
-		<channel active="True">
 			<name>GREEK CINEMA</name>
 			<type>livestream</type>
 			<url>http://www.livestream.com/naturatv1</url>
@@ -129,6 +124,63 @@
 			<url>http://www.ustream.tv/channel/odie-tv-live</url>
 			<base>http://www.odie.tv/</base>
 		</channel>
+	</area>
+	<area name="ATTICA">
+		<channel active="False">
+			<name>AB CHANNEL</name>
+			<base>http://www.abchannel.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>ACTION24</name>
+			<type>streamago</type>
+			<url>http://www.streamago.tv/channel/44490/action-24/</url>
+			<base>http://www.action24.gr/</base>
+		</channel>
+		<channel active="False">
+			<name>ATTICA TV</name>
+			<base>http://youatticatv.blogspot.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>BLUE SKY</name>
+			<type>hls</type>
+			<url>http://88.198.238.44:1935/bluesky/bluesky.stream/playlist.m3u8</url>
+			<base>http://www.blueskytv.gr/live-tv/</base>
+		</channel>
+		<channel active="False">
+			<name>CHANNEL 9</name>
+			<type>livestream</type>
+			<url>http://www.livestream.com/channel9gr</url>
+			<base>http://www.channel9.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>EXTRA CHANNEL</name>
+			<url>rtmp://213.16.167.186:1935/live/mpegts_256.stream live=1 timeout=10</url>
+			<base>http://www.extratv.gr/</base>
+		</channel>
+		<channel active="False">
+			<name>HIGH TV</name>
+			<base>http://skaisat.com/highchannel/</base>
+		</channel>
+		<channel active="True">
+			<name>KONTRA CHANNEL</name>
+			<url>rtmp://flashcloud.mediacdn.com/live/kontratv live=1 timeout=10</url>
+			<base>http://live24.gr/webtv/kontrachannel/</base>
+		</channel>
+		<channel active="True">
+			<name>MAD TV</name>
+			<type>madtv</type>
+			<url>http://www.mad.tv/players/madtv/</url>
+			<base>http://www.mad.tv/</base>
+		</channel>
+		<channel active="True">
+			<name>MAD TV CYPRUS</name>
+			<url>rtmp://144.76.2.213/live/livestream swfUrl=http://jwplayer.mediaserve.com/player.swf live=1 timeout=10</url>
+			<base>http://www.madtv.com.cy/</base>
+		</channel>
+		<channel active="False">
+			<name>MTV GREECE</name>
+			<base>http://www.mtvgreece.gr/</base>
+		</channel>
 		<channel active="False">
 			<name>NICKELODEON</name>
 			<base>http://www.nickelodeon.gr/</base>
@@ -138,76 +190,20 @@
 			<base>http://www.nickelodeon.gr/</base>
 		</channel>
 		<channel active="False">
-			<name>MTV</name>
-			<base>http://www.mtvgreece.gr/</base>
+			<name>SMILE</name>
+			<base>http://tvsmile.gr/</base>
 		</channel>
 		<channel active="False">
-			<name>MUSIC TV</name>
-			<base>http://musictv.com.cy/</base>
-		</channel>
-	</area>
-	<area name="ATTICA">
-		<channel active="True">
-			<name>KONTRA CHANNEL</name>
-			<url>rtmp://flashcloud.mediacdn.com/live/kontratv live=1 timeout=10</url>
-			<base>http://live24.gr/webtv/kontrachannel/</base>
-		</channel>
-		<channel active="True">
-			<name>BLUE SKY</name>
-			<type>hls</type>
-			<url>http://176.9.52.185:1935/bluesky/bluesky.stream/playlist.m3u8</url>
-			<base>http://www.blueskytv.gr/live-tv/</base>
-		</channel>
-		<channel active="True">
-			<name>ACTION 24</name>
-			<type>streamago</type>
-			<url>http://www.streamago.tv/channel/44490/action-24/</url>
-			<base>http://www.action24.gr/</base>
-		</channel>
-		<channel active="True">
-			<name>ART CHANNEL</name>
-			<type>ustream</type>
-			<url>http://www.ustream.tv/embed/16667543</url>
-			<base>http://www.arttv.info/</base>
-		</channel>
-		<channel active="True">
-			<name>EXTRA 3</name>
-			<url>rtmp://213.16.167.186:1935/live/mpegts_256.stream live=1 timeout=10</url>
-			<base>http://www.extratv.gr/</base>
+			<name>SBC</name>
+			<type>livestream</type>
+			<url>http://www.livestream.com/sbcgr</url>
+			<base>http://www.sbctv.gr/</base>
 		</channel>
 		<channel active="True">
 			<name>ZOUGLA TV</name>
 			<type>hls</type>
 			<url>http://zouglahd-f.akamaihd.net/i/zougla_1@56341/index_700_av-p.m3u8?rebase=on</url>
 			<base>http://www.zougla.gr/zouglatv</base>
-		</channel>
-		<channel active="False">
-			<name>CHANNEL 9</name>
-			<type>livestream</type>
-			<url>http://www.livestream.com/channel9gr</url>
-			<base>http://www.channel9.gr/</base>
-		</channel>
-		<channel active="False">
-			<name>SBC TV</name>
-			<type>livestream</type>
-			<url>http://www.livestream.com/sbcgr</url>
-			<base>http://www.sbctv.gr/</base>
-		</channel>
-		<channel active="False">
-			<name>ATTICA TV</name>
-			<base>http://youatticatv.blogspot.gr/</base>
-		</channel>
-		<channel active="False">
-			<name>HIGH TV</name>
-			<base>http://skaisat.com/highchannel/</base>
-		</channel>
-		<channel active="False">
-			<name>SMILE TV</name>
-			<base>http://tvsmile.gr/</base>
-		</channel>
-		<channel active="False">
-			<name>AB CHANNEL</name>
-			<base>http://www.abchannel.gr/</base>
 		</channel>
 	</area>
 	<area name="CENTRAL MACEDONIA">
@@ -217,10 +213,43 @@
 			<base>http://www.fm100.gr/</base>
 		</channel>
 		<channel active="True">
-			<name>4E TV</name>
+			<name>4E</name>
 			<type>hls</type>
 			<url>http://mail.tv4e.gr:1935/live/myStream.sdp/playlist.m3u8</url>
 			<base>http://www.tv4e.gr/livestreaming.php</base>
+		</channel>
+		<channel active="False">
+			<name>BEE CHANNEL</name>
+			<type>livestream</type>
+			<url>http://www.livestream.com/tvhalk</url>
+			<base>http://beechannel.gr/</base>
+		</channel>
+		<channel active="False">
+			<name>BERGINA</name>
+			<url>http://195.81.140.68/0f5e3de651a80e17745bbef999c967e8/VerginaStream1.m3u8</url>
+			<base>http://verginatv.blogspot.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>DION</name>
+			<type>ustream</type>
+			<url>http://www.ustream.tv/channel/dion-tv-live</url>
+			<base>http://www.diontv.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>EUROPE ONE</name>
+			<type>ustream</type>
+			<url>http://www.ustream.tv/channel/%CE%95%CE%A5%CE%A1%CE%9F%CE%A0%CE%97-1</url>
+			<base>http://www.europeone.gr/</base>
+		</channel>
+		<channel active="False">
+			<name>KANALI 9</name>
+			<base>http://www.kanali9.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>SUPER TV</name>
+			<type>ustream</type>
+			<url>http://www.ustream.tv/channel/tvsuperstream</url>
+			<base>http://www.tvsuper.gr/</base>
 		</channel>
 		<channel active="True">
 			<name>EGNATIA TV</name>
@@ -228,39 +257,13 @@
 			<url>http://www.ustream.tv/channel/egnatiatv</url>
 			<base>http://www.egnatia.tv/live</base>
 		</channel>
-		<channel active="True">
-			<name>VERGINA TV</name>
-			<type>livestream</type>
-			<url>http://www.livestream.com/verginatv</url>
-			<base>http://verginatv.blogspot.gr/</base>
-		</channel>
-		<channel active="True">
-			<name>EUROPE 1</name>
-			<type>ustream</type>
-			<url>http://www.ustream.tv/channel/%CE%95%CE%A5%CE%A1%CE%9F%CE%A0%CE%97-1</url>
-			<base>http://www.europeone.gr/</base>
-		</channel>
-		<channel active="True">
-			<name>DION TV</name>
-			<type>ustream</type>
-			<url>http://www.ustream.tv/channel/dion-tv-live</url>
-			<base>http://www.diontv.gr/</base>
-		</channel>
-		<channel active="False">
-			<name>XTV</name>
-			<type>livestream</type>
-			<url>http://www.livestream.com/tvhalk</url>
-			<base>http://x-tv.gr/</base>
-		</channel>
-		<channel active="False">
-			<name>TV THESS</name>
-			<type>livestream</type>
-			<url>http://www.livestream.com/thessalonikitelevision</url>
-			<base>http://www.thessalonikitv.gr/</base>
-		</channel>
 		<channel active="False">
 			<name>GNOMI TV</name>
 			<base>http://www.gnominet.gr/</base>
+		</channel>
+		<channel active="False">
+			<name>EURO CHANNEL</name>
+			<base>http://eurotileorasi.eu/</base>
 		</channel>
 		<channel active="False">
 			<name>PELLA TV</name>
@@ -270,60 +273,51 @@
 			<name>TIME CHANNEL</name>
 			<base>http://timechannel.gr/</base>
 		</channel>
-		<channel active="False">
-			<name>EURO CHANNEL</name>
-			<base>http://eurotileorasi.eu/</base>
-		</channel>
-		<channel active="False">
-			<name>KANALI 9</name>
-			<base>http://www.kanali9.gr/</base>
-		</channel>
 	</area>
 	<area name="CENTRAL GREECE">
+		<channel active="False">
+			<name>ETV</name>
+			<base>http://www.etv-hellas.net/</base>
+		</channel>
 		<channel active="True">
 			<name>ENA TV</name>
 			<type>viiideo</type>
 			<url>http://enatv.viiideo.gr/</url>
 			<base>http://www.enatv.gr/</base>
 		</channel>
-		<channel active="False">
-			<name>STAR KENTRIKIS ELLADOS</name>
+		<channel active="True">
+			<name>STAR CENTRAL GR</name>
 			<type>dailymotion</type>
-			<url>http://www.dailymotion.com/video/xqjey2_star-lamia-live-streaming_news</url>
+			<url>http://www.dailymotion.com/video/xqjey2</url>
 			<base>http://webtv.lamiastar.gr/index.php</base>
-		</channel>
-		<channel active="False">
-			<name>ETV</name>
-			<base>http://www.etv-hellas.net/</base>
 		</channel>
 	</area>
 	<area name="THESSALY">
-		<channel active="True">
-			<name>TRT</name>
-			<type>livestream</type>
-			<url>http://www.livestream.com/elladalive</url>
-			<base>http://www.trttv.com/</base>
-		</channel>
 		<channel active="True">
 			<name>ASTRA TV</name>
 			<type>hls</type>
 			<url>http://www.astratv.gr:8090/hls/livestream/index.m3u8</url>
 			<base>http://www.astratv.gr/</base>
 		</channel>
-		<channel active="True">
-			<name>ZEUS</name>
-			<type>livestream</type>
-			<url>http://www.livestream.com/tvzeys</url>
-			<base>http://www.zeystv.net/</base>
-		</channel>
 		<channel active="False">
 			<name>THESSALIA TV</name>
 			<base>http://www.thessaliatv.gr/</base>
 		</channel>
+		<channel active="True">
+			<name>TRT</name>
+			<type>livestream</type>
+			<url>http://www.livestream.com/elladalive</url>
+			<base>http://www.trttv.com/</base>
+		</channel>
 		<channel active="False">
 			<name>TV 10</name>
-			<url></url>
 			<base>http://www.tv-10.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>ZEYS TV</name>
+			<type>livestream</type>
+			<url>http://www.livestream.com/tvzeys</url>
+			<base>http://zeystv.blogspot.gr/</base>
 		</channel>
 	</area>
 	<area name="EPIRUS AND WEST GREECE">
@@ -333,17 +327,9 @@
 			<url>http://www.livestream.com/epirustv1</url>
 			<base>http://epirustv1.gr/</base>
 		</channel>
-		<channel active="True">
-			<name>VIMA TV</name>
-			<type>ustream</type>
-			<url>http://www.ustream.tv/channel/pluswebtv</url>
-			<base>http://vimanews.gr/</base>
-		</channel>
-		<channel active="True">
-			<name>ITV</name>
-			<type>ustream</type>
-			<url>http://www.ustream.tv/channel/ioannina-tv1</url>
-			<base></base>
+		<channel active="False">
+			<name>ART TV</name>
+			<base>http://www.arttv.gr/</base>
 		</channel>
 		<channel active="True">
 			<name>ACHELOOS TV</name>
@@ -352,23 +338,30 @@
 			<base>http://www.axeloostv.gr/</base>
 		</channel>
 		<channel active="True">
+			<name>CORFU TV</name>
+			<type>ustream</type>
+			<url>http://www.ustream.tv/channel/corfu-tv</url>
+			<base>http://www.corfutv.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>ITV</name>
+			<type>ustream</type>
+			<url>http://www.ustream.tv/channel/ioannina-tv1</url>
+		</channel>
+		<channel active="False">
+			<name>KOSMO TV</name>
+		</channel>
+		<channel active="True">
 			<name>START TV</name>
 			<type>veetle</type>
 			<url>http://veetle.com/index.php/channel/view#5378ba5fe38e8</url>
 			<base>http://www.startmedia.gr/</base>
 		</channel>
 		<channel active="True">
-			<name>CORFU CHANNEL</name>
+			<name>VIMA TV</name>
 			<type>ustream</type>
-			<url>http://www.ustream.tv/channel/corfu-tv</url>
-			<base>http://www.corfutv.gr/</base>
-		</channel>
-		<channel active="False">
-			<name>ART TV</name>
-			<base>http://www.arttv.gr/</base>
-		</channel>
-		<channel active="False">
-			<name>KOSMO TV</name>
+			<url>http://www.ustream.tv/channel/pluswebtv</url>
+			<base>http://vimanews.gr/</base>
 		</channel>
 	</area>
 	<area name="PELOPONNESE AND WEST GREECE">
@@ -377,16 +370,14 @@
 			<url>rtmp://78.129.184.15:11056/streaming/stream pageUrl=http://achaianews.listen2myradio.com/ live=1 timeout=10</url>
 			<base>http://www.achaianews.gr/</base>
 		</channel>
-		<channel active="True">
-			<name>LEPANTO</name>
-			<url>rtmp://78.129.184.15:10223/streaming/stream pageUrl=http://lepantortv.listen2myradio.com/ live=1 timeout=10</url>
-			<base>http://lepantotv.gr/</base>
+		<channel active="False">
+			<name>ARKADIKI TV</name>
+			<url>http://www.arttv.com.gr/</url>
+			<base></base>
 		</channel>
-		<channel active="True">
-			<name>IONIAN CHANNEL</name>
-			<type>livestream</type>
-			<url>http://www.livestream.com/ioniantvlivebroadcast</url>
-			<base>http://ioniantv.gr/</base>
+		<channel active="False">
+			<name>AXION TV</name>
+			<base>http://axiontv.gr/</base>
 		</channel>
 		<channel active="True">
 			<name>BEST TV</name>
@@ -394,34 +385,9 @@
 			<url>http://smooth.istoikona.net/besttv.isml/manifest(format=m3u8-aapl).m3u8</url>
 			<base>http://www.best-tv.gr/</base>
 		</channel>
-		<channel active="True">
-			<name>ORT</name>
-			<url>rtmp://media.patrisnews.com:1935/patris/tvstream live=1 timeout=10</url>
-			<base>http://www.patrisnews.com/ort-live</base>
-		</channel>
-		<channel active="False">
-			<name>MESOGEIOS TV</name>
-			<url>rtsp://54.246.125.118/mesogeiostv</url>
-			<base>http://www.mesogeiostv.gr/</base>
-		</channel>
-		<channel active="False">
-			<name>SUPER B</name>
-			<type>dailymotion</type>
-			<url>http://www.dailymotion.com/video/xxyvtx_live_webcam</url>
-			<base>http://www.superb.gr/</base>
-		</channel>
-		<channel active="False">
-			<name>TELETIME</name>
-		</channel>
 		<channel active="False">
 			<name>COSMOS TV</name>
-		</channel>
-	</area>
-	<area name="EAST PELOPONNESE">
-		<channel active="True">
-			<name>ELLADA TV</name>
-			<url>rtmp://fml.68FC.edgecastcdn.net/2068FC/elladatv swfUrl=http://www.elladatv.gr/scripts/player.swf swfVfy=1 live=1 timeout=10</url>
-			<base>http://www.elladatv.gr/</base>
+			<base>http://www.tvcosmos.gr/</base>
 		</channel>
 		<channel active="True">
 			<name>DR TV</name>
@@ -430,25 +396,56 @@
 			<base>http://www.drtv.gr/</base>
 		</channel>
 		<channel active="True">
+			<name>ELLADA TV</name>
+			<url>rtmp://fml.68FC.edgecastcdn.net/2068FC/elladatv swfUrl=http://www.elladatv.gr/scripts/player.swf swfVfy=1 live=1 timeout=10</url>
+			<base>http://www.elladatv.gr/</base>
+		</channel>
+		<channel active="False">
+			<name>ELECTRA TV</name>
+			<base>http://www.hlektra.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>IONIAN CHANNEL</name>
+			<type>hls</type>
+			<url>http://stream8.upg.gr:1935/live/stream/playlist.m3u8</url>
+			<base>http://ioniantv.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>LEPANTO</name>
+			<url>rtmp://78.129.184.15:10223/streaming/stream pageUrl=http://lepantortv.listen2myradio.com/ live=1 timeout=10</url>
+			<base>http://lepantotv.gr/</base>
+		</channel>
+		<channel active="True">
 			<name>MAX TV</name>
 			<type>livestream</type>
 			<url>http://www.livestream.com/maxtvdigital</url>
 			<base>http://www.maxtv.gr/</base>
 		</channel>
 		<channel active="False">
-			<name>ELECTRA TV</name>
-			<base>http://www.pelopas.gr/</base>
+			<name>MESOGEIOS TV</name>
+			<url>mmsh://188.40.50.66/mesogeiostv</url>
+			<base>http://www.mesogeiostv.gr/</base>
 		</channel>
 		<channel active="False">
-			<name>AXION TV</name>
-			<base>http://axiontv.gr/</base>
+			<name>NET TV</name>
+			<base>http://www.notia.tv/</base>
+		</channel>
+		<channel active="True">
+			<name>ORT</name>
+			<url>rtmp://media.patrisnews.com:1935/patris/tvstream live=1 timeout=10</url>
+			<base>http://www.patrisnews.com/ort-live</base>
 		</channel>
 		<channel active="False">
-			<name>SUPER TV</name>
+			<name>RTP KENTPO</name>
+		</channel>
+		<channel active="False">
+			<name>TV SUPER</name>
 			<base>http://tvsupernews.blogspot.gr/</base>
 		</channel>
-		<channel active="False">
-			<name>TOP TV</name>
+		<channel active="True">
+			<name>SUPER B</name>
+			<url>rtmp://37.220.27.70/live/livestream live=1 timeout=10</url>
+			<base>http://www.superb.gr/</base>
 		</channel>
 	</area>
 	<area name="CRETE">
@@ -476,31 +473,21 @@
 			<base>http://www.kydon.gr/</base>
 		</channel>
 		<channel active="False">
-			<name>MY TV</name>
-			<base>http://www.my-tv.gr/</base>
-		</channel>
-		<channel active="False">
 			<name>CHANNEL 4U</name>
 			<base>http://www.channel4.gr/</base>
 		</channel>
 		<channel active="False">
-			<name>SITIA TV</name>
+			<name>KRITI TV1</name>
 		</channel>
 		<channel active="False">
-			<name>KRITI TV1</name>
+			<name>MY TV</name>
+			<base>http://www.my-tv.gr/</base>
+		</channel>
+		<channel active="False">
+			<name>SITIA TV</name>
 		</channel>
 	</area>
 	<area name="SOUTH AEGEAN">
-		<channel active="True">
-			<name>KOSMOS</name>
-			<url>rtmp://edge.vidblee.com/tvkosmos/mp4:tvkosmos.mp4 live=1 timeout=10</url>
-			<base>http://tvkosmos.gr/live-streaming-webtv</base>
-		</channel>
-		<channel active="True">
-			<name>IRIDA TV</name>
-			<url>mmsh://212.251.44.111:27030</url>
-			<base>http://www.iridatv.gr/</base>
-		</channel>
 		<channel active="True">
 			<name>TV AIGAIO</name>
 			<type>livestream</type>
@@ -508,21 +495,33 @@
 			<base>http://www.aigaio-tv.gr/</base>
 		</channel>
 		<channel active="True">
-			<name>OMEGA TV</name>
-			<url>rtmp://stream2.omegatv.net:1935/livepkgr/omegatv live=1 timeout=10</url>
-			<base>http://www.omegatv.net/</base>
-		</channel>
-		<channel active="True">
 			<name>DIRAS TV</name>
 			<url>rtmp://www.cityofkos.gr/live/livetv live=1 timeout=10</url>
 			<base>http://www.diras.gr/</base>
 		</channel>
-		<channel active="False">
-			<name>TV12</name>
-			<base>http://www.kalymnosweb.gr/tv12.htm</base>
+		<channel active="True">
+			<name>IRIDA TV</name>
+			<url>mmsh://212.251.44.111:27030</url>
+			<base>http://www.iridatv.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>OMEGA TV</name>
+			<url>rtmp://stream2.omegatv.net:1935/livepkgr/omegatv live=1 timeout=10</url>
+			<base>http://www.omegatv.net/</base>
 		</channel>
 		<channel active="False">
 			<name>RODOS TV4</name>
+			<base>http://www.tv4.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>SAMIAKI TV</name>
+			<url>rtmp://91.121.107.131/samiaki/samiaki live=1 timeout=10</url>
+			<base>http://www.samiaki.tv/</base>
+		</channel>
+		<channel active="True">
+			<name>KOSMOS</name>
+			<url>rtmp://edge.vidblee.com/tvkosmos/mp4:tvkosmos.mp4 live=1 timeout=10</url>
+			<base>http://tvkosmos.gr/live-streaming-webtv</base>
 		</channel>
 	</area>
 	<area name="NORTH AEGEAN">
@@ -541,6 +540,12 @@
 		</channel>
 	</area>
 	<area name="CYCLADES">
+		<channel active="False">
+			<name>AIGAIO TV</name>
+			<type>livestream</type>
+			<url>http://www.livestream.com/aigaiotv</url>
+			<base>http://aigaio-tv.blogspot.gr/</base>
+		</channel>
 		<channel active="True">
 			<name>SYROS TV1</name>
 			<type>hls</type>
@@ -548,15 +553,20 @@
 			<base>http://www.syrostv1.gr/</base>
 		</channel>
 		<channel active="False">
+			<name>VOLCANO TV</name>
+		</channel>
+		<channel active="False">
 			<name>ZEUS TV</name>
+			<type>livestream</type>
+			<url>http://www.livestream.com/zeustv</url>
 		</channel>
 	</area>
 	<area name="WEST MACEDONIA">
-		<channel active="True">
-			<name>WEST CHANNEL</name>
-			<type>ustream</type>
-			<url>http://www.ustream.tv/channel/west-channel</url>
-			<base>http://www.westchannel.gr/</base>
+		<channel active="False">
+			<name>.DIKTYO</name>
+			<type>livestream</type>
+			<url>http://www.livestream.com/diktyo</url>
+			<base>http://www.diktyo1.gr/</base>
 		</channel>
 		<channel active="True">
 			<name>FLASH TV</name>
@@ -565,73 +575,60 @@
 			<base>http://www.westgroup.gr/</base>
 		</channel>
 		<channel active="False">
-			<name>SUPER 28</name>
+			<name>KANALI 28</name>
 			<url>mmsh://live.onestreaming.com/super28</url>
 			<base>http://grevenamedia.gr/</base>
 		</channel>
 		<channel active="False">
 			<name>TOP CHANNEL</name>
-			<base>http://www.top-channel.tripod.com/profil.htm</base>
+			<base>http://topchannel.gr/</base>
 		</channel>
 		<channel active="False">
 			<name>TRM</name>
-			<base>http://www.grevenatv.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>WEST CHANNEL</name>
+			<type>ustream</type>
+			<url>http://www.ustream.tv/channel/west-channel</url>
+			<base>http://www.westchannel.gr/</base>
 		</channel>
 	</area>
-	<area name="EAST MACEDONIA">
+	<area name="EAST MACEDONIA AND THRACE">
+		<channel active="False">
+			<name>ALFA TV</name>
+			<base>http://www.alfadramas.gr/</base>
+		</channel>
 		<channel active="True">
-			<name>DIKTYO TV</name>
+			<name>AMFIPOLIS TV</name>
 			<type>ustream</type>
-			<url>http://www.ustream.tv/channel/diktyo-tv1</url>
-			<base>http://www.diktyotv.gr/</base>
-		</channel>
-		<channel active="True">
-			<name>TELE EPILOGES</name>
-			<type>ustream</type>
-			<url>http://www.ustream.tv/channel/epilogestv</url>
-			<base>http://www.epiloges.tv/</base>
-		</channel>
-		<channel active="True">
-			<name>ENA CHANNEL</name>
-			<url>rtmp://fml.68FC.edgecastcdn.net/2068FC/ena-rtmp swfUrl=http://www.ellastv.gr/jw/player.swf swfVfy=1 live=1 timeout=10</url>
-			<base>http://enachannel.gr/</base>
-		</channel>
-		<channel active="True">
-			<name>STAR TV DRAMA</name>
-			<url>mmsh://radiofeeds1.mediabox.gr/startv</url>
-			<base>http://news.startvfm.gr/</base>
+			<url>http://www.ustream.tv/channel/livezone-gr</url>
+			<base>http://amfipolitv.gr/</base>
 		</channel>
 		<channel active="False">
 			<name>CENTER TV</name>
 			<base>http://www.centertv.gr/</base>
 		</channel>
 		<channel active="False">
-			<name>ALFA TV</name>
-			<base>http://www.alfadramas.gr/</base>
+			<name>COSMOS</name>
 		</channel>
-		<channel active="False">
-			<name>TV DELTA</name>
-		</channel>
-		<channel active="False">
-			<name>TVS</name>
-		</channel>
-	</area>
-	<area name="THRACE">
 		<channel active="True">
 			<name>DELTA TV</name>
 			<url>mmsh://ams01.egihosting.com/989630</url>
 			<base>http://www.deltatv.gr/</base>
 		</channel>
 		<channel active="True">
-			<name>THRAKI NET</name>
-			<url>mmsh://live.onestreaming.com/thrakinet</url>
-			<base>http://www.thrakinet.tv/</base>
+			<name>DIKTYO TV</name>
+			<type>ustream</type>
+			<url>http://www.ustream.tv/channel/diktyo-tv1</url>
+			<base>http://www.diktyotv.gr/</base>
+		</channel>
+		<channel active="False">
+			<name>EGNATIA TV XANTHI</name>
 		</channel>
 		<channel active="True">
-			<name>R CHANNEL</name>
-			<type>livestream</type>
-			<url>http://www.livestream.com/rodopi_tv</url>
-			<base>http://www.tvrodopi.gr/</base>
+			<name>ENA CHANNEL</name>
+			<url>rtmp://fml.68FC.edgecastcdn.net/2068FC/ena-rtmp swfUrl=http://www.ellastv.gr/jw/player.swf swfVfy=1 live=1 timeout=10</url>
+			<base>http://enachannel.gr/</base>
 		</channel>
 		<channel active="True">
 			<name>KANALI 6</name>
@@ -640,11 +637,46 @@
 			<base>http://www.kanali6.gr/</base>
 		</channel>
 		<channel active="False">
+			<name>LYDIA TV</name>
+			<base>http://www.lydiatv.gr/</base>
+		</channel>
+		<channel active="False">
 			<name>ORESTIADA TV</name>
 			<base>http://www.orestiada.gr/</base>
 		</channel>
+		<channel active="True">
+			<name>R CHANNEL</name>
+			<type>livestream</type>
+			<url>http://www.livestream.com/rodopi_tv</url>
+			<base>http://www.tvrodopi.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>STAR TV DRAMA</name>
+			<url>mmsh://radiofeeds1.mediabox.gr/startv</url>
+			<base>http://news.startvfm.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>TELE EPILOGES</name>
+			<type>ustream</type>
+			<url>http://www.ustream.tv/channel/epilogestv</url>
+			<base>http://www.epiloges.tv/</base>
+		</channel>
+		<channel active="True">
+			<name>THRAKI NET</name>
+			<url>mmsh://live.onestreaming.com/thrakinet</url>
+			<base>http://www.thrakinet.tv/</base>
+		</channel>
 		<channel active="False">
-			<name>HOME SHOP</name>
+			<name>TV DELTA</name>
+		</channel>
+		<channel active="True">
+			<name>TVS</name>
+			<type>ustream</type>
+			<url>http://www.ustream.tv/channel/tvs-livestream</url>
+			<base>http://www.serrestv.gr/tv/page.php?p=106</base>
+		</channel>
+		<channel active="False">
+			<name>XANTHI CHANNEL</name>
 		</channel>
 	</area>
 </channels>
