@@ -497,7 +497,7 @@ class index:
         total = len(channelList)
         for i in channelList:
             try:
-                name, title, epg, image = i['name'], i['title'], i['epg'], i['image']
+                name, title, epg, image, type = i['name'], i['title'], i['epg'], i['image'], i['type']
 
                 label = '[B]%s[/B]' % name
                 if not title == '0': 
@@ -1253,10 +1253,10 @@ class channels:
         self.channelMap = {'MEGA':'10', 'ANT1':'7', 'ALPHA':'5', 'STAR':'12', 'SKAI':'11', 'MACEDONIA TV':'8', 'NERIT':'4', 'NERIT PLUS':'352', 'RIK SAT':'83', 'BLUE SKY':'200', 'E TV':'326', 'EXTRA CHANNEL':'191', 'CHANNEL 9':'199', 'KONTRA CHANNEL':'194', 'ART CHANNEL':'248', 'AB CHANNEL':'249', 'TV 100':'229', 'DELTA TV':'236', 'DIKTYO TV':'235', 'STAR CENTRAL GR':'230', 'ALFA TV':'372', 'ATTICA TV':'190', 'BEST TV':'332', 'IONIAN CHANNEL':'360', 'SUPER B':'368', 'COSMOS TV':'370', 'KANALI 6':'377', 'R CHANNEL':'380', 'THRAKI NET':'382', 'ASTRA TV':'400', 'ACTION24':'189', 'BOYLH TV':'1', 'SBC':'228', 'NICKELODEON':'193', 'MAD TV':'9', 'MTV GREECE':'138', '4E':'222', 'TV AIGAIO':'330', 'CORFU TV':'331', 'KRITI TV':'227', 'EPIRUS TV1':'234', 'KOSMOS':'334', 'EURONEWS':'119', 'MEGA CYPRUS':'306', 'ANT1 CYPRUS':'258', 'SIGMA':'305', 'TV PLUS':'289', 'EXTRA TV':'290', 'CAPITAL':'282', 'RIK 1':'274', 'RIK 2':'277'}
 
         self.entertainmentMap = ['ET3', 'CAPITAL']
+        self.movieMap = ['GREEK CINEMA 50s', 'GREEK CINEMA 60s', 'GREEK CINEMA 70s', 'GREEK CINEMA 80s']
         self.childrenMap = ['NICKELODEON', 'NICKELODEON+', 'SMILE']
         self.sportMap = ['CY SPORTS', 'ODIE TV']
         self.musicMap = ['MAD TV', 'MAD TV CYPRUS']
-        self.movieMap = ['GREEK CINEMA']
         self.newsMap = ['SBC']
 
         self.dt_link = 'http://www.tvcontrol.gr/app_api/functions.php?method=DateTime_Get'
@@ -1317,7 +1317,7 @@ class channels:
                     elif name in self.sportMap: title = 'Αθλητικό πρόγραμμα'.decode('iso-8859-7')
                     elif name in self.musicMap: title = 'Μουσικό πρόγραμμα'.decode('iso-8859-7')
                     elif name in self.newsMap: title = 'Ενημερωτικό πρόγραμμα'.decode('iso-8859-7')
-                    elif name in self.movieMap: title = 'Ελληνική ταινία'.decode('iso-8859-7')
+                    elif name in self.movieMap: title = 'Ταινία'.decode('iso-8859-7')
                     else: title = '0'
 
                     epg = '[B]ΤΩΡΑ[/B]\nΔεν υπάρχουν πληροφορίες\n\n[B]ΕΠΟΜΕΝΟ[/B]\nΔεν υπάρχουν πληροφορίες'.decode('iso-8859-7')
@@ -1705,6 +1705,10 @@ class gm:
         self.list = index().cache(self.movies_list, 24, url)
         index().movieList(self.list)
 
+    def movies_2(self, url):
+        self.list = index().cache(self.movies_list, 240, url)
+        return self.list
+
     def cartoons(self):
         try:
             c1 = index().cache(self.movies_list, 24, 'g=8&y=1&l=&p=')
@@ -1738,7 +1742,7 @@ class gm:
 
     def titles_list(self, url):
         try:
-            result = getUrl(url).result
+            result = getUrl(url, timeout='20').result
             result = common.parseDOM(result, "select", attrs = { "onChange": ".+?" })
             result = ''.join(result)
 
@@ -1796,15 +1800,15 @@ class gm:
 
     def movies_info(self, i):
         try:
-            result = getUrl(self.list[i]['url']).result
-            result = common.parseDOM(result, "DIV", attrs = { "class": "maincontent" })[0]
+            result = getUrl(self.list[i]['url'], timeout='30').result
+            result = common.parseDOM(result, "div", attrs = { "class": "movie" })[0]
 
-            title = common.parseDOM(result, "p", attrs = { "class": "movieheading2" })[0]
+            title = common.parseDOM(result, "h1", attrs = { "class": "movie" })[0]
             title = common.replaceHTMLCodes(title)
             title = title.encode('utf-8')
             if not title == '0': self.list[i].update({'title': title})
 
-            year = common.parseDOM(result, "p", attrs = { "class": "movieheading3" })[0]
+            year = common.parseDOM(result, "h3", attrs = { "class": "movie" })[0]
             year = re.sub('[^0-9]', '', year.encode('utf-8'))
             if not year == '0': self.list[i].update({'year': year})
 
@@ -1824,7 +1828,7 @@ class gm:
 
     def shows_info(self, i):
         try:
-            result = getUrl(self.list[i]['url']).result
+            result = getUrl(self.list[i]['url'], timeout='30').result
             result = common.parseDOM(result, "DIV", attrs = { "class": "maincontent" })[0]
 
             title = common.parseDOM(result, "p", attrs = { "class": "seriesheading2" })[0]
@@ -1843,7 +1847,7 @@ class gm:
 
     def movies_list(self, url):
         try:
-            result = getUrl(self.movies_link + url).result
+            result = getUrl(self.movies_link + url, timeout='20').result
             result = common.parseDOM(result, "DIV", attrs = { "class": "maincontent" })
 
             movies = common.parseDOM(result, "td")
@@ -1889,10 +1893,10 @@ class gm:
             self.result2 = []
 
             def thread(url):
-                try: self.result.append(getUrl(url).result)
+                try: self.result.append(getUrl(url, timeout='20').result)
                 except: pass
             def thread2(url):
-                try: self.result2.append(getUrl(url).result)
+                try: self.result2.append(getUrl(url, timeout='20').result)
                 except: pass
 
             threads = []
@@ -1943,7 +1947,7 @@ class gm:
 
     def episodes_list(self, name, url, image, genre, plot, show):
         try:
-            result = getUrl(url).result
+            result = getUrl(url, timeout='20').result
             result = common.parseDOM(result, "DIV", attrs = { "class": "maincontent" })[0]
 
             sort_dict = {'ce99ceb1cebd':'01', 'cea6ceb5ceb2':'02', 'ce9cceaccf81':'03', 'ce91cf80cf81':'04', 'ce9cceacceb9':'05', 'ce99cebfcf8dcebd':'06', 'ce99cebfcf8dcebb':'07', 'ce91cf8dceb3':'08', 'cea3ceb5cf80':'09', 'ce9fcebacf84':'10', 'ce9dcebfcead':'11', 'ce94ceb5ceba':'12'}
@@ -1987,13 +1991,13 @@ class gm:
             host_order = ['youtube', 'dailymotion', 'datemule', 'streamin', 'vidto', 'megatv', 'antenna', 'alphatv', 'skai', 'sigmatv', 'nerit', 'ant1iwo', 'livenews']
 
             if url.startswith(self.movies_link):
-                result = getUrl(url).result
+                result = getUrl(url, timeout='20').result
                 result = common.parseDOM(result, "DIV", attrs = { "class": "maincontent" })[0]
                 result = re.compile('(<a.+?</a>)').findall(result)
                 result = uniqueList(result).list
             else:
                 u = url.split('?')
-                result = getUrl(u[0], post=u[1]).result
+                result = getUrl(u[0], post=u[1], timeout='20').result
                 result = re.compile('(<a.+?</a>)').findall(result)
                 result = uniqueList(result).list
 
@@ -2025,7 +2029,7 @@ class gm:
         for i in sources:
             try:
                 url = i['url']
-                result = getUrl(url).result
+                result = getUrl(url, timeout='20').result
                 url = common.parseDOM(result, "button", ret="OnClick")[0]
                 url = url.split("'")[1]
 
@@ -3712,6 +3716,29 @@ class livestream:
 
             url = re.compile(regex).findall(result)[0]
             url = urllib.unquote(url).replace('\\/', '/')
+            return url
+        except:
+            return
+
+    def kanalia_eu(self, url):
+        try:
+            u = 'http://proxy.cyberunlocker.com/browse.php?u=%s' % urllib.quote_plus(url)
+            result = getUrl(u).result
+
+            r = re.compile('streamer *: *"(.+?)"').findall(result)[0]
+            p = re.compile('file *: *"(.+?)"').findall(result)[0]
+
+            url = '%s playpath=%s pageUrl=%s live=1 timeout=10' % (r, p, url)
+            return url
+        except:
+            return
+
+    def gm(self, url):
+        try:
+            import random
+            url = gm().movies_2(url)
+            url = random.choice(url)['url']
+            url = gm().resolve(url)
             return url
         except:
             return

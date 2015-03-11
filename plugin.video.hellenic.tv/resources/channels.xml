@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <channels>
 	<area name="PANHELLENIC">
 		<channel active="True">
@@ -6,6 +6,12 @@
 			<type>hls</type>
 			<url>http://megahdlive1-f.akamaihd.net/i/live_1@105260/master.m3u8</url>
 			<base>http://www.megatv.com/webtv</base>
+		</channel>
+		<channel active="True">
+			<name>MEGA (2)</name>
+			<type>kanalia_eu</type>
+			<url>http://kanalia.eu/mega_channel_original.php</url>
+			<base>http://kanalia.eu</base>
 		</channel>
 		<channel active="True">
 			<name>ANT1</name>
@@ -17,6 +23,12 @@
 			<name>STAR</name>
 			<url>http://starhdlive2-lh.akamaihd.net/i/live_1@181243/master.m3u8</url>
 			<base>http://www.star.gr/tv/el/Pages/LiveVideo.aspx</base>
+		</channel>
+		<channel active="True">
+			<name>STAR (2)</name>
+			<type>kanalia_eu</type>
+			<url>http://kanalia.eu/star_original.php</url>
+			<base>http://kanalia.eu</base>
 		</channel>
 		<channel active="True">
 			<name>ALPHA</name>
@@ -108,9 +120,24 @@
 	</area>
 	<area name="THEMATIC">
 		<channel active="True">
-			<name>GREEK CINEMA</name>
-			<type>livestream</type>
-			<url>http://www.livestream.com/naturatv1</url>
+			<name>GREEK CINEMA 50s</name>
+			<type>gm</type>
+			<url>y=7&amp;l=&amp;g=&amp;p=1</url>
+		</channel>
+		<channel active="True">
+			<name>GREEK CINEMA 60s</name>
+			<type>gm</type>
+			<url>y=6&amp;l=&amp;g=&amp;p=1</url>
+		</channel>
+		<channel active="True">
+			<name>GREEK CINEMA 70s</name>
+			<type>gm</type>
+			<url>y=5&amp;l=&amp;g=&amp;p=1</url>
+		</channel>
+		<channel active="True">
+			<name>GREEK CINEMA 80s</name>
+			<type>gm</type>
+			<url>y=4&amp;l=&amp;g=&amp;p=1</url>
 		</channel>
 		<channel active="True">
 			<name>CY SPORTS</name>
@@ -202,7 +229,7 @@
 		<channel active="True">
 			<name>ZOUGLA TV</name>
 			<type>hls</type>
-			<url>http://zouglahd-f.akamaihd.net/i/zougla_1@56341/index_700_av-p.m3u8?rebase=on</url>
+			<url>http://zouglahd-f.akamaihd.net/i/zougla_1@56341/index_700_av-b.m3u8?rebase=on</url>
 			<base>http://www.zougla.gr/zouglatv</base>
 		</channel>
 	</area>
@@ -313,7 +340,7 @@
 			<name>TV 10</name>
 			<base>http://www.tv-10.gr/</base>
 		</channel>
-		<channel active="True">
+		<channel active="False">
 			<name>ZEYS TV</name>
 			<type>livestream</type>
 			<url>http://www.livestream.com/tvzeys</url>
@@ -324,7 +351,7 @@
 		<channel active="True">
 			<name>EPIRUS TV1</name>
 			<type>livestream</type>
-			<url>http://www.livestream.com/epirustv1</url>
+			<url>http://www.livestream.com/epirustv1live</url>
 			<base>http://epirustv1.gr/</base>
 		</channel>
 		<channel active="False">
@@ -415,7 +442,7 @@
 			<url>rtmp://78.129.184.15:10223/streaming/stream pageUrl=http://lepantortv.listen2myradio.com/ live=1 timeout=10</url>
 			<base>http://lepantotv.gr/</base>
 		</channel>
-		<channel active="True">
+		<channel active="False">
 			<name>MAX TV</name>
 			<type>livestream</type>
 			<url>http://www.livestream.com/maxtvdigital</url>
@@ -572,7 +599,7 @@
 			<name>FLASH TV</name>
 			<type>ustream</type>
 			<url>http://www.ustream.tv/channel/flash-tv-ch</url>
-			<base>http://www.westgroup.gr/</base>
+			<base>http://www.flash-tv.gr/</base>
 		</channel>
 		<channel active="False">
 			<name>KANALI 28</name>
