@@ -32,23 +32,22 @@
 		<setting id="primewire" type="bool" label="Primewire" default="true"/>
 		<setting id="movie25" type="bool" label="Movie25" default="true"/>
 		<setting id="iwatchonline" type="bool" label="Iwatchonline" default="true"/>
+		<setting id="gvcenter" type="bool" label="GVcenter" default="true"/>
 		<setting id="movietube" type="bool" label="Movietube" default="true"/>
 		<setting id="moviezone" type="bool" label="Moviezone" default="true"/>
+		<setting id="yify" type="bool" label="YIFY" default="true"/>
 		<setting id="zumvo" type="bool" label="Zumvo" default="true"/>
-		<setting id="view47" type="bool" label="View47" default="true"/>
 		<setting id="g2g" type="bool" label="G2G" default="true"/>
 		<setting id="muchmovies" type="bool" label="Muchmovies" default="true"/>
 		<setting id="sweflix" type="bool" label="Sweflix" default="true"/>
 		<setting id="movieshd" type="bool" label="MoviesHD" default="true"/>
 		<setting id="onlinemovies" type="bool" label="Onlinemovies" default="true"/>
-		<setting id="yify" type="bool" label="YIFY" default="true"/>
 		<setting id="vkbox" type="bool" label="VKBox" default="true"/>
 		<setting id="moviestorm" type="bool" label="Moviestorm" default="true"/>
 		<setting id="watchfree" type="bool" label="Watchfree" default="true"/>
 		<setting id="merdb" type="bool" label="MerDB" default="true"/>
 		<setting id="wso" type="bool" label="WSO" default="true"/>
 		<setting id="einthusan" type="bool" label="Einthusan (India)" default="true"/>
-		<setting id="oneclickwatch" type="bool" label="Oneclickwatch" default="true"/>
 		<setting id="noobroom" type="bool" label="Noobroom" default="false"/>
 		<setting id="furk" type="bool" label="Furk" default="false"/>
 	</category>
@@ -58,6 +57,7 @@
 		<setting id="primewire_tv" type="bool" label="Primewire" default="true"/>
 		<setting id="watchseries_tv" type="bool" label="Watchseries" default="true"/>
 		<setting id="iwatchonline_tv" type="bool" label="Iwatchonline" default="true"/>
+		<setting id="gvcenter_tv" type="bool" label="GVcenter" default="true"/>
 		<setting id="movietube_tv" type="bool" label="Movietube" default="true"/>
 		<setting id="ororo_tv" type="bool" label="Ororo" default="true"/>
 		<setting id="hdtvshows_tv" type="bool" label="HDTVshows" default="true"/>
@@ -69,7 +69,6 @@
 		<setting id="wso_tv" type="bool" label="WSO" default="true"/>
 		<setting id="animeultima_tv" type="bool" label="Animeultima" default="true"/>
 		<setting id="tvrelease_tv" type="bool" label="TVrelease" default="true"/>
-		<setting id="oneclickwatch_tv" type="bool" label="Oneclickwatch" default="true"/>
 		<setting id="directdl_tv" type="bool" label="Directdownload" default="true"/>
 		<setting id="noobroom_tv" type="bool" label="Noobroom" default="false"/>
 		<setting id="furk_tv" type="bool" label="Furk" default="false"/>

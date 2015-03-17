@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import urllib,urllib2,re,os,threading,datetime,time,base64,xbmc,xbmcplugin,xbmcgui,xbmcaddon,xbmcvfs
+import urllib,urllib2,urlparse,re,os,threading,datetime,time,base64,xbmc,xbmcplugin,xbmcgui,xbmcaddon,xbmcvfs
 from operator import itemgetter
 import commonsources
 
@@ -200,6 +200,8 @@ class main:
         elif action == 'people_shows':                people().shows(query)
         elif action == 'genres_movies':               genres().movies()
         elif action == 'genres_shows':                genres().shows()
+        elif action == 'certificates_movies':         certificates().movies()
+        elif action == 'certificates_shows':          certificates().shows()
         elif action == 'languages_movies':            languages().movies()
         elif action == 'years_movies':                years().movies()
         elif action == 'calendar_episodes':           calendar().episodes()
@@ -563,7 +565,7 @@ class player(xbmc.Player):
 			pass
 
         if getSetting("playback_info") == 'true' and not PseudoTV == 'True':
-            elapsedTime = '%s %.2f seconds' % (language(30309).encode("utf-8"), (time.time() - self.loadingStarting))     
+            elapsedTime = '%s %s seconds' % (language(30309).encode("utf-8"), int((time.time() - self.loadingStarting)))     
             index().infoDialog(elapsedTime, header=self.name)
 
     def onPlayBackStopped(self):
@@ -832,8 +834,11 @@ class index:
             elif root == 'root_genesis': image = 'DefaultVideoPlaylists.png'
             elif root == 'root_tools': image = 'DefaultAddonProgram.png'
             elif root.startswith('movies') or root.endswith('_movies'): image = 'DefaultMovies.png'
-            elif root.startswith('episodes') or root.endswith('_episodes'): image = 'DefaultTVShows.png'
+            elif image == 'movie_poster.png': image = 'DefaultMovies.png'
             elif root.startswith('shows') or root.endswith('_shows'): image = 'DefaultTVShows.png'
+            elif image == 'tv_poster.png' or image == 'tv_banner.png': image = 'DefaultTVShows.png'
+            elif root.startswith('episodes') or root.endswith('_episodes'): image = 'DefaultTVShows.png'
+            elif image == 'tv_thumb.png': image = 'DefaultTVShows.png'
             else: image = 'DefaultFolder.png'
         else:
             art = os.path.join(addonPath, 'resources/art')
@@ -951,6 +956,7 @@ class index:
     def movieList(self, movieList):
         if movieList == None or len(movieList) == 0: return
 
+        addonPoster = self.addonArt('movie_poster.png')
         addonFanart = self.addonArt('fanart.jpg')
 
         video_type = 'true'
@@ -1003,6 +1009,7 @@ class index:
             try:
                 name, title, year, imdb, genre, url, poster, fanart, studio, duration, rating, votes, mpaa, director, plot, plotoutline, tagline = i['name'], i['title'], i['year'], i['imdb'], i['genre'], i['url'], i['poster'], i['fanart'], i['studio'], i['duration'], i['rating'], i['votes'], i['mpaa'], i['director'], i['plot'], i['plotoutline'], i['tagline']
 
+                if poster == '0': poster = addonPoster
                 if fanart == '0' or not getSetting("fanart") == 'true': fanart = addonFanart
                 if duration == '0': duration == '120'
 
@@ -1088,6 +1095,8 @@ class index:
     def showList(self, showList):
         if showList == None or len(showList) == 0: return
 
+        addonPoster = self.addonArt('tv_poster.png')
+        addonBanner = self.addonArt('tv_banner.png')
         addonFanart = self.addonArt('fanart.jpg')
 
         video_type = 'true'
@@ -1126,6 +1135,8 @@ class index:
             try:
                 name, title, year, imdb, tvdb, genre, url, poster, banner, fanart, studio, premiered, duration, rating, mpaa, plot = i['title'],  i['title'], i['year'], i['imdb'], i['tvdb'], i['genre'], i['url'], i['poster'], i['banner'], i['fanart'], i['studio'], i['premiered'], i['duration'], i['rating'], i['mpaa'], i['plot']
 
+                if poster == '0': poster = addonPoster
+                if banner == '0': banner = addonBanner
                 if fanart == '0' or not getSetting("fanart") == 'true': fanart = addonFanart
                 if duration == '0': duration == '60'
 
@@ -1199,6 +1210,9 @@ class index:
     def seasonList(self, seasonList):
         if seasonList == None or len(seasonList) == 0: return
 
+        addonPoster = self.addonArt('tv_poster.png')
+        addonBanner = self.addonArt('tv_banner.png')
+        addonThumb = self.addonArt('tv_thumb.png')
         addonFanart = self.addonArt('fanart.jpg')
 
         video_type = 'true'
@@ -1221,6 +1235,9 @@ class index:
             try:
                 title, year, imdb, tvdb, season, show, show_alt, genre, url, poster, banner, thumb, fanart, studio, status, premiered, duration, rating, mpaa, plot = 'Season ' + i['title'], i['year'], i['imdb'], i['tvdb'], i['season'], i['show'], i['show_alt'], i['genre'], i['url'], i['poster'], i['banner'], i['thumb'], i['fanart'], i['studio'], i['status'], i['date'], i['duration'], i['rating'], i['mpaa'], i['plot']
 
+                if poster == '0': poster = addonPoster
+                if banner == '0': banner = addonBanner
+                if thumb == '0': thumb = addonThumb
                 if fanart == '0' or not getSetting("fanart") == 'true': fanart = addonFanart
                 if duration == '0': duration == '60'
 
@@ -1268,6 +1285,9 @@ class index:
     def episodeList(self, episodeList):
         if episodeList == None or len(episodeList) == 0: return
 
+        addonPoster = self.addonArt('tv_poster.png')
+        addonBanner = self.addonArt('tv_banner.png')
+        addonThumb = self.addonArt('tv_thumb.png')
         addonFanart = self.addonArt('fanart.jpg')
 
         video_type = 'true'
@@ -1323,6 +1343,9 @@ class index:
                 label = season + 'x' + '%02d' % int(episode) + ' . ' + title
                 if action == 'episodes_added' or action == 'episodes_trakt_progress' or action == 'episodes_trakt' or action == 'episodes_calendar': label = show + ' - ' + label
 
+                if poster == '0': poster = addonPoster
+                if banner == '0': banner = addonBanner
+                if thumb == '0': thumb = addonThumb
                 if fanart == '0' or not getSetting("fanart") == 'true': fanart = addonFanart
                 if duration == '0': duration == '60'
 
@@ -1723,10 +1746,12 @@ class contextMenu:
         try:
             if not getSetting("check_library") == 'true': raise Exception()
 
-            lib = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["imdbnumber"]}, "id": 1}' % (year, str(int(year)+1), str(int(year)-1)))
+            id = 'tt' + imdb if imdb.isdigit() else imdb
+
+            lib = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter":{"or": [{"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}, {"field": "year", "operator": "is", "value": "%s"}]}, "properties" : ["imdbnumber", "originaltitle", "year"]}, "id": 1}' % (year, str(int(year)+1), str(int(year)-1)))
             lib = unicode(lib, 'utf-8', errors='ignore')
             lib = json.loads(lib)['result']['movies']
-            lib = [i for i in lib if imdb in i['imdbnumber']][0]
+            lib = [i for i in lib if str(i['imdbnumber']) == id or (i['originaltitle'].encode("utf-8") == title and str(i['year']) == year)][0]
         except:
             lib = []
 
@@ -1828,11 +1853,13 @@ class contextMenu:
         try:
             if not getSetting("check_library") == 'true': raise Exception()
 
-            lib = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"properties" : ["title", "imdbnumber"]}, "id": 1}')
+            id = ['tt' + match[0]['imdb'] if match[0]['imdb'].isdigit() else match[0]['imdb'], match[0]['tvdb']]
+
+            lib = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"properties" : ["imdbnumber", "title", "year"]}, "id": 1}')
             lib = unicode(lib, 'utf-8', errors='ignore')
             lib = json.loads(lib)['result']['tvshows']
 
-            lib = [i['title'].encode("utf-8") for i in lib if match[0]['tvdb'] in i['imdbnumber']][0]
+            lib = [i['title'].encode("utf-8") for i in lib if str(i['imdbnumber']) in id or (i['title'].encode("utf-8") == name and str(i['year']) == year)][0]
             lib = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "tvshow", "operator": "is", "value": "%s"}]}, "properties": ["season", "episode"]}, "id": 1}' % lib)
             lib = unicode(lib, 'utf-8', errors='ignore')
             lib = json.loads(lib)['result']['episodes']
@@ -1925,6 +1952,7 @@ class contextMenu:
 
             enc_name = name.translate(None, '\/:*?"<>|').strip('.')
             stream = os.path.join(folder, enc_name + '.strm')
+            print 'GENESIS: %s - %s' % (enc_name, str(content))
             file = xbmcvfs.File(stream, 'w')
             file.write(str(content))
             file.close()
@@ -1973,7 +2001,7 @@ class contextMenu:
             date = datetime.datetime.utcnow() - datetime.timedelta(hours = 29)
             date = int(date.strftime("%Y%m%d"))
 
-            lib = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"properties" : ["title", "imdbnumber"]}, "id": 1}')
+            lib = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"properties" : ["imdbnumber", "title", "year"]}, "id": 1}')
             lib = unicode(lib, 'utf-8', errors='ignore')
             lib = json.loads(lib)['result']['tvshows']
         except:
@@ -1992,9 +2020,7 @@ class contextMenu:
                 dbcur.execute("SELECT * FROM rel_lib WHERE tvdb_id = '%s'" % sh['tvdb'])
                 fetch = dbcur.fetchone()
 
-                tvdb_id = str(fetch[0].encode('utf-8'))
                 show = eval(fetch[1].encode('utf-8'))
-                status = show['status']
                 episode = eval(fetch[2].encode('utf-8'))
             except:
                 pass
@@ -2004,14 +2030,13 @@ class contextMenu:
                 match = episodes().get(sh['show'], sh['year'], sh['imdb'], sh['tvdb'], idx=False)
                 match = match[1]['episodes']
 
-                tvdb_id = str(match[0]['tvdb'])
                 show = {'show': match[0]['show'], 'show_alt': match[0]['show_alt'], 'year': match[0]['year'], 'genre': match[0]['genre'], 'url': match[0]['url'], 'imdb': match[0]['imdb'], 'tvdb': match[0]['tvdb'], 'status': match[0]['status']}
-                status = show['status']
                 episode = [{'name': i['name'], 'title': i['title'], 'season': i['season'], 'episode': i['episode'], 'date': i['date']} for i in match]
             except:
                 pass
 
             try:
+                status = show['status']
                 if status.lower() == 'continuing': raise Exception()
                 if not fetch == None: raise Exception()
 
@@ -2023,7 +2048,11 @@ class contextMenu:
                 pass
 
             try:
-                ep = [i['title'].encode("utf-8") for i in lib if tvdb_id in i['imdbnumber']][0]
+                id = ['tt' + show['imdb'] if show['imdb'].isdigit() else show['imdb'], show['tvdb']]
+                sd = [show['show'], show['show_alt']]
+                yd = show['year']
+
+                ep = [i['title'].encode("utf-8") for i in lib if str(i['imdbnumber']) in id or (i['title'].encode("utf-8") in sd and str(i['year']) == yd)][0]
                 ep = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "tvshow", "operator": "is", "value": "%s"}]}, "properties": ["season", "episode"]}, "id": 1}' % ep)
                 ep = unicode(ep, 'utf-8', errors='ignore')
                 ep = json.loads(ep)['result']['episodes'][-1]
@@ -2049,7 +2078,7 @@ class contextMenu:
                     pass
 
         if notify == 'true':
-            end = '%s %.2f seconds' % (language(30314).encode("utf-8"), (time.time() - start))
+            end = '%s %s seconds' % (language(30314).encode("utf-8"), int((time.time() - start)))
             index().infoDialog(end, language(30313).encode("utf-8"))
 
         if getSetting("update_library") == 'true' and not xbmc.getCondVisibility('Library.IsScanningVideo'):
@@ -2229,33 +2258,35 @@ class root:
         rootList = []
         rootList.append({'name': 30521, 'image': 'genres_movies.jpg', 'action': 'genres_movies'})
         rootList.append({'name': 30522, 'image': 'languages_movies.jpg', 'action': 'languages_movies'})
-        rootList.append({'name': 30523, 'image': 'movies_boxoffice.jpg', 'action': 'movies_boxoffice'})
-        rootList.append({'name': 30524, 'image': 'years_movies.jpg', 'action': 'years_movies'})
-        rootList.append({'name': 30525, 'image': 'movies_trending.jpg', 'action': 'movies_trending'})
-        rootList.append({'name': 30526, 'image': 'movies_popular.jpg', 'action': 'movies_popular'})
-        rootList.append({'name': 30527, 'image': 'movies_views.jpg', 'action': 'movies_views'})
-        rootList.append({'name': 30528, 'image': 'movies_oscars.jpg', 'action': 'movies_oscars'})
-        rootList.append({'name': 30529, 'image': 'movies_theaters.jpg', 'action': 'movies_theaters'})
-        rootList.append({'name': 30530, 'image': 'movies_added_hd.jpg', 'action': 'movies_added_hd'})
-        rootList.append({'name': 30531, 'image': 'movies_added.jpg', 'action': 'movies_added'})
-        rootList.append({'name': 30532, 'image': 'movies_favourites.jpg', 'action': 'movies_favourites'})
-        rootList.append({'name': 30533, 'image': 'people_movies.jpg', 'action': 'people_movies'})
-        rootList.append({'name': 30534, 'image': 'movies_search.jpg', 'action': 'movies_search'})
+        rootList.append({'name': 30523, 'image': 'certificates_movies.jpg', 'action': 'certificates_movies'})
+        rootList.append({'name': 30524, 'image': 'movies_boxoffice.jpg', 'action': 'movies_boxoffice'})
+        rootList.append({'name': 30525, 'image': 'years_movies.jpg', 'action': 'years_movies'})
+        rootList.append({'name': 30526, 'image': 'movies_trending.jpg', 'action': 'movies_trending'})
+        rootList.append({'name': 30527, 'image': 'movies_popular.jpg', 'action': 'movies_popular'})
+        rootList.append({'name': 30528, 'image': 'movies_views.jpg', 'action': 'movies_views'})
+        rootList.append({'name': 30529, 'image': 'movies_oscars.jpg', 'action': 'movies_oscars'})
+        rootList.append({'name': 30530, 'image': 'movies_theaters.jpg', 'action': 'movies_theaters'})
+        rootList.append({'name': 30531, 'image': 'movies_added_hd.jpg', 'action': 'movies_added_hd'})
+        rootList.append({'name': 30532, 'image': 'movies_added.jpg', 'action': 'movies_added'})
+        rootList.append({'name': 30533, 'image': 'movies_favourites.jpg', 'action': 'movies_favourites'})
+        rootList.append({'name': 30534, 'image': 'people_movies.jpg', 'action': 'people_movies'})
+        rootList.append({'name': 30535, 'image': 'movies_search.jpg', 'action': 'movies_search'})
         index().rootList(rootList)
 
     def shows(self):
         rootList = []
         rootList.append({'name': 30541, 'image': 'genres_shows.jpg', 'action': 'genres_shows'})
-        rootList.append({'name': 30542, 'image': 'shows_popular.jpg', 'action': 'shows_popular'})
-        rootList.append({'name': 30543, 'image': 'shows_active.jpg', 'action': 'shows_active'})
-        rootList.append({'name': 30544, 'image': 'shows_trending.jpg', 'action': 'shows_trending'})
-        rootList.append({'name': 30545, 'image': 'shows_rating.jpg', 'action': 'shows_rating'})
-        rootList.append({'name': 30546, 'image': 'shows_views.jpg', 'action': 'shows_views'})
-        rootList.append({'name': 30547, 'image': 'episodes_added.jpg', 'action': 'episodes_added'})
-        rootList.append({'name': 30548, 'image': 'calendar_episodes.jpg', 'action': 'calendar_episodes'})
-        rootList.append({'name': 30549, 'image': 'shows_favourites.jpg', 'action': 'shows_favourites'})
-        rootList.append({'name': 30550, 'image': 'people_shows.jpg', 'action': 'people_shows'})
-        rootList.append({'name': 30551, 'image': 'shows_search.jpg', 'action': 'shows_search'})
+        rootList.append({'name': 30542, 'image': 'certificates_shows.jpg', 'action': 'certificates_shows'})
+        rootList.append({'name': 30543, 'image': 'shows_popular.jpg', 'action': 'shows_popular'})
+        rootList.append({'name': 30544, 'image': 'shows_active.jpg', 'action': 'shows_active'})
+        rootList.append({'name': 30545, 'image': 'shows_trending.jpg', 'action': 'shows_trending'})
+        rootList.append({'name': 30546, 'image': 'shows_rating.jpg', 'action': 'shows_rating'})
+        rootList.append({'name': 30547, 'image': 'shows_views.jpg', 'action': 'shows_views'})
+        rootList.append({'name': 30548, 'image': 'episodes_added.jpg', 'action': 'episodes_added'})
+        rootList.append({'name': 30549, 'image': 'calendar_episodes.jpg', 'action': 'calendar_episodes'})
+        rootList.append({'name': 30550, 'image': 'shows_favourites.jpg', 'action': 'shows_favourites'})
+        rootList.append({'name': 30551, 'image': 'people_shows.jpg', 'action': 'people_shows'})
+        rootList.append({'name': 30552, 'image': 'shows_search.jpg', 'action': 'shows_search'})
         index().rootList(rootList)
 
     def genesis(self):
@@ -2329,23 +2360,21 @@ class link:
         self.imdb_media = 'http://ia.media-imdb.com'
         self.imdb_seasons = 'http://www.imdb.com/title/tt%s/episodes'
         self.imdb_episodes = 'http://www.imdb.com/title/tt%s/episodes?season=%s'
-        self.imdb_image = 'http://i.media-imdb.com/images/SFaa265aa19162c9e4f3781fbae59f856d/nopicture/medium/film.png'
-        self.imdb_tv_image = 'http://i.media-imdb.com/images/SF1b61b592d2fa1b9cfb8336f160e1efcf/nopicture/medium/tv.png'
         self.imdb_genres = 'http://www.imdb.com/search/title?title_type=feature,tv_movie&sort=boxoffice_gross_us&count=25&start=1&genres=%s'
+        self.imdb_certificates = 'http://www.imdb.com/search/title?title_type=feature,tv_movie&sort=boxoffice_gross_us&count=25&start=1&certificates=us:%s'
         self.imdb_languages = 'http://www.imdb.com/search/title?languages=%s|1&title_type=feature,tv_movie&sort=moviemeter,asc&count=25&start=1'
         self.imdb_years = 'http://www.imdb.com/search/title?title_type=feature,tv_movie&sort=boxoffice_gross_us&count=25&start=1&year=%s,%s'
-        self.imdb_popular = 'http://www.imdb.com/search/title?title_type=feature,tv_movie&sort=moviemeter,asc&count=25&start=1'
+        self.imdb_popular = 'http://www.imdb.com/search/title?groups=top_1000&sort=moviemeter,asc&count=25&start=1'
         self.imdb_boxoffice = 'http://www.imdb.com/search/title?title_type=feature,tv_movie&sort=boxoffice_gross_us,desc&count=25&start=1'
         self.imdb_views = 'http://www.imdb.com/search/title?title_type=feature,tv_movie&sort=num_votes,desc&count=25&start=1'
         self.imdb_oscars = 'http://www.imdb.com/search/title?title_type=feature,tv_movie&groups=oscar_best_picture_winners&sort=year,desc&count=25&start=1'
-        self.imdb_search = 'http://www.imdb.com/search/title?title_type=feature,short,tv_movie,tv_special,video&sort=moviemeter,asc&count=25&start=1&title=%s'
         self.imdb_tv_genres = 'http://www.imdb.com/search/title?title_type=tv_series,mini_series&sort=moviemeter,asc&count=25&start=1&genres=%s'
+        self.imdb_tv_certificates = 'http://www.imdb.com/search/title?title_type=tv_series,mini_series&sort=moviemeter,asc&count=25&start=1&certificates=us:%s'
         self.imdb_tv_popular = 'http://www.imdb.com/search/title?title_type=tv_series,mini_series&sort=moviemeter,asc&count=25&start=1'
         self.imdb_tv_rating = 'http://www.imdb.com/search/title?title_type=tv_series,mini_series&num_votes=5000,&sort=user_rating,desc&count=25&start=1'
         self.imdb_tv_views = 'http://www.imdb.com/search/title?title_type=tv_series,mini_series&sort=num_votes,desc&count=25&start=1'
         self.imdb_tv_active = 'http://www.imdb.com/search/title?title_type=tv_series,mini_series&production_status=active&sort=moviemeter,asc&count=25&start=1'
-        self.imdb_tv_search = 'http://www.imdb.com/search/title?title_type=tv_series,mini_series&sort=moviemeter,asc&count=25&start=1&title=%s'
-        self.imdb_api_search = 'http://www.imdb.com/xml/find?json=1&nr=1&tt=on&q=%s'
+        self.imdb_search = 'http://www.imdb.com/xml/find?json=1&nr=1&tt=on&q=%s'
         self.imdb_people_search = 'http://www.imdb.com/search/name?count=100&name=%s'
         self.imdb_people = 'http://www.imdb.com/search/title?count=25&sort=year,desc&title_type=feature,tv_movie&start=1&role=nm%s'
         self.imdb_tv_people = 'http://www.imdb.com/search/title?count=25&sort=year,desc&title_type=tv_series,mini_series&start=1&role=nm%s'
@@ -2401,9 +2430,11 @@ class link:
         self.tvrage_info = 'http://www.tvrage.com/shows/id-%s/episode_list/all'
         self.epguides_info = 'http://epguides.com/common/exportToCSV.asp?rage=%s'
 
-        self.scn_base = 'http://predb.me'
-        self.scn_added = 'http://predb.me/?cats=movies-hd%2Cmovies-sd&page=1'
-        self.scn_added_hd = 'http://predb.me/?cats=movies-hd&page=1'
+        self.gtranslator = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=%s'
+
+        self.scn_base = 'http://www.movie25.ag'
+        self.scn_added = 'http://www.movie25.ag/new-releases/1'
+        self.scn_added_hd = 'http://www.movie25.ag/latest-hd-movies/1'
         self.scn_tv_base = 'http://m2v.ru'
         self.scn_tv_added = 'http://m2v.ru/?Part=11&func=part&page=1'
 
@@ -2569,6 +2600,46 @@ class languages:
                 self.list.append({'name': name, 'url': url})
             except:
                 pass
+
+        return self.list
+
+class certificates:
+    def __init__(self):
+        self.list = []
+
+    def movies(self):
+        self.list = self.imdb_list()
+        for i in range(0, len(self.list)): self.list[i].update({'image': 'certificates_movies.jpg', 'action': 'movies'})
+        index().rootList(self.list)
+        return self.list
+
+    def shows(self):
+        self.list = self.imdb_list2()
+        for i in range(0, len(self.list)): self.list[i].update({'image': 'certificates_shows.jpg', 'action': 'shows'})
+        index().rootList(self.list)
+        return self.list
+
+    def imdb_list(self):
+        certificates = ['G', 'PG', 'PG-13', 'R', 'NC-17']
+
+        for c in certificates:
+            name = c.encode('utf-8')
+            url = c.replace('-', '_').lower()
+            url = link().imdb_certificates % url
+            url = url.encode('utf-8')
+            self.list.append({'name': name, 'url': url})
+
+        return self.list
+
+    def imdb_list2(self):
+        certificates = ['TV-G', 'TV-PG', 'TV-14', 'TV-MA']
+
+        for c in certificates:
+            name = c.encode('utf-8')
+            url = c.replace('-', '_').lower()
+            url = link().imdb_tv_certificates % url
+            url = url.encode('utf-8')
+            self.list.append({'name': name, 'url': url})
 
         return self.list
 
@@ -2773,7 +2844,7 @@ class channels:
             match = []
             title = self.list[i]['title']
             year = self.list[i]['year']
-            url = link().imdb_api_search % urllib.quote_plus(title)
+            url = link().imdb_search % urllib.quote_plus(title)
             result = getUrl(url, timeout='30').result
             result = common.replaceHTMLCodes(result)
             result = json.loads(result)
@@ -2921,8 +2992,7 @@ class movies:
         else:
             self.query = query
         if not (self.query == None or self.query == ''):
-            self.query = link().imdb_search % urllib.quote_plus(self.query)
-            self.list = self.imdb_list(self.query)
+            self.list = self.imdb_list3(self.query)
             index().movieList(self.list)
             return self.list
 
@@ -2954,6 +3024,10 @@ class movies:
             return self.list
         except:
             return
+
+    def cleantitle_movie(self, title):
+        title = re.sub('\n|([[].+?[]])|([(].+?[)])|\s(vs|v[.])\s|(:|;|-|"|,|\'|\.|\?)|\s', '', title).lower()
+        return title
 
     def imdb_list(self, url):
         try:
@@ -2998,10 +3072,10 @@ class movies:
                 imdb = re.sub('[^0-9]', '', url.rsplit('tt', 1)[-1])
                 imdb = imdb.encode('utf-8')
 
-                poster = link().imdb_image
+                poster = '0'
                 try: poster = common.parseDOM(movie, "img", ret="src")[0]
                 except: pass
-                if not ('_SX' in poster or '_SY' in poster): poster = link().imdb_image
+                if not ('_SX' in poster or '_SY' in poster): poster = '0'
                 poster = re.sub('_SX\d*|_SY\d*|_CR\d+?,\d+?,\d+?,\d*','_SX500', poster)
                 poster = common.replaceHTMLCodes(poster)
                 poster = poster.encode('utf-8')
@@ -3078,9 +3152,13 @@ class movies:
 
     def imdb_list2(self, url, idx=True):
         try:
+            def imdb_watchlist_id(url):
+                id = getUrl(url, timeout='30').result
+                id = re.compile('/export[?]list_id=(ls\d*)').findall(id)[0]
+                return id
+
             if url == link().imdb_watchlist % link().imdb_user:
-                result = getUrl(url, timeout='30').result
-                url = re.compile('/export[?]list_id=(ls\d*)').findall(result)[0]
+                url = index().cache(imdb_watchlist_id, 8640, url)
                 url = link().imdb_list % url
 
             result = getUrl(url, timeout='30').result
@@ -3137,12 +3215,12 @@ class movies:
                 imdb = re.sub('[^0-9]', '', url.rsplit('tt', 1)[-1])
                 imdb = imdb.encode('utf-8')
 
-                poster = link().imdb_image
+                poster = '0'
                 try: poster = common.parseDOM(movie, "img", ret="src")[0]
                 except: pass
                 try: poster = common.parseDOM(movie, "img", ret="loadlate")[0]
                 except: pass
-                if not ('_SX' in poster or '_SY' in poster): poster = link().imdb_image
+                if not ('_SX' in poster or '_SY' in poster): poster = '0'
                 poster = re.sub('_SX\d*|_SY\d*|_CR\d+?,\d+?,\d+?,\d*','_SX500', poster)
                 poster = common.replaceHTMLCodes(poster)
                 poster = poster.encode('utf-8')
@@ -3195,6 +3273,67 @@ class movies:
                 self.list.append({'name': name, 'title': title, 'year': year, 'imdb': imdb, 'tvdb': '0', 'season': '0', 'episode': '0', 'show': '0', 'show_alt': '0', 'date': '0', 'genre': '0', 'url': url, 'poster': poster, 'fanart': '0', 'studio': '0', 'duration': duration, 'rating': rating, 'votes': votes, 'mpaa': '0', 'director': director, 'plot': plot, 'plotoutline': tagline, 'tagline': tagline, 'next': next})
             except:
                 pass
+
+        return self.list
+
+    def imdb_list3(self, url):
+        try:
+            url = link().imdb_search % urllib.quote_plus(url)
+
+            result = getUrl(url, timeout='30').result
+            result = common.replaceHTMLCodes(result)
+            result = json.loads(result)
+
+            movies = []
+            try: movies += result['title_popular']
+            except: pass
+            try: movies += result['title_exact']
+            except: pass
+            try: movies += result['title_substring']
+            except: pass
+        except:
+            return
+
+        for movie in movies:
+            try:
+                year = movie['title_description']
+                year = year.split(',', 1)[0].lower()
+                if any(x in year for x in ['tv series', 'tv mini-series', 'video game']): raise Exception()
+                year = re.sub('[^0-9]', '', str(year))[:4]
+                if not year.isdigit(): raise Exception()
+
+                if int(year) > int((datetime.datetime.utcnow() - datetime.timedelta(hours = 5)).strftime("%Y")): raise Exception()
+
+                title = movie['title']
+                title = common.replaceHTMLCodes(title)
+                title = title.encode('utf-8')
+
+                name = '%s (%s)' % (title, year)
+                try: name = name.encode('utf-8')
+                except: pass
+
+                imdb = movie['id']
+                imdb = re.sub('[^0-9]', '', str(imdb))
+                imdb = imdb.encode('utf-8')
+
+                url = link().imdb_title % imdb
+                url = common.replaceHTMLCodes(url)
+                url = url.encode('utf-8')
+
+                self.list.append({'name': name, 'title': title, 'year': year, 'imdb': imdb, 'tvdb': '0', 'season': '0', 'episode': '0', 'show': '0', 'show_alt': '0', 'date': '0', 'genre': '0', 'url': url, 'poster': '0', 'fanart': '0', 'studio': '0', 'duration': '0', 'rating': '0', 'votes': '0', 'mpaa': '0', 'director': '0', 'plot': '0', 'plotoutline': '0', 'tagline': '0'})
+            except:
+                pass
+
+        self.list = self.list[:50]
+
+        threads = []
+        for i in range(0, len(self.list)): threads.append(Thread(self.tmdb_info, i))
+        [i.start() for i in threads]
+        [i.join() for i in threads]
+
+        filter = [i for i in self.list if not i['poster'] == '0']
+        filter += [i for i in self.list if i['poster'] == '0']
+        self.list = filter
 
         return self.list
 
@@ -3315,10 +3454,10 @@ class movies:
                 genre = common.replaceHTMLCodes(genre)
                 genre = genre.encode('utf-8')
 
-                poster = link().imdb_image
+                poster = '0'
                 try: poster = movie['images']['poster']['medium']
                 except: pass
-                if poster == None or not '/posters/' in poster: poster = link().imdb_image
+                if poster == None or not '/posters/' in poster: poster = '0'
                 poster = poster.rsplit('?', 1)[0]
                 poster = common.replaceHTMLCodes(poster)
                 poster = poster.encode('utf-8')
@@ -3381,41 +3520,66 @@ class movies:
 
     def scn_list(self, url):
         try:
-            result = getUrl(url, timeout='10').result
+            #result = getUrl(url).result
+            #if not "movie_table" in result: result = getUrl(link().gtranslator % url).result
+            result = getUrl(link().gtranslator % url).result
             result = result.decode('iso-8859-1').encode('utf-8')
-
-            movies = common.parseDOM(result, "a", attrs = { "class": "p-title" })
-            movies = [re.compile('(.+?\.\d{4})\.').findall(i) for i in movies]
-            movies = [i[0] for i in movies if len(i) > 0]
-            movies = [i.replace('.3D.', '.').replace('.', ' ') for i in movies]
-            movies = uniqueList(movies).list
+            movies = common.parseDOM(result, "div", attrs = { "class": "movie_table" })
         except:
             return
 
         try:
-            next = re.compile('class=[\'|\"]page-button page-current[\'|\"]>.+?href=[\'|\"](.+?)[\'|\"]').findall(result)[0]
-            if next == link().scn_base: raise Exception()
+            next = common.parseDOM(result, "div", attrs = { "class": "count_text" })[0]
+            next = re.compile('(<a.+?</a>)').findall(next)
+            next = [i for i in next if '>Next<' in i][-1]
+            next = re.compile('href=(.+?)>').findall(next)[-1]
+            next = re.sub('\'|\"','', next)
             next = common.replaceHTMLCodes(next)
+            try: next = urlparse.parse_qs(urlparse.urlparse(next).query)['u'][0]
+            except: pass
+            if not next.startswith('http'): next = urlparse.urljoin(link().scn_base, next)
             next = next.encode('utf-8')
         except:
             next = ''
 
         for movie in movies:
             try:
-                title = re.compile('(.+?) \d{4}$').findall(movie)[0]
+                title = common.parseDOM(movie, "a", ret="title")[0]
+                title = re.compile('(.+?) [(]\d{4}[)]$').findall(title)[0]
                 title = common.replaceHTMLCodes(title)
                 title = title.encode('utf-8')
 
-                year = re.compile('(\d{4})$').findall(movie)[0]
+                year = common.parseDOM(movie, "a", ret="title")[0]
+                year = re.compile('.+? [(](\d{4})[)]$').findall(year)[0]
                 year = year.encode('utf-8')
 
                 name = '%s (%s)' % (title, year)
                 try: name = name.encode('utf-8')
                 except: pass
 
-                poster = link().imdb_image
+                url = common.parseDOM(movie, "a", ret="href")[0]
+                url = common.replaceHTMLCodes(url)
+                try: url = urlparse.parse_qs(urlparse.urlparse(url).query)['u'][0]
+                except: pass
+                if not url.startswith('http'): url = urlparse.urljoin(link().scn_base, url)
+                url = url.encode('utf-8')
 
-                self.list.append({'name': name, 'title': title, 'year': year, 'imdb': '0000000', 'tvdb': '0', 'season': '0', 'episode': '0', 'show': '0', 'show_alt': '0', 'date': '0', 'genre': '0', 'url': '0', 'poster': poster, 'fanart': '0', 'studio': '0', 'duration': '0', 'rating': '0', 'votes': '0', 'mpaa': '0', 'director': '0', 'plot': '0', 'plotoutline': '0', 'tagline': '0', 'next': next})
+                poster = '0'
+                try: poster = common.parseDOM(movie, "img", ret="src")[0]
+                except: pass
+                poster = common.replaceHTMLCodes(poster)
+                try: poster = urlparse.parse_qs(urlparse.urlparse(poster).query)['u'][0]
+                except: pass
+                poster = poster.encode('utf-8')
+
+                genre = common.parseDOM(movie, "div", attrs = { "class": "movie_about_genre" })
+                genre = common.parseDOM(genre, "a")
+                genre = " / ".join(genre)
+                if genre == '': genre = '0'
+                genre = common.replaceHTMLCodes(genre)
+                genre = genre.encode('utf-8')
+
+                self.list.append({'name': name, 'title': title, 'year': year, 'imdb': '0000000', 'tvdb': '0', 'season': '0', 'episode': '0', 'show': '0', 'show_alt': '0', 'date': '0', 'genre': genre, 'url': '0', 'poster': poster, 'fanart': '0', 'studio': '0', 'duration': '0', 'rating': '0', 'votes': '0', 'mpaa': '0', 'director': '0', 'plot': '0', 'plotoutline': '0', 'tagline': '0', 'next': next})
             except:
                 pass
 
@@ -3435,73 +3599,44 @@ class movies:
 
     def imdb_info(self, i):
         try:
-            url = link().imdb_info % (urllib.quote_plus(self.list[i]['title']), self.list[i]['year'])
-            result = getUrl(url, timeout='10').result
+            match = []
+            title = self.list[i]['title']
+            year = self.list[i]['year']
+            url = link().imdb_search % urllib.quote_plus(title)
+            result = getUrl(url, timeout='30').result
+            result = common.replaceHTMLCodes(result)
             result = json.loads(result)
+            for x in result.keys(): match += result[x]
 
-            imdb = result['imdbID']
-            if imdb == 'N/A' or imdb == None: imdb = '0000000'
+            title = self.cleantitle_movie(title)
+            years = [str(year), str(int(year)+1), str(int(year)-1)]
+            match = [x for x in match if title == self.cleantitle_movie(x['title'])]
+            match = [x for x in match if any(x['title_description'].startswith(y) for y in years)][0]
+
+            title = match['title']
+            if title == '' or title == None: title = '0'
+            title = common.replaceHTMLCodes(title)
+            title = title.encode('utf-8')
+            if not title == '0': self.list[i].update({'title': title})
+
+            year = match['title_description']
+            year = re.sub('[^0-9]', '', str(year))[:4]
+            self.list[i].update({'year': year})
+
+            name = '%s (%s)' % (self.list[i]['title'], self.list[i]['year'])
+            try: name = name.encode('utf-8')
+            except: pass
+            self.list[i].update({'name': name})
+
+            imdb = match['id']
             imdb = re.sub('[^0-9]', '', str(imdb))
             imdb = imdb.encode('utf-8')
-            if not imdb == '0000000': self.list[i].update({'imdb': imdb})
+            self.list[i].update({'imdb': imdb})
 
             url = link().imdb_title % imdb
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
-            if not imdb == '0000000': self.list[i].update({'url': url})
-
-            poster = result['Poster']
-            if not ('_SX' in poster or '_SY' in poster): poster = link().imdb_image
-            poster = re.sub('_SX\d*|_SY\d*|_CR\d+?,\d+?,\d+?,\d*','_SX500', poster)
-            poster = common.replaceHTMLCodes(poster)
-            poster = poster.encode('utf-8')
-            if not poster == link().imdb_image: self.list[i].update({'poster': poster})
-
-            genre = result['Genre'].split(',')
-            genre = [x.strip() for x in genre]
-            if genre == ['N/A'] or genre == None: genre = '0'
-            genre = " / ".join(genre)
-            genre = common.replaceHTMLCodes(genre)
-            genre = genre.encode('utf-8')
-            if not genre == '0': self.list[i].update({'genre': genre})
-
-            duration = str(result['Runtime'])
-            if duration == 'N/A' or duration == None: duration = '0'
-            duration = re.sub('[^0-9]', '', str(duration))
-            duration = duration.encode('utf-8')
-            if not duration == '0': self.list[i].update({'duration': duration})
-
-            rating = str(result['imdbRating'])
-            if rating == 'N/A' or rating == None: rating = '0'
-            rating = common.replaceHTMLCodes(rating)
-            rating = rating.encode('utf-8')
-            if not rating == '0': self.list[i].update({'rating': rating})
-
-            votes = str(result['imdbVotes'])
-            if votes == 'N/A' or votes == None: votes = '0'
-            votes = common.replaceHTMLCodes(votes)
-            votes = votes.encode('utf-8')
-            if not votes == '0': self.list[i].update({'votes': votes})
-
-            director = result['Director'].split(',')
-            director = [x.strip() for x in director]
-            if director == ['N/A'] or director == None: director = '0'
-            director = " / ".join(director)
-            director = common.replaceHTMLCodes(director)
-            director = director.encode('utf-8')
-            if not director == '0': self.list[i].update({'director': director})
-
-            plot = result['Plot']
-            if plot == 'N/A' or plot == None: plot = '0'
-            plot = common.replaceHTMLCodes(plot)
-            plot = plot.encode('utf-8')
-            if not plot == '0': self.list[i].update({'plot': plot})
-
-            tagline = re.compile('[.!?][\s]{1,2}(?=[A-Z])').split(plot)[0]
-            try: tagline = tagline.encode('utf-8')
-            except: pass
-            if self.list[i]['plotoutline'] == '0' and not plot == '0': self.list[i].update({'plotoutline': tagline})
-            if self.list[i]['tagline'] == '0' and not plot == '0': self.list[i].update({'tagline': tagline})
+            self.list[i].update({'url': url})
         except:
             pass
 
@@ -3719,12 +3854,7 @@ class shows:
         else:
             self.query = query
         if not (self.query == None or self.query == ''):
-            self.query = link().imdb_tv_search % urllib.quote_plus(self.query)
-            self.list = self.imdb_list(self.query)
-            try:
-                for i in range(0, len(self.list)): del self.list[i]['next']
-            except:
-                pass
+            self.list = self.imdb_list3(self.query)
             index().showList(self.list)
             return self.list
 
@@ -3799,10 +3929,10 @@ class shows:
                 imdb = re.sub('[^0-9]', '', url.rsplit('tt', 1)[-1])
                 imdb = imdb.encode('utf-8')
 
-                poster = link().imdb_tv_image
+                poster = '0'
                 try: poster = common.parseDOM(show, "img", ret="src")[0]
                 except: pass
-                if not ('_SX' in poster or '_SY' in poster): poster = link().imdb_tv_image
+                if not ('_SX' in poster or '_SY' in poster): poster = '0'
                 poster = re.sub('_SX\d*|_SY\d*|_CR\d+?,\d+?,\d+?,\d*','_SX500', poster)
                 poster = common.replaceHTMLCodes(poster)
                 poster = poster.encode('utf-8')
@@ -3853,9 +3983,13 @@ class shows:
 
     def imdb_list2(self, url, idx=True):
         try:
+            def imdb_watchlist_id(url):
+                id = getUrl(url, timeout='30').result
+                id = re.compile('/export[?]list_id=(ls\d*)').findall(id)[0]
+                return id
+
             if url == link().imdb_watchlist % link().imdb_user:
-                result = getUrl(url, timeout='30').result
-                url = re.compile('/export[?]list_id=(ls\d*)').findall(result)[0]
+                url = index().cache(imdb_watchlist_id, 8640, url)
                 url = link().imdb_tv_list % url
 
             result = getUrl(url, timeout='30').result
@@ -3908,12 +4042,12 @@ class shows:
                 imdb = re.sub('[^0-9]', '', url.rsplit('tt', 1)[-1])
                 imdb = imdb.encode('utf-8')
 
-                poster = link().imdb_tv_image
+                poster = '0'
                 try: poster = common.parseDOM(show, "img", ret="src")[0]
                 except: pass
                 try: poster = common.parseDOM(show, "img", ret="loadlate")[0]
                 except: pass
-                if not ('_SX' in poster or '_SY' in poster): poster = link().imdb_tv_image
+                if not ('_SX' in poster or '_SY' in poster): poster = '0'
                 poster = re.sub('_SX\d*|_SY\d*|_CR\d+?,\d+?,\d+?,\d*','_SX500', poster)
                 poster = common.replaceHTMLCodes(poster)
                 poster = poster.encode('utf-8')
@@ -3936,6 +4070,65 @@ class shows:
                 self.list.append({'title': title, 'year': year, 'imdb': imdb, 'tvdb': '0', 'genre': '0', 'url': url, 'poster': poster, 'banner': poster, 'fanart': '0', 'studio': '0', 'premiered': '0', 'duration': '0', 'rating': rating, 'mpaa': '0', 'plot': plot, 'next': next})
             except:
                 pass
+
+        return self.list
+
+    def imdb_list3(self, url):
+        try:
+            url = link().imdb_search % urllib.quote_plus(url)
+
+            result = getUrl(url, timeout='30').result
+            result = common.replaceHTMLCodes(result)
+            result = json.loads(result)
+
+            shows = []
+            try: shows += result['title_popular']
+            except: pass
+            try: shows += result['title_exact']
+            except: pass
+            try: shows += result['title_substring']
+            except: pass
+        except:
+            return
+
+        for show in shows:
+            try:
+                year = show['title_description']
+                year = year.split(',', 1)[0].lower()
+                if not any(x in year for x in ['tv series', 'tv mini-series']): raise Exception()
+                year = re.sub('[^0-9]', '', str(year))[:4]
+                if not year.isdigit(): raise Exception()
+
+                if int(year) > int((datetime.datetime.utcnow() - datetime.timedelta(hours = 5)).strftime("%Y")): raise Exception()
+
+                title = show['title']
+                title = common.replaceHTMLCodes(title)
+                title = title.encode('utf-8')
+
+                imdb = show['id']
+                imdb = re.sub('[^0-9]', '', str(imdb))
+                imdb = imdb.encode('utf-8')
+
+                url = link().imdb_title % imdb
+                url = common.replaceHTMLCodes(url)
+                url = url.encode('utf-8')
+
+                self.list.append({'title': title, 'year': year, 'imdb': imdb, 'tvdb': '0', 'genre': '0', 'url': url, 'poster': '0', 'banner': '0', 'fanart': '0', 'studio': '0', 'premiered': '0', 'duration': '0', 'rating': '0', 'mpaa': '0', 'plot': '0'})
+            except:
+                pass
+
+        self.list = self.list[:50]
+
+        threads = []
+        for i in range(0, len(self.list)): threads.append(Thread(self.tvdb_info, i))
+        [i.start() for i in threads]
+        [i.join() for i in threads]
+
+        self.list = [i for i in self.list if not i['tvdb'] == '0']
+
+        filter = [i for i in self.list if not i['poster'] == '0']
+        filter += [i for i in self.list if i['poster'] == '0']
+        self.list = filter
 
         return self.list
 
@@ -3979,10 +4172,10 @@ class shows:
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
-                poster = link().imdb_tv_image
+                poster = '0'
                 try: poster = show['images']['poster']['medium']
                 except: pass
-                if poster == None or not '/posters/' in poster: poster = link().imdb_tv_image
+                if poster == None or not '/posters/' in poster: poster = '0'
                 poster = poster.rsplit('?', 1)[0]
                 poster = common.replaceHTMLCodes(poster)
                 poster = poster.encode('utf-8')
@@ -4179,7 +4372,8 @@ class seasons:
     def get(self, show, year, imdb, tvdb, idx=True):
         if idx == True:
             self.list = index().cache(self.tvdb_list, 24, show, year, imdb, tvdb, '-1')
-            self.list = self.list[0]['seasons']
+            try: self.list = self.list[0]['seasons']
+            except: return
             index().seasonList(self.list)
             return self.list
         else:
@@ -4218,7 +4412,7 @@ class seasons:
             if not imdb == '0000000': raise Exception()
 
             match = []
-            url = link().imdb_api_search % urllib.quote_plus(show)
+            url = link().imdb_search % urllib.quote_plus(show)
             result = getUrl(url, timeout='30').result
             result = common.replaceHTMLCodes(result)
             result = json.loads(result)
@@ -4307,7 +4501,6 @@ class seasons:
             if not poster == '0': pass
             elif not fanart == '0': poster = fanart
             elif not banner == '0': poster = banner
-            else: poster = link().imdb_tv_image
 
             if not banner == '0': pass
             elif not fanart == '0': banner = fanart
@@ -4482,7 +4675,8 @@ class episodes:
     def get(self, show, year, imdb, tvdb, season='', idx=True):
         if idx == True:
             self.list = index().cache(seasons().tvdb_list, 1, show, year, imdb, tvdb, season)
-            self.list = self.list[1]['episodes']
+            try: self.list = self.list[1]['episodes']
+            except: return
             index().episodeList(self.list)
             return self.list
         else:
@@ -4679,10 +4873,10 @@ class episodes:
                 try: name = name.encode('utf-8')
                 except: pass
 
-                poster = link().imdb_tv_image
+                poster = '0'
                 try: poster = episode['show']['images']['poster']['medium']
                 except: pass
-                if poster == None or not '/posters/' in poster: poster = link().imdb_tv_image
+                if poster == None or not '/posters/' in poster: poster = '0'
                 poster = poster.rsplit('?', 1)[0]
                 poster = common.replaceHTMLCodes(poster)
                 poster = poster.encode('utf-8')
@@ -4872,7 +5066,6 @@ class episodes:
                 if not poster == '0': pass
                 elif not fanart == '0': poster = fanart
                 elif not banner == '0': poster = banner
-                else: poster = link().imdb_tv_image
 
                 if not banner == '0': pass
                 elif not fanart == '0': banner = fanart
@@ -5103,7 +5296,6 @@ class resolver:
             if self.sources == []: raise Exception()
             self.sources = self.sources_filter()
 
-
             meta = json.loads(meta)
 
             if content == 'movie': 
@@ -5189,11 +5381,11 @@ class resolver:
         else: content = 'episode'
 
         if content == 'movie':
-            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('movie25', 'true'), ('iwatchonline', 'true'), ('movietube', 'true'), ('moviezone', 'true'), ('zumvo', 'true'), ('view47', 'true'), ('g2g', 'true'), ('muchmovies', 'true'), ('sweflix', 'true'), ('movieshd', 'true'), ('onlinemovies', 'true'), ('yify', 'true'), ('vkbox', 'true'), ('moviestorm', 'true'), ('watchfree', 'true'), ('merdb', 'true'), ('wso', 'true'), ('einthusan', 'true'), ('oneclickwatch', 'true'), ('noobroom', 'true'), ('furk', 'true')]
-            sourceDict = [('icefilms', getSetting("icefilms")), ('primewire', getSetting("primewire")), ('movie25', getSetting("movie25")), ('iwatchonline', getSetting("iwatchonline")), ('movietube', getSetting("movietube")), ('moviezone', getSetting("moviezone")), ('zumvo', getSetting("zumvo")), ('view47', getSetting("view47")), ('g2g', getSetting("g2g")), ('muchmovies', getSetting("muchmovies")), ('sweflix', getSetting("sweflix")), ('movieshd', getSetting("movieshd")), ('onlinemovies', getSetting("onlinemovies")), ('yify', getSetting("yify")), ('vkbox', getSetting("vkbox")), ('moviestorm', getSetting("moviestorm")), ('watchfree', getSetting("watchfree")), ('merdb', getSetting("merdb")), ('wso', getSetting("wso")), ('einthusan', getSetting("einthusan")), ('oneclickwatch', getSetting("oneclickwatch")), ('noobroom', getSetting("noobroom")), ('furk', getSetting("furk"))]
+            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('movie25', 'true'), ('iwatchonline', 'true'), ('gvcenter', 'true'), ('movietube', 'true'), ('moviezone', 'true'), ('yify', 'true'), ('zumvo', 'true'), ('g2g', 'true'), ('muchmovies', 'true'), ('sweflix', 'true'), ('movieshd', 'true'), ('onlinemovies', 'true'), ('vkbox', 'true'), ('moviestorm', 'true'), ('watchfree', 'true'), ('merdb', 'true'), ('wso', 'true'), ('einthusan', 'true'), ('noobroom', 'true'), ('furk', 'true')]
+            sourceDict = [('icefilms', getSetting("icefilms")), ('primewire', getSetting("primewire")), ('movie25', getSetting("movie25")), ('iwatchonline', getSetting("iwatchonline")), ('gvcenter', getSetting("gvcenter")), ('movietube', getSetting("movietube")), ('moviezone', getSetting("moviezone")), ('yify', getSetting("yify")), ('zumvo', getSetting("zumvo")), ('g2g', getSetting("g2g")), ('muchmovies', getSetting("muchmovies")), ('sweflix', getSetting("sweflix")), ('movieshd', getSetting("movieshd")), ('onlinemovies', getSetting("onlinemovies")), ('vkbox', getSetting("vkbox")), ('moviestorm', getSetting("moviestorm")), ('watchfree', getSetting("watchfree")), ('merdb', getSetting("merdb")), ('wso', getSetting("wso")), ('einthusan', getSetting("einthusan")), ('noobroom', getSetting("noobroom")), ('furk', getSetting("furk"))]
         else:
-            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('watchseries', 'true'), ('iwatchonline', 'true'), ('movietube', 'true'), ('ororo', 'true'), ('hdtvshows', 'true'), ('vkbox', 'true'), ('clickplay', 'true'), ('moviestorm', 'true'), ('watchfree', 'true'), ('merdb', 'true'), ('wso', 'true'), ('animeultima', 'true'), ('oneclickwatch', 'true'), ('tvrelease', 'true'), ('directdl', 'true'), ('noobroom', 'true'), ('furk', 'true')]
-            sourceDict = [('icefilms', getSetting("icefilms_tv")), ('primewire', getSetting("primewire_tv")), ('watchseries', getSetting("watchseries_tv")), ('iwatchonline', getSetting("iwatchonline_tv")), ('movietube', getSetting("movietube_tv")), ('ororo', getSetting("ororo_tv")), ('hdtvshows', getSetting("hdtvshows_tv")), ('vkbox', getSetting("vkbox_tv")), ('clickplay', getSetting("clickplay_tv")), ('moviestorm', getSetting("moviestorm_tv")), ('watchfree', getSetting("watchfree_tv")), ('merdb', getSetting("merdb_tv")), ('wso', getSetting("wso_tv")), ('animeultima', getSetting("animeultima_tv")), ('tvrelease', getSetting("tvrelease_tv")), ('oneclickwatch', getSetting("oneclickwatch_tv")), ('directdl', getSetting("directdl_tv")), ('noobroom', getSetting("noobroom_tv")), ('furk', getSetting("furk_tv"))]
+            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('watchseries', 'true'), ('iwatchonline', 'true'), ('gvcenter', 'true'), ('movietube', 'true'), ('ororo', 'true'), ('hdtvshows', 'true'), ('vkbox', 'true'), ('clickplay', 'true'), ('moviestorm', 'true'), ('watchfree', 'true'), ('merdb', 'true'), ('wso', 'true'), ('animeultima', 'true'), ('tvrelease', 'true'), ('directdl', 'true'), ('noobroom', 'true'), ('furk', 'true')]
+            sourceDict = [('icefilms', getSetting("icefilms_tv")), ('primewire', getSetting("primewire_tv")), ('watchseries', getSetting("watchseries_tv")), ('iwatchonline', getSetting("iwatchonline_tv")), ('gvcenter', getSetting("gvcenter_tv")), ('movietube', getSetting("movietube_tv")), ('ororo', getSetting("ororo_tv")), ('hdtvshows', getSetting("hdtvshows_tv")), ('vkbox', getSetting("vkbox_tv")), ('clickplay', getSetting("clickplay_tv")), ('moviestorm', getSetting("moviestorm_tv")), ('watchfree', getSetting("watchfree_tv")), ('merdb', getSetting("merdb_tv")), ('wso', getSetting("wso_tv")), ('animeultima', getSetting("animeultima_tv")), ('tvrelease', getSetting("tvrelease_tv")), ('directdl', getSetting("directdl_tv")), ('noobroom', getSetting("noobroom_tv")), ('furk', getSetting("furk_tv"))]
 
 
         global global_sources

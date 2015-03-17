@@ -1,4 +1,36 @@
 ------------------------
+Genesis v4.1.0 (17-Mar-15)
+------------------------
+
+- Tweaked Most Popular movies.
+- Fixed issues with library integration.
+- Added section for movie certificates.
+- Added section for TV show certificates.
+- Re-work of Latest HD movies (Movie25).
+- Re-work of Latest movies (Movie25).
+- Re-work of movie search.
+- Re-work of TV show search.
+- Tweaked IMDb watchlist.
+- Tweaked IMDb TV watchlist.
+- Fixed Hugefiles resolver.
+- Fixed Videomega resolver.
+- Fixed GVideo resolver.
+- Fixed Bestreams resolver.
+- Tweaked available resolvers.
+- Re-work of Icefilms source.
+- Re-work of Primewire source.
+- Re-work of Movie25 source.
+- Added GVcenter source.
+- Removed View47 source.
+- Removed Oneclickwatch source.
+- Tweaked available sources.
+- Tweaked various listings.
+- Tweaked info dialogs.
+- Updated all themes.
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.0.1 (7-Mar-15)
 ------------------------
 

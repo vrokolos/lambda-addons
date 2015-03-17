@@ -56,8 +56,9 @@ def get(url):
     elif u == 'filecloud.io': url = filecloud(url)
     elif u == 'filehoot.com': url = filehoot(url)
     elif u == 'filenuke.com': url = filenuke(url)
-    elif u == 'docs.google.com': url = googledocs(url)
+    elif u == 'picasaweb.google.com': url = googleplus(url)
     elif u == 'plus.google.com': url = googleplus(url)
+    elif u == 'docs.google.com': url = googledocs(url)
     elif u == 'gorillavid.in': url = gorillavid(url)
     elif u == 'gorillavid.com': url = gorillavid(url)
     elif u == 'grifthost.com': url = grifthost(url)
@@ -362,29 +363,11 @@ def bestreams(url):
     try:
         url = url.replace('/embed-', '/')
         url = re.compile('//.+?/([\w]+)').findall(url)[0]
-        url = 'http://bestreams.net/%s' % url
+        url = 'http://bestreams.net/embed-%s.html' % url
 
-        result = getUrl(url, mobile=True, close=False).result
-
-        post = {}
-        f = common.parseDOM(result, "Form", attrs = { "method": "POST" })[-1]
-        k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
-        for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-        post.update({'imhuman': 'Proceed to video'})
-        post = urllib.urlencode(post)
-
-        import time
-
-        for i in range(0, 5):
-            try:
-                result = getUrl(url, mobile=True, close=False, post=post).result
-                if 'Proceed to video' in result: raise Exception()
-
-                url = common.parseDOM(result, "div", attrs = { "id": "main" })[0]
-                url = common.parseDOM(url, "a", ret="href")[0]
-                return url
-            except:
-                time.sleep(1)
+        result = getUrl(url, mobile=True).result
+        url = re.compile('file *: *"(http.+?)"').findall(result)[-1]
+        return url
     except:
         return
 
@@ -569,8 +552,11 @@ def googledocs(url):
 def googleplus(url):
     try:
         result = getUrl(url).result
-
         u = re.compile('"(http.+?videoplayback[?].+?)"').findall(result)
+        if len(u) == 0:
+            result = getUrl(url, mobile=True).result
+            u = re.compile('"(http.+?videoplayback[?].+?)"').findall(result)
+
         u = [i.replace('\\u003d','=').replace('\\u0026','&') for i in u]
 
         d = []
@@ -645,6 +631,7 @@ def hugefiles(url):
 
         post = {}
         f = common.parseDOM(result, "Form", attrs = { "action": "" })
+        f += common.parseDOM(result, "form", attrs = { "action": "" })
         k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
         for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
         post.update({'method_free': 'Free Download'})
@@ -716,6 +703,7 @@ def kingfiles(url):
 def mailru(url):
     try:
         url = url.replace('/my.mail.ru/video/', '/api.video.mail.ru/videos/embed/')
+        url = url.replace('/my.mail.ru/mail/', '/api.video.mail.ru/videos/embed/mail/')
         url = url.replace('/videoapi.my.mail.ru/', '/api.video.mail.ru/')
         result = getUrl(url).result
 
@@ -1132,11 +1120,9 @@ def videomega(url):
         url = urlparse.parse_qs(url)['ref'][0]
         url = 'http://videomega.tv/cdn.php?ref=%s' % url
 
-        result = getUrl(url).result
+        result = getUrl(url, mobile=True).result
 
-        url = re.compile('document.write.unescape."(.+?)"').findall(result)[-1]
-        url = urllib.unquote_plus(url)
-        url = re.compile('file *: *"(.+?)"').findall(url)[0]
+        url = common.parseDOM(result, "source", ret="src", attrs = { "type": "video.+?" })[0]
         return url
     except:
         return
