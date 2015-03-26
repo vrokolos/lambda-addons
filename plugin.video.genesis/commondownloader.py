@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import urllib
 import urllib2
 import xbmc
 import xbmcgui
@@ -61,6 +62,14 @@ def download(url, dest, title=None, referer=None, agent=None, cookie=None):
     if not cookie:
         cookie  = ''
 
+    #quote parameters
+    url     = urllib.quote_plus(url)
+    dest    = urllib.quote_plus(dest)
+    title   = urllib.quote_plus(title)
+    referer = urllib.quote_plus(referer)
+    agent   = urllib.quote_plus(agent)
+    cookie  = urllib.quote_plus(cookie)
+
     script = inspect.getfile(inspect.currentframe())
     cmd    = 'RunScript(%s, %s, %s, %s, %s, %s, %s)' % (script, url, dest, title, referer, agent, cookie)
 
@@ -68,6 +77,14 @@ def download(url, dest, title=None, referer=None, agent=None, cookie=None):
 
 
 def doDownload(url, dest, title, referer, agent, cookie):
+    #unquote parameters
+    url     = urllib.unquote_plus(url)
+    dest    = urllib.unquote_plus(dest)
+    title   = urllib.unquote_plus(title)
+    referer = urllib.unquote_plus(referer)
+    agent   = urllib.unquote_plus(agent)
+    cookie  = urllib.unquote_plus(cookie)
+
     file = dest.rsplit(os.sep, 1)[-1]
 
     resp = getResponse(url, 0, referer, agent, cookie)
@@ -108,6 +125,13 @@ def doDownload(url, dest, title, referer, agent, cookie):
         return
 
     print 'Download File Size : %dMB %s ' % (mb, dest)
+
+    #Create directory of file
+    dirs = os.path.dirname(os.path.abspath(dest))
+    dirs = dirs.split(os.sep)
+    dirs = [str.join(os.sep, dirs[:dirs.index(i)+2]) for i in dirs]
+    for dir in dirs: xbmcvfs.mkdir(dir)
+
 
     #f = open(dest, mode='wb')
     f = xbmcvfs.File(dest, 'w')

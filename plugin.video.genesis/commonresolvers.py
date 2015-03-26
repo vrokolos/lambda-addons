@@ -79,6 +79,7 @@ def get(url):
     elif u == 'nosvideo.com': url = nosvideo(url)
     elif u == 'novamov.com': url = coolcdn(url)
     elif u == 'nowvideo.sx': url = coolcdn(url)
+    elif u == 'openload.io': url = openload(url)
     elif u == 'played.to': url = played(url)
     elif u == 'primeshare.tv': url = primeshare(url)
     elif u == 'promptfile.com': url = promptfile(url)
@@ -883,6 +884,16 @@ def nosvideo(url):
 
         result = getUrl(url).result
         url = common.parseDOM(result, "file")[0]
+        return url
+    except:
+        return
+
+def openload(url):
+    try:
+        result = getUrl(url).result
+
+        url = common.parseDOM(result, "span", attrs = { "id": "realdownload" })[0]
+        url = common.parseDOM(url, "a", ret="href")[0]
         return url
     except:
         return

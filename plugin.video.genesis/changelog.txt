@@ -1,4 +1,30 @@
 ------------------------
+Genesis v4.2.0 (26-Mar-15)
+------------------------
+
+- Added Openload resolver.
+- Moved Nosvideo to LQ hosts.
+- NOTE: Host priorities are reset because of new hosts.
+- Tweaked detection of new episodes (library).
+- Tweaked loading of sources (10 seconds timeout).
+- NOTE: Sources timeout can change in addon's settings.
+- Added option for refreshing sources (Host selection = Directory).
+- Moved cache of sources to seperate database.
+- Moved downloads to seperate folders based on content.
+- Tweaked spoyser's Download Script.
+- Re-work of Watchseries source.
+- Re-work of Iwatchonline source.
+- Re-work of DirectDownload source.
+- Fixed issue with MoviesHD source.
+- Removed HDTVshows source.
+- Tweaked available sources.
+- Tweaked Tools section.
+- Updated translations.
+- Updated all themes.
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.1.0 (17-Mar-15)
 ------------------------
 

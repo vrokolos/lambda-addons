@@ -1,4 +1,19 @@
 ------------------------
+Hellenic TV v3.3.3 (26-Mar-15)
+------------------------
+
+- Tweaked live stream of SKAI.
+- Tweaked live stream of MAD TV.
+- Tweaked live stream of EURONEWS GR.
+- Updated E TV, KONTRA CHANNEL, EXTRA CHANNEL and ENA CHANNEL.
+- Tweaked stream selection of movies and TV shows.
+- Added Hellenic TV1 network.
+- Added videopublishing resolver.
+- Tweaked available resolvers.
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.3.2 (11-Mar-15)
 ------------------------
 

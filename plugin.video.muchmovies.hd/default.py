@@ -128,31 +128,43 @@ class main:
         return
 
 class getUrl(object):
-    def __init__(self, url, close=True, proxy=None, post=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
+    def __init__(self, url, close=True, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='20'):
         if not proxy == None:
             proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
             opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
             opener = urllib2.install_opener(opener)
         if output == 'cookie' or not close == True:
             import cookielib
-            cookie_handler = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
-            opener = urllib2.build_opener(cookie_handler, urllib2.HTTPBasicAuthHandler(), urllib2.HTTPHandler())
+            cookies = cookielib.LWPCookieJar()
+            handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
+            opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
-        if not post == None:
-            request = urllib2.Request(url, post)
+        try: headers.update(headers)
+        except: headers = {}
+        if 'User-Agent' in headers:
+            pass
+        elif not mobile == True:
+            headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0'
         else:
-            request = urllib2.Request(url,None)
-        if mobile == True:
-            request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; CPU; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7')
+            headers['User-Agent'] = 'Apple-iPhone/701.341'
+        if 'referer' in headers:
+            pass
+        elif referer == None:
+            headers['referer'] = url
         else:
-            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0')
-        if not referer == None:
-            request.add_header('Referer', referer)
-        if not cookie == None:
-            request.add_header('cookie', cookie)
+            headers['referer'] = referer
+        if not 'Accept-Language' in headers:
+            headers['Accept-Language'] = 'en-US'
+        if 'cookie' in headers:
+            pass
+        elif not cookie == None:
+            headers['cookie'] = cookie
+        request = urllib2.Request(url, data=post, headers=headers)
         response = urllib2.urlopen(request, timeout=int(timeout))
         if output == 'cookie':
-            result = str(response.headers.get('Set-Cookie'))
+            result = []
+            for c in cookies: result.append('%s=%s' % (c.name, c.value))
+            result = "; ".join(result)
         elif output == 'geturl':
             result = response.geturl()
         else:
@@ -900,26 +912,26 @@ class root:
 
 class link:
     def __init__(self):
-        self.muchmovies_base = 'http://umovies.me'
-        self.muchmovies_sort = 'http://umovies.me/session/sort'
-        self.muchmovies_title = 'http://umovies.me/movies?sort_by=title'
-        self.muchmovies_release = 'http://umovies.me/movies?sort_by=release'
-        self.muchmovies_added = 'http://umovies.me/movies?sort_by=date_added'
-        self.muchmovies_rating = 'http://umovies.me/movies?sort_by=rating'
-        self.muchmovies_root = 'http://umovies.me/movies'
-        self.muchmovies_search = 'http://umovies.me/search'
-        self.muchmovies_genre = 'http://umovies.me/genres'
+        self.muchmovies_base = 'http://aws.123movies.me'
+        self.muchmovies_sort = 'http://aws.123movies.me/session/sort'
+        self.muchmovies_title = 'http://aws.123movies.me/movies?sort_by=title'
+        self.muchmovies_release = 'http://aws.123movies.me/movies?sort_by=release'
+        self.muchmovies_added = 'http://aws.123movies.me/movies?sort_by=date_added'
+        self.muchmovies_rating = 'http://aws.123movies.me/movies?sort_by=rating'
+        self.muchmovies_root = 'http://aws.123movies.me/movies'
+        self.muchmovies_search = 'http://aws.123movies.me/search'
+        self.muchmovies_genre = 'http://aws.123movies.me/genres'
 
 class pages:
     def __init__(self):
         self.list = []
 
     def get(self):
-        #self.list = self.muchmovies_list()
-        self.list = cache(self.muchmovies_list)
+        #self.list = self.muchmovies_list(link().muchmovies_base)
+        self.list = cache(self.muchmovies_list, link().muchmovies_base)
         index().pageList(self.list)
 
-    def muchmovies_list(self):
+    def muchmovies_list(self, url):
         try:
             result = getUrl(link().muchmovies_root, mobile=True).result
 
@@ -951,11 +963,11 @@ class genres:
         self.list = []
 
     def get(self):
-        #self.list = self.muchmovies_list()
-        self.list = cache3(self.muchmovies_list)
+        #self.list = self.muchmovies_list(link().muchmovies_base)
+        self.list = cache3(self.muchmovies_list, link().muchmovies_base)
         index().pageList(self.list)
 
-    def muchmovies_list(self):
+    def muchmovies_list(self, url):
         try:
             result = getUrl(link().muchmovies_genre, mobile=True).result
 

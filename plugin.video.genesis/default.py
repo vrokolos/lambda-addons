@@ -50,6 +50,7 @@ tvLibrary           = os.path.join(xbmc.translatePath(getSetting("tv_library")),
 PseudoTV            = xbmcgui.Window(10000).getProperty('PseudoTVRunning')
 addonLogos          = os.path.join(addonPath,'resources/logos')
 addonSettings       = os.path.join(dataPath,'settings.db')
+addonSources        = os.path.join(dataPath,'sources.db')
 addonCache          = os.path.join(dataPath,'cache.db')
 
 
@@ -113,6 +114,7 @@ class main:
         elif action == 'root_library':                root().library()
         elif action == 'cache_clear_list':            index().cache_clear_list()
         elif action == 'cache_clear_src':             index().cache_clear_src()
+        elif action == 'container_refresh':           index().container_refresh()
         elif action == 'item_queue':                  contextMenu().item_queue()
         elif action == 'view_movies':                 contextMenu().view('movies')
         elif action == 'view_tvshows':                contextMenu().view('tvshows')
@@ -126,9 +128,10 @@ class main:
         elif action == 'settings_tv':                 contextMenu().settings_open(cat=3.0)
         elif action == 'settings_hostshd':            contextMenu().settings_open(cat=4.0)
         elif action == 'settings_hostssd':            contextMenu().settings_open(cat=5.0)
-        elif action == 'settings_library':            contextMenu().settings_open(cat=6.0)
-        elif action == 'settings_accounts':           contextMenu().settings_open(cat=7.1)
-        elif action == 'settings_subtitles':          contextMenu().settings_open(cat=8.0)
+        elif action == 'settings_accounts':           contextMenu().settings_open(cat=6.1)
+        elif action == 'settings_library':            contextMenu().settings_open(cat=7.0)
+        elif action == 'settings_downloads':          contextMenu().settings_open(cat=8.0)
+        elif action == 'settings_subtitles':          contextMenu().settings_open(cat=9.0)
         elif action == 'favourite_movie_add':         contextMenu().favourite_add('Movie', imdb, name, year, image, refresh=True)
         elif action == 'favourite_movie_from_search': contextMenu().favourite_add('Movie', imdb, name, year, image)
         elif action == 'favourite_tv_add':            contextMenu().favourite_add('TV Show', imdb, name, year, image, refresh=True)
@@ -456,7 +459,7 @@ class player(xbmc.Player):
             hours, minutes = divmod(minutes, 60)
             offset_time = '%02d:%02d:%02d' % (hours, minutes, seconds)
 
-            yes = index().yesnoDialog('%s %s' % (language(30348).encode("utf-8"), offset_time), '', self.name, language(30349).encode("utf-8"), language(30350).encode("utf-8"))
+            yes = index().yesnoDialog('%s %s' % (language(30342).encode("utf-8"), offset_time), '', self.name, language(30343).encode("utf-8"), language(30344).encode("utf-8"))
             if not yes: self.offset = '0'
         except:
             pass
@@ -792,7 +795,7 @@ class index:
 
     def cache_clear_list(self):
         try:
-            yes = index().yesnoDialog(language(30347).encode("utf-8"), '')
+            yes = index().yesnoDialog(language(30341).encode("utf-8"), '')
             if not yes: return
 
             dbcon = database.connect(addonCache)
@@ -810,10 +813,10 @@ class index:
 
     def cache_clear_src(self):
         try:
-            yes = index().yesnoDialog(language(30347).encode("utf-8"), '')
+            yes = index().yesnoDialog(language(30341).encode("utf-8"), '')
             if not yes: return
 
-            dbcon = database.connect(addonCache)
+            dbcon = database.connect(addonSources)
             dbcur = dbcon.cursor()
             dbcur.execute("DROP TABLE IF EXISTS rel_src")
             dbcur.execute("VACUUM")
@@ -866,13 +869,18 @@ class index:
                 u = '%s?action=%s' % (sys.argv[0], root)
                 try: u += '&url=%s' % urllib.quote_plus(i['url'])
                 except: pass
-                if root == 'folder_downloads':
-                    u = xbmc.translatePath(getSetting("downloads"))
-                elif root == 'folder_movie':
+                if root == 'downloads_movies':
+                    u = xbmc.translatePath(getSetting("movie_downloads"))
+                    if len(xbmcvfs.listdir(u)[0]) == 0: raise Exception()
+                if root == 'downloads_shows':
+                    u = xbmc.translatePath(getSetting("tv_downloads"))
+                    if len(xbmcvfs.listdir(u)[0]) == 0: raise Exception()
+                elif root == 'library_movies':
                     u = movieLibrary
-                elif root == 'folder_tv':
+                    if len(xbmcvfs.listdir(u)[0]) == 0: raise Exception()
+                elif root == 'library_shows':
                     u = tvLibrary
-                if u == '': raise Exception()
+                    if len(xbmcvfs.listdir(u)[0]) == 0: raise Exception()
 
                 cm = []
                 replaceItems = False
@@ -1435,6 +1443,7 @@ class index:
                 cm.append((language(30401).encode("utf-8"), 'RunPlugin(%s?action=item_queue)' % (sys.argv[0])))
                 cm.append((language(30402).encode("utf-8"), 'RunPlugin(%s?action=download&name=%s&url=%s&provider=%s)' % (sys.argv[0], sysname, sysurl, sysprovider)))
                 cm.append((language(30412).encode("utf-8"), 'Action(Info)'))
+                cm.append((language(30427).encode("utf-8"), 'RunPlugin(%s?action=container_refresh)' % (sys.argv[0])))
                 cm.append((language(30410).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
                 cm.append((language(30411).encode("utf-8"), 'RunPlugin(%s?action=playlist_open)' % (sys.argv[0])))
 
@@ -1469,6 +1478,7 @@ class index:
                 cm.append((language(30401).encode("utf-8"), 'RunPlugin(%s?action=item_queue)' % (sys.argv[0])))
                 cm.append((language(30402).encode("utf-8"), 'RunPlugin(%s?action=download&name=%s&url=%s&provider=%s)' % (sys.argv[0], sysname, sysurl, sysprovider)))
                 cm.append((language(30414).encode("utf-8"), 'Action(Info)'))
+                cm.append((language(30427).encode("utf-8"), 'RunPlugin(%s?action=container_refresh)' % (sys.argv[0])))
                 cm.append((language(30410).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
                 cm.append((language(30411).encode("utf-8"), 'RunPlugin(%s?action=playlist_open)' % (sys.argv[0])))
 
@@ -1797,7 +1807,7 @@ class contextMenu:
             xbmc.executebuiltin('UpdateLibrary(video)')
 
     def library_movie_tool(self, url):
-        yes = index().yesnoDialog(language(30347).encode("utf-8"), '')
+        yes = index().yesnoDialog(language(30341).encode("utf-8"), '')
         if not yes: return
 
         if url == 'trakt_collection':
@@ -1817,11 +1827,11 @@ class contextMenu:
 
             content = '%s?action=play&name=%s&title=%s&year=%s&imdb=%s&url=%s' % (sys.argv[0], sysname, systitle, sysyear, sysimdb, sysurl)
 
-            if not xbmcvfs.exists(movieLibrary): xbmcvfs.mkdir(movieLibrary)
+            xbmcvfs.mkdir(movieLibrary)
 
             enc_name = name.translate(None, '\/:*?"<>|').strip('.')
             folder = os.path.join(movieLibrary, enc_name)
-            if not xbmcvfs.exists(folder): xbmcvfs.mkdir(folder)
+            xbmcvfs.mkdir(folder)
 
             stream = os.path.join(folder, enc_name + '.strm')
             file = xbmcvfs.File(stream, 'w')
@@ -1920,7 +1930,7 @@ class contextMenu:
             xbmc.executebuiltin('UpdateLibrary(video)')
 
     def library_tv_tool(self, url):
-        yes = index().yesnoDialog(language(30347).encode("utf-8"), '')
+        yes = index().yesnoDialog(language(30341).encode("utf-8"), '')
         if not yes: return
 
         if url == 'trakt_tv_collection':
@@ -1940,15 +1950,15 @@ class contextMenu:
 
             content = '%s?action=play&name=%s&title=%s&year=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&show=%s&show_alt=%s&date=%s&genre=%s&url=%s' % (sys.argv[0], sysname, systitle, sysyear, sysimdb, systvdb, sysseason, sysepisode, sysshow, sysshow_alt, sysdate, sysgenre, sysurl)
 
-            if not xbmcvfs.exists(tvLibrary): xbmcvfs.mkdir(tvLibrary)
+            xbmcvfs.mkdir(tvLibrary)
 
             enc_show = show_alt.translate(None, '\/:*?"<>|').strip('.')
             folder = os.path.join(tvLibrary, enc_show)
-            if not xbmcvfs.exists(folder): xbmcvfs.mkdir(folder)
+            xbmcvfs.mkdir(folder)
 
             enc_season = 'Season %s' % season.translate(None, '\/:*?"<>|').strip('.')
             folder = os.path.join(folder, enc_season)
-            if not xbmcvfs.exists(folder): xbmcvfs.mkdir(folder)
+            xbmcvfs.mkdir(folder)
 
             enc_name = name.translate(None, '\/:*?"<>|').strip('.')
             stream = os.path.join(folder, enc_name + '.strm')
@@ -2071,7 +2081,7 @@ class contextMenu:
 
                     if date <= int(re.sub('[^0-9]', '', str(i['date']))):
                         src = resolver().sources_get(i['name'], i['title'], i['year'], i['imdb'], i['tvdb'], i['season'], i['episode'], i['show'], i['show_alt'], i['date'], i['genre'])
-                        if not len(src) > 0: raise Exception()
+                        if not len(src) > 2: raise Exception()
 
                     self.library_tv_strm(i)
                 except:
@@ -2151,24 +2161,8 @@ class contextMenu:
 
     def download(self, name, url, provider):
         try:
-            folder = xbmc.translatePath(getSetting("downloads"))
-            enc_name = name.translate(None, '\/:*?"<>|').strip('.')
-            xbmcvfs.mkdir(dataPath)
-            xbmcvfs.mkdir(folder)
-
-            if folder == '':
-            	yes = index().yesnoDialog(language(30341).encode("utf-8"), language(30342).encode("utf-8"))
-            	if yes: contextMenu().settings_open()
-            	return
-
             url = resolver().sources_resolve(url, provider)
             if url == None: raise Exception()
-
-            import urlparse
-            ext = urlparse.urlsplit(url.split('|')[0]).path.split('/')[-1]
-            ext = os.path.splitext(ext)[1][1:]
-            if ext in ['', 'php']: ext = 'mp4'
-            dest = os.path.join(folder, enc_name + '.' + ext)
 
             try: agent = urlparse.parse_qs(url.split('|')[1])['User-Agent'][0]
             except: agent = None
@@ -2179,9 +2173,26 @@ class contextMenu:
 
             url = url.split('|')[0]
 
+            name = name.translate(None, '\/:*?"<>|').strip('.')
+
+            content = re.compile('(.+?)\sS(\d*)E\d*$').findall(name)
+
+            if len(content) == 0:
+            	dest = xbmc.translatePath(getSetting("movie_downloads"))
+            	dest = os.path.join(dest, name)
+            else:
+            	dest = xbmc.translatePath(getSetting("tv_downloads"))
+            	dest = os.path.join(dest, content[0][0])
+            	dest = os.path.join(dest, 'Season %01d' % int(content[0][1]))
+
+            ext = os.path.splitext(urlparse.urlparse(url).path)[1][1:]
+            if ext in ['', 'php']: ext = 'mp4'
+            dest = os.path.join(dest, name + '.' + ext)
+
             import commondownloader
             commondownloader.download(url, dest, 'Genesis', referer=referer, agent=agent, cookie=cookie)
         except:
+            index().infoDialog(language(30308).encode("utf-8"))
             return
 
     def toggle_playback(self, content, name, title, year, imdb, tvdb, season, episode, show, show_alt, date, genre):
@@ -2306,7 +2317,8 @@ class root:
             rootList.append({'name': 30570, 'image': 'userlists_shows.jpg', 'action': 'userlists_shows'})
         rootList.append({'name': 30571, 'image': 'movies_favourites.jpg', 'action': 'movies_favourites'})
         rootList.append({'name': 30572, 'image': 'shows_favourites.jpg', 'action': 'shows_favourites'})
-        rootList.append({'name': 30573, 'image': 'folder_downloads.jpg', 'action': 'folder_downloads'})
+        rootList.append({'name': 30573, 'image': 'downloads_movies.jpg', 'action': 'downloads_movies'})
+        rootList.append({'name': 30574, 'image': 'downloads_shows.jpg', 'action': 'downloads_shows'})
         index().rootList(rootList)
 
     def search(self):
@@ -2329,23 +2341,24 @@ class root:
         rootList.append({'name': 30608, 'image': 'settings_open.jpg', 'action': 'settings_hostssd'})
         rootList.append({'name': 30609, 'image': 'cache_clear.jpg', 'action': 'cache_clear_src'})
         rootList.append({'name': 30610, 'image': 'cache_clear.jpg', 'action': 'cache_clear_list'})
-        rootList.append({'name': 30611, 'image': 'root_library.jpg', 'action': 'root_library'})
+        rootList.append({'name': 30611, 'image': 'settings_open.jpg', 'action': 'settings_downloads'})
+        rootList.append({'name': 30612, 'image': 'root_library.jpg', 'action': 'root_library'})
         index().rootList(rootList)
 
     def library(self):
         rootList = []
-        rootList.append({'name': 30612, 'image': 'settings_open.jpg', 'action': 'settings_library'})
-        rootList.append({'name': 30613, 'image': 'library_update.jpg', 'action': 'library_update_tool'})
-        rootList.append({'name': 30614, 'image': 'folder_movie.jpg', 'action': 'folder_movie'})
-        rootList.append({'name': 30615, 'image': 'folder_tv.jpg', 'action': 'folder_tv'})
+        rootList.append({'name': 30620, 'image': 'settings_open.jpg', 'action': 'settings_library'})
+        rootList.append({'name': 30621, 'image': 'library_update.jpg', 'action': 'library_update_tool'})
+        rootList.append({'name': 30622, 'image': 'library_movies.jpg', 'action': 'library_movies'})
+        rootList.append({'name': 30623, 'image': 'library_shows.jpg', 'action': 'library_shows'})
         if not (link().trakt_user == '' or link().trakt_password == ''):
-            rootList.append({'name': 30616, 'image': 'movies_trakt_collection.jpg', 'action': 'library_trakt_collection'})
-            rootList.append({'name': 30617, 'image': 'shows_trakt_collection.jpg', 'action': 'library_tv_trakt_collection'})
-            rootList.append({'name': 30618, 'image': 'movies_trakt_watchlist.jpg', 'action': 'library_trakt_watchlist'})
-            rootList.append({'name': 30619, 'image': 'shows_trakt_watchlist.jpg', 'action': 'library_tv_trakt_watchlist'})
+            rootList.append({'name': 30624, 'image': 'movies_trakt_collection.jpg', 'action': 'library_trakt_collection'})
+            rootList.append({'name': 30625, 'image': 'shows_trakt_collection.jpg', 'action': 'library_tv_trakt_collection'})
+            rootList.append({'name': 30626, 'image': 'movies_trakt_watchlist.jpg', 'action': 'library_trakt_watchlist'})
+            rootList.append({'name': 30627, 'image': 'shows_trakt_watchlist.jpg', 'action': 'library_tv_trakt_watchlist'})
         if not (link().imdb_user == ''):
-            rootList.append({'name': 30620, 'image': 'movies_imdb_watchlist.jpg', 'action': 'library_imdb_watchlist'})
-            rootList.append({'name': 30621, 'image': 'shows_imdb_watchlist.jpg', 'action': 'library_tv_imdb_watchlist'})
+            rootList.append({'name': 30628, 'image': 'movies_imdb_watchlist.jpg', 'action': 'library_imdb_watchlist'})
+            rootList.append({'name': 30629, 'image': 'shows_imdb_watchlist.jpg', 'action': 'library_tv_imdb_watchlist'})
         index().rootList(rootList)
 
 
@@ -5384,8 +5397,8 @@ class resolver:
             #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('movie25', 'true'), ('iwatchonline', 'true'), ('gvcenter', 'true'), ('movietube', 'true'), ('moviezone', 'true'), ('yify', 'true'), ('zumvo', 'true'), ('g2g', 'true'), ('muchmovies', 'true'), ('sweflix', 'true'), ('movieshd', 'true'), ('onlinemovies', 'true'), ('vkbox', 'true'), ('moviestorm', 'true'), ('watchfree', 'true'), ('merdb', 'true'), ('wso', 'true'), ('einthusan', 'true'), ('noobroom', 'true'), ('furk', 'true')]
             sourceDict = [('icefilms', getSetting("icefilms")), ('primewire', getSetting("primewire")), ('movie25', getSetting("movie25")), ('iwatchonline', getSetting("iwatchonline")), ('gvcenter', getSetting("gvcenter")), ('movietube', getSetting("movietube")), ('moviezone', getSetting("moviezone")), ('yify', getSetting("yify")), ('zumvo', getSetting("zumvo")), ('g2g', getSetting("g2g")), ('muchmovies', getSetting("muchmovies")), ('sweflix', getSetting("sweflix")), ('movieshd', getSetting("movieshd")), ('onlinemovies', getSetting("onlinemovies")), ('vkbox', getSetting("vkbox")), ('moviestorm', getSetting("moviestorm")), ('watchfree', getSetting("watchfree")), ('merdb', getSetting("merdb")), ('wso', getSetting("wso")), ('einthusan', getSetting("einthusan")), ('noobroom', getSetting("noobroom")), ('furk', getSetting("furk"))]
         else:
-            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('watchseries', 'true'), ('iwatchonline', 'true'), ('gvcenter', 'true'), ('movietube', 'true'), ('ororo', 'true'), ('hdtvshows', 'true'), ('vkbox', 'true'), ('clickplay', 'true'), ('moviestorm', 'true'), ('watchfree', 'true'), ('merdb', 'true'), ('wso', 'true'), ('animeultima', 'true'), ('tvrelease', 'true'), ('directdl', 'true'), ('noobroom', 'true'), ('furk', 'true')]
-            sourceDict = [('icefilms', getSetting("icefilms_tv")), ('primewire', getSetting("primewire_tv")), ('watchseries', getSetting("watchseries_tv")), ('iwatchonline', getSetting("iwatchonline_tv")), ('gvcenter', getSetting("gvcenter_tv")), ('movietube', getSetting("movietube_tv")), ('ororo', getSetting("ororo_tv")), ('hdtvshows', getSetting("hdtvshows_tv")), ('vkbox', getSetting("vkbox_tv")), ('clickplay', getSetting("clickplay_tv")), ('moviestorm', getSetting("moviestorm_tv")), ('watchfree', getSetting("watchfree_tv")), ('merdb', getSetting("merdb_tv")), ('wso', getSetting("wso_tv")), ('animeultima', getSetting("animeultima_tv")), ('tvrelease', getSetting("tvrelease_tv")), ('directdl', getSetting("directdl_tv")), ('noobroom', getSetting("noobroom_tv")), ('furk', getSetting("furk_tv"))]
+            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('watchseries', 'true'), ('iwatchonline', 'true'), ('gvcenter', 'true'), ('movietube', 'true'), ('ororo', 'true'), ('vkbox', 'true'), ('clickplay', 'true'), ('moviestorm', 'true'), ('watchfree', 'true'), ('merdb', 'true'), ('wso', 'true'), ('animeultima', 'true'), ('tvrelease', 'true'), ('directdl', 'true'), ('noobroom', 'true'), ('furk', 'true')]
+            sourceDict = [('icefilms', getSetting("icefilms_tv")), ('primewire', getSetting("primewire_tv")), ('watchseries', getSetting("watchseries_tv")), ('iwatchonline', getSetting("iwatchonline_tv")), ('gvcenter', getSetting("gvcenter_tv")), ('movietube', getSetting("movietube_tv")), ('ororo', getSetting("ororo_tv")), ('vkbox', getSetting("vkbox_tv")), ('clickplay', getSetting("clickplay_tv")), ('moviestorm', getSetting("moviestorm_tv")), ('watchfree', getSetting("watchfree_tv")), ('merdb', getSetting("merdb_tv")), ('wso', getSetting("wso_tv")), ('animeultima', getSetting("animeultima_tv")), ('tvrelease', getSetting("tvrelease_tv")), ('directdl', getSetting("directdl_tv")), ('noobroom', getSetting("noobroom_tv")), ('furk', getSetting("furk_tv"))]
 
 
         global global_sources
@@ -5393,6 +5406,7 @@ class resolver:
 
         threads = []
         sourceDict = [i[0] for i in sourceDict if i[1] == 'true']
+
 
         if content == 'movie':
             title = self.normaltitle(title)
@@ -5402,8 +5416,21 @@ class resolver:
             season, episode = episodes().tvrage_redirect(title, year, imdb, tvdb, season, episode, show, date, genre)
             for source in sourceDict: threads.append(Thread(self.sources_tv, name, title, year, imdb, tvdb, date, season, episode, show, show_alt, source))
 
+
+        timeout = int(getSetting("sources_timeout_beta"))
+
         [i.start() for i in threads]
-        [i.join() for i in threads]
+
+        for i in range(0, timeout * 2):
+            is_alive = [x.is_alive() for x in threads]
+            if all(x == False for x in is_alive): break
+            time.sleep(0.5)
+
+        for i in range(0, 5 * 2):
+            is_alive = len([i for i in threads if i.is_alive() == True])
+            if is_alive < 10: break
+            time.sleep(0.5)
+
 
         self.sources = global_sources
 
@@ -5411,7 +5438,7 @@ class resolver:
 
     def sources_movie(self, name, title, year, imdb, source):
         try:
-            dbcon = database.connect(addonCache)
+            dbcon = database.connect(addonSources)
             dbcur = dbcon.cursor()
             dbcur.execute("CREATE TABLE IF NOT EXISTS rel_url (""source TEXT, ""imdb_id TEXT, ""season TEXT, ""episode TEXT, ""rel_url TEXT, ""UNIQUE(source, imdb_id, season, episode)"");")
             dbcur.execute("CREATE TABLE IF NOT EXISTS rel_src (""source TEXT, ""imdb_id TEXT, ""season TEXT, ""episode TEXT, ""hosts TEXT, ""added TEXT, ""UNIQUE(source, imdb_id, season, episode)"");")
@@ -5462,7 +5489,7 @@ class resolver:
 
     def sources_tv(self, name, title, year, imdb, tvdb, date, season, episode, show, show_alt, source):
         try:
-            dbcon = database.connect(addonCache)
+            dbcon = database.connect(addonSources)
             dbcur = dbcon.cursor()
             dbcur.execute("CREATE TABLE IF NOT EXISTS rel_url (""source TEXT, ""imdb_id TEXT, ""season TEXT, ""episode TEXT, ""rel_url TEXT, ""UNIQUE(source, imdb_id, season, episode)"");")
             dbcur.execute("CREATE TABLE IF NOT EXISTS rel_src (""source TEXT, ""imdb_id TEXT, ""season TEXT, ""episode TEXT, ""hosts TEXT, ""added TEXT, ""UNIQUE(source, imdb_id, season, episode)"");")
@@ -5573,7 +5600,7 @@ class resolver:
         sd_rank += self.directprDict
         sd_rank += [i for i in pz_hosts if i in self.hostprDict + self.hosthqDict]
         sd_rank += [i for i in rd_hosts if i in self.hostprDict + self.hosthqDict]
-        #sd_rank += ['Movreel', '180upload', 'Vidplay', 'Ororo', 'HDTVshows', 'Animeultima', 'Grifthost', 'Primeshare', 'Promptfile', 'Nosvideo', 'Mrfile', 'Mightyupload', 'Cloudyvideos', 'iShared', 'Uptobox', 'V-vids', 'Ipithos', 'Zettahost', 'Uploadc', 'Zalaa']
+        #sd_rank += ['Movreel', '180upload', 'Vidplay', 'Ororo', 'Animeultima', 'Grifthost', 'Openload', 'Primeshare', 'Promptfile', 'Mrfile', 'Mightyupload', 'Cloudyvideos', 'iShared', 'Uptobox', 'V-vids', 'Ipithos', 'Zettahost', 'Uploadc', 'Zalaa', 'Streamin']
         sd_rank += [getSetting("host1"), getSetting("host2"), getSetting("host3"), getSetting("host4"), getSetting("host5"), getSetting("host6"), getSetting("host7"), getSetting("host8"), getSetting("host9"), getSetting("host10"), getSetting("host11"), getSetting("host12"), getSetting("host13"), getSetting("host14"), getSetting("host15"), getSetting("host16"), getSetting("host17"), getSetting("host18"), getSetting("host19"), getSetting("host20")]
         sd_rank += self.directsdDict + self.hosthqDict + self.hostmqDict + self.hostlqDict
 
@@ -5706,7 +5733,7 @@ class resolver:
 
     def sources_reset(self):
         try:
-            v = '4.0.0'
+            v = '4.2.0'
             if getSetting("sources_version") == v: return
 
             settings = os.path.join(dataPath,'settings.xml')
@@ -5735,17 +5762,17 @@ class resolver:
 
         self.directhdDict = ['vk', 'gvideo', 'muchmovies', 'sweflix', 'videomega', 'yify', 'einthusan']
 
-        self.directsdDict = ['ororo', 'hdtvshows', 'animeultima', 'vk']
+        self.directsdDict = ['ororo', 'animeultima', 'vk']
 
         self.hostprDict = ['uploaded', 'rapidgator', 'filefactory', 'bitshare', 'uploadable']
 
         self.hosthdDict = ['movreel', '180upload', 'vidplay', 'mrfile', 'mightyupload', 'uptobox', 'hugefiles', 'filecloud', 'uploadrocket', 'kingfiles']
 
-        self.hosthqDict = ['movreel', '180upload', 'vidplay', 'grifthost', 'primeshare', 'promptfile', 'nosvideo', 'mrfile', 'mightyupload', 'cloudyvideos', 'ishared', 'uptobox', 'v-vids', 'ipithos', 'zettahost', 'uploadc', 'zalaa']
+        self.hosthqDict = ['movreel', '180upload', 'vidplay', 'grifthost', 'openload', 'primeshare', 'promptfile', 'mrfile', 'mightyupload', 'cloudyvideos', 'ishared', 'uptobox', 'v-vids', 'ipithos', 'zettahost', 'uploadc', 'zalaa']
 
         self.hostmqDict = ['youtube', 'streamin', 'xvidstage', 'vidspot', 'allmyvideos', 'cloudzilla', 'streamcloud']
 
-        self.hostlqDict = ['played', 'vidto', 'bestreams', 'mooshare', 'thefile', 'faststream', 'fastvideo', 'filenuke', 'sharerepo', 'sharesix', 'nowvideo', 'movshare', 'videoweed', 'novamov', 'vidbull', 'filehoot', 'daclips', 'gorillavid', 'movpod', 'vidzi', 'vodlocker', 'thevideo', 'movdivx', 'stagevu']
+        self.hostlqDict = ['played', 'vidto', 'bestreams', 'mooshare', 'thefile', 'faststream', 'fastvideo', 'filenuke', 'sharerepo', 'sharesix', 'nowvideo', 'movshare', 'videoweed', 'novamov', 'vidbull', 'filehoot', 'nosvideo', 'daclips', 'gorillavid', 'movpod', 'vidzi', 'vodlocker', 'thevideo', 'movdivx', 'stagevu']
 
         self.hostsdfullDict = self.hostprDict + self.hosthqDict + self.hostmqDict + self.hostlqDict
 

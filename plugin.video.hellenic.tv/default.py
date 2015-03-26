@@ -176,6 +176,7 @@ class main:
         elif action == 'shows_art':                   youtube().art()
         elif action == 'shows_mtv':                   gm().network('mtvgreece')
         elif action == 'shows_madtv':                 youtube().madtv()
+        elif action == 'shows_hellenictv1':           youtube().hellenictv1()
         elif action == 'shows_real_fm':               realfm().podcasts()
         elif action == 'shows_skai_fm':               skai().podcasts()
         elif action == 'shows_networks':              gm().networks()
@@ -1052,6 +1053,7 @@ class root:
         rootList.append({'name': 'ART TV', 'image': 'logos_art.jpg', 'action': 'shows_art'})
         rootList.append({'name': 'MTV', 'image': 'logos_mtv.jpg', 'action': 'shows_mtv'})
         rootList.append({'name': 'MAD TV', 'image': 'logos_madtv.jpg', 'action': 'shows_madtv'})
+        rootList.append({'name': 'Hellenic TV1', 'image': 'logos_hellenictv1.jpg', 'action': 'shows_hellenictv1'})
         rootList.append({'name': 'REAL FM', 'image': 'logos_real_fm.jpg', 'action': 'shows_real_fm'})
         rootList.append({'name': 'SKAI 100,3', 'image': 'logos_skai_fm.jpg', 'action': 'shows_skai_fm'})
         rootList.append({'name': 30531, 'image': 'shows_networks.jpg', 'action': 'shows_networks'})
@@ -2015,7 +2017,9 @@ class gm:
                     pass
 
             sources = [i for i in sources if any(x in i['host'] for x in host_order)]
-            sources.sort(key=lambda x: host_order.index(x['host']))
+            #sources.sort(key=lambda x: host_order.index(x['host']))
+            import random
+            random.shuffle(sources)
 
             if len(sources) == 0:
                 url = common.parseDOM(result, "a", ret="href")[0]
@@ -3474,6 +3478,12 @@ class youtube:
         except: return
         index().showList(self.list)
 
+    def hellenictv1(self):
+        channel = 'HellenicTV1'
+        exclude = ["LLE1CQmHM-oeCQoaW3JTxHcw", "PLzaa5cr7QTutgpyGJd5E0BA2XTCpgEZAd", "FLE1CQmHM-oeCQoaW3JTxHcw"]
+        self.list = index().cache(self.shows_list, 24, channel, [], exclude)
+        index().showList(self.list)
+
     def enikos(self):
         name = 'ENIKOS'
         self.list = self.episodes_list(name, self.enikos_link, '0', 'Greek', '0', name)
@@ -3659,16 +3669,18 @@ class livestream:
             url = common.parseDOM(result, "File")[0]
             url = url.split('[')[-1].split(']')[0]
             url = 'https://www.youtube.com/watch?v=%s' % url
+            url = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=%s' % url
 
             result = getUrl(url).result
-            regex = '"hlsvp" *: *"(.+?)"'
-            check = re.compile(regex).findall(result)
-            if len(check) == 0:
-                url = 'https://www.4proxy.us/index.php?hl=220&q=%s' % url
-                result = getUrl(url).result
+            url = re.compile('"hlsvp" *: *"(.+?)"').findall(result)[0]
+            url = urllib.unquote(url).replace('\\/', '/').replace('https://', 'http://')
 
-            url = re.compile(regex).findall(result)[0]
-            url = urllib.unquote(url).replace('\\/', '/')
+            result = getUrl(url).result
+            result = result.replace('\n','')
+            url = re.compile('RESOLUTION *= *(\d*)x\d*(http.+?\.m3u8)').findall(result)
+            url = [(int(i[0]), i[1]) for i in url]
+            url.sort()
+            url = url[-1][1]
             return url
         except:
             return
@@ -3686,7 +3698,7 @@ class livestream:
             except: url = None
 
             if url == None:
-                url = 'http://www.4proxy.de/index.php?hl=220&q=%s' % urllib.quote_plus(u)
+                url = 'http://www.unblockaccess.com/browse.php?b=20&u=%s' % urllib.quote_plus(u)
                 url = getUrl(url).result
                 url = json.loads(url)
                 url = url['primary']['gr']['hls']
@@ -3706,16 +3718,18 @@ class livestream:
             url = common.parseDOM(result, "iframe", ret="src")[0]
             url = url.split("?v=")[-1].split("/")[-1].split("?")[0].split("&")[0]
             url = 'https://www.youtube.com/watch?v=%s' % url
+            url = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=%s' % url
 
             result = getUrl(url).result
-            regex = '"hlsvp" *: *"(.+?)"'
-            check = re.compile(regex).findall(result)
-            if len(check) == 0:
-                url = 'https://www.4proxy.us/index.php?hl=220&q=%s' % url
-                result = getUrl(url).result
+            url = re.compile('"hlsvp" *: *"(.+?)"').findall(result)[0]
+            url = urllib.unquote(url).replace('\\/', '/').replace('https://', 'http://')
 
-            url = re.compile(regex).findall(result)[0]
-            url = urllib.unquote(url).replace('\\/', '/')
+            result = getUrl(url).result
+            result = result.replace('\n','')
+            url = re.compile('RESOLUTION *= *(\d*)x\d*(http.+?\.m3u8)').findall(result)
+            url = [(int(i[0]), i[1]) for i in url]
+            url.sort()
+            url = url[-1][1]
             return url
         except:
             return
@@ -3739,6 +3753,19 @@ class livestream:
             url = gm().movies_2(url)
             url = random.choice(url)['url']
             url = gm().resolve(url)
+            return url
+        except:
+            return
+
+    def videopublishing(self, url):
+        try:
+            url = 'http://static.videopublishing.com/?publish=%s' % url
+            result = getUrl(url).result
+
+            rtmp = common.parseDOM(result, "server")[0]
+            playpath = common.parseDOM(result, "id")[0]
+
+            url = 'rtmp://%s:1935/live playpath=%s live=1 timeout=10' % (rtmp, playpath)
             return url
         except:
             return
