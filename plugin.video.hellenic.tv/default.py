@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import urllib,urllib2,re,os,threading,datetime,time,base64,xbmc,xbmcplugin,xbmcgui,xbmcaddon,xbmcvfs
+import urllib,urllib2,urlparse,re,os,threading,datetime,time,base64,xbmc,xbmcplugin,xbmcgui,xbmcaddon,xbmcvfs
 from operator import itemgetter
 
 try:
@@ -1560,7 +1560,7 @@ class episodes:
         elif url.startswith(realfm().base_link):
             self.list = realfm().episodes_list(name, url, image, genre, plot, show)
         elif url.startswith(novasports().base_link):
-            self.list = novasports().episodes_list(name, url, image, genre, plot, show)
+            self.list = novasports().episodes_list2(name, url, image, genre, plot, show)
         elif url.startswith(mtvchart().base_link):
             self.list = mtvchart().episodes_list(name, url, image, genre, plot, show)
         elif url.startswith(rythmoschart().base_link):
@@ -1574,12 +1574,14 @@ class episodes:
             try: self.list = self.list[::-1]
             except: pass
         index().episodeList(self.list)
+        return self.list
 
     def stacked(self, name, url, image, genre, plot, show):
         # stacked mp3 files from real fm fail after 10 seconds of playback, parse them to a folder.
         if url.startswith(realfm().base_link):
             self.list = realfm().stacked_list(name, url, image, genre, plot, show)
         index().episodeList(self.list)
+        return self.list
 
 class resolver:
     def run(self, url):
@@ -1693,6 +1695,7 @@ class gm:
         if not (self.query == None or self.query == ''):
             self.list = self.search_list('movie', self.query)
             index().movieList(self.list)
+            return self.list
 
     def search_tv(self, query=None):
         if query == None:
@@ -1702,10 +1705,12 @@ class gm:
         if not (self.query == None or self.query == ''):
             self.list = self.search_list('tv', self.query)
             index().showList(self.list)
+            return self.list
 
     def movies(self, url):
         self.list = index().cache(self.movies_list, 24, url)
         index().movieList(self.list)
+        return self.list
 
     def movies_2(self, url):
         self.list = index().cache(self.movies_list, 240, url)
@@ -1722,12 +1727,14 @@ class gm:
             self.list = sorted(self.list, key=itemgetter('name'))
 
             index().cartoonList(self.list)
+            return self.list
         except:
             pass
 
     def shows(self, url):
         self.list = index().cache(self.shows_list, 24, url)
         index().showList(self.list)
+        return self.list
 
     def networks(self):
         networks = ['mega', 'ant1', 'alpha', 'star', 'skai', 'nerit', 'epsilontv', 'kontrachannel', 'bluesky', 'action24', 'art', 'sigmatv', 'ant1_cy', 'mtvgreece', 'madtv']
@@ -1735,12 +1742,14 @@ class gm:
         try: self.list = [i for i in self.list if i['network'] in networks]
         except: return
         index().showList(self.list)
+        return self.list
 
     def network(self, limit):
         self.list = index().cache(self.shows_list, 24, 'y=1')
         try: self.list = [i for i in self.list if i['network'] == limit]
         except: return
         index().showList(self.list)
+        return self.list
 
     def titles_list(self, url):
         try:
@@ -1760,7 +1769,7 @@ class gm:
                 name = name.encode('utf-8')
 
                 url = common.parseDOM(title, "option", ret="value")[0]
-                url = url.split('?')[-1]
+                url = urlparse.urlparse(url).query
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
@@ -1784,7 +1793,7 @@ class gm:
             result = uniqueList(result).list
 
             for i in result:
-                self.list.append({'name': '0', 'url': '%s/%s' % (self.base_link, i), 'image': '0', 'title': '0', 'year': '0', 'genre': 'Greek', 'plot': '0'})
+                self.list.append({'name': '0', 'url': urlparse.urljoin(self.base_link, i), 'image': '0', 'title': '0', 'year': '0', 'genre': 'Greek', 'plot': '0'})
         except:
             return self.list
 
@@ -1820,7 +1829,7 @@ class gm:
             if not title == '0': self.list[i].update({'name': name})
 
             image = common.parseDOM(result, "img", ret="src")[0]
-            image = '%s/%s' % (self.base_link, image)
+            image = urlparse.urljoin(self.base_link, image)
             if image.endswith('icon/film.jpg'): image = '0'
             image = common.replaceHTMLCodes(image)
             image = image.encode('utf-8')
@@ -1839,7 +1848,7 @@ class gm:
             if not title == '0': self.list[i].update({'name': title, 'title': title})
 
             image = common.parseDOM(result, "img", ret="src")[0]
-            image = '%s/%s' % (self.base_link, image)
+            image = urlparse.urljoin(self.base_link, image)
             if image.endswith('icon/film.jpg'): image = '0'
             image = common.replaceHTMLCodes(image)
             image = image.encode('utf-8')
@@ -1873,12 +1882,12 @@ class gm:
                 except: pass
 
                 url = common.parseDOM(movie, "a", ret="href")[0]
-                url = '%s/%s' % (self.base_link, url)
+                url = urlparse.urljoin(self.base_link, url)
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
                 image = common.parseDOM(movie, "IMG", ret="SRC")[0]
-                image = '%s/%s' % (self.base_link, image)
+                image = urlparse.urljoin(self.base_link, image)
                 if image.endswith('icon/film.jpg'): image = '0'
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
@@ -1923,12 +1932,12 @@ class gm:
                 name = name.encode('utf-8')
 
                 url = common.parseDOM(show, "a", ret="href")[0]
-                url = '%s/%s' % (self.base_link, url)
+                url = urlparse.urljoin(self.base_link, url)
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
                 image = common.parseDOM(show, "IMG", ret="SRC")[0]
-                image = '%s/%s' % (self.base_link, image)
+                image = urlparse.urljoin(self.base_link, image)
                 if image.endswith('icon/film.jpg'): image = '0'
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
@@ -2058,16 +2067,19 @@ class mega:
     def shows(self):
         self.list = index().cache(self.shows_list, 24)
         index().showList(self.list)
+        return self.list
 
     def news(self):
         name = 'MEGA GEGONOTA'
         self.list = self.episodes_list2(name, self.news_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
 
     def sports(self):
         name = 'MEGA SPORTS'
         self.list = self.episodes_list2(name, self.sports_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
 
     def shows_list(self):
         try:
@@ -2086,7 +2098,8 @@ class mega:
                 if not tpl == 'ekpompiindex': raise Exception()
 
                 url = common.parseDOM(show, "a", ret="data-params")[0]
-                url = self.episodes_link % url.split("catid=")[-1]
+                url = urlparse.parse_qs(urlparse.urlparse(url).query)['catid'][0]
+                url = self.episodes_link % url
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
@@ -2128,11 +2141,12 @@ class mega:
 
                 url = common.parseDOM(episode, "a", ret="data-vUrl")[0]
                 url = url.replace(',', '').split('/i/', 1)[-1].rsplit('.csmil', 1)[0]
-                url = '%s/%s' % (self.media_link, url)
+                url = urlparse.urljoin(self.media_link, url)
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
                 image = common.parseDOM(episode, "img", ret="src")[0]
+                image = urlparse.urljoin(self.media_link, image)
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
@@ -2166,8 +2180,11 @@ class mega:
                 name = name.encode('utf-8')
 
                 url = common.parseDOM(episode, "a", ret="href")[0]
-                url = url.split("catid=")[-1].replace("')",'')
-                url = '%s/r.asp?catid=%s' % (self.base_link, url)
+
+                url = re.compile("'(.+?)'").findall(url)
+                url = [i for i in url if 'catid' in i][0]
+                url = 'r.asp?%s' % url
+                url = urlparse.urljoin(self.base_link, url)
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
@@ -2195,7 +2212,7 @@ class ant1:
     def __init__(self):
         self.list = []
         self.base_link = 'http://www.antenna.gr'
-        self.img_link = 'http://www.antenna.gr/imgHandler/326'
+        self.img_link = 'http://www.antenna.gr/imgHandler/326/'
         self.shows_link = 'http://www.antenna.gr/tv/doubleip/shows?version=3.0'
         self.episodes_link = 'http://www.antenna.gr/tv/doubleip/show?version=3.0&sid='
         self.episodes_link2 = 'http://www.antenna.gr/tv/doubleip/categories?version=3.0&howmany=100&cid='
@@ -2207,16 +2224,19 @@ class ant1:
     def shows(self):
         self.list = index().cache(self.shows_list, 24)
         index().showList(self.list)
+        return self.list
 
     def news(self):
         name = 'ANT1 NEWS'
         self.list = self.episodes_list(name, self.news_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
 
     def sports(self):
         name = 'ANT1 SPORTS'
         self.list = self.episodes_list(name, self.sports_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
 
     def shows_list(self):
         try:
@@ -2236,7 +2256,7 @@ class ant1:
                 name = name.encode('utf-8')
 
                 image = i['webpath'].strip()
-                image = '%s/%s' % (self.img_link, image)
+                image = urlparse.urljoin(self.img_link, image)
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
@@ -2288,7 +2308,7 @@ class ant1:
                 name = name.encode('utf-8')
 
                 image = i['webpath'].strip()
-                image = '%s/%s' % (self.img_link, image)
+                image = urlparse.urljoin(self.img_link, image)
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
@@ -2336,11 +2356,13 @@ class alpha:
     def shows(self):
         self.list = index().cache(self.shows_list, 24)
         index().showList(self.list)
+        return self.list
 
     def news(self):
         name = 'ALPHA NEWS'
         self.list = self.episodes_list(name, self.news_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
 
     def shows_list(self):
         try:
@@ -2372,11 +2394,12 @@ class alpha:
 
                 url = common.parseDOM(show, "a", ret="href")[0]
                 if not any(url == i for i in filter): raise Exception()
-                url = '%s%s' % (self.base_link, url)
+                url = urlparse.urljoin(self.base_link, url)
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
                 image = common.parseDOM(show, "img", ret="src")[0]
+                image = urlparse.urljoin(self.base_link, image)
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
@@ -2414,7 +2437,7 @@ class alpha:
                 name = name.encode('utf-8')
 
                 url = common.parseDOM(episode, "a", ret="href")[-1]
-                url = '%s%s' % (self.base_link, url)
+                url = urlparse.urljoin(self.base_link, url)
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
@@ -2422,7 +2445,7 @@ class alpha:
                 if url in [i['url'] for i in self.list]: raise Exception()
 
                 image = common.parseDOM(episode, "img", ret="src")[-1]
-                if not image.startswith('http://'): image = '%s%s' % (self.base_link, image)
+                image = urlparse.urljoin(self.base_link, image)
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
@@ -2481,12 +2504,14 @@ class star:
     def shows(self):
         self.list = index().cache(self.shows_list, 24)
         index().showList(self.list)
+        return self.list
 
     def news(self):
         name = 'STAR NEWS'
         image = 'http://www.star.gr/tv/PublishingImages/160913114342_2118.jpg'
         self.list = self.episodes_list(name, self.news_link, image, 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
 
     def shows_list(self):
         try:
@@ -2503,7 +2528,7 @@ class star:
                 name = name.encode('utf-8')
 
                 image = show['Image'].strip()
-                image = '%s%s' % (self.base_link, image)
+                image = urlparse.urljoin(self.base_link, image)
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
@@ -2552,6 +2577,9 @@ class star:
 
         return self.list
 
+    def resolve(self, url):
+        return url
+
 class skai:
     def __init__(self):
         self.list = []
@@ -2566,19 +2594,23 @@ class skai:
     def shows(self):
         self.list = index().cache(self.shows_list, 24, self.shows_link)
         index().showList(self.list)
+        return self.list
 
     def podcasts(self):
         self.list = index().cache(self.shows_list, 24, self.podcasts_link)
         index().showList(self.list)
+        return self.list
 
     def docs(self):
         self.list = index().cache(self.docs_list, 24)
         index().showList(self.list)
+        return self.list
 
     def news(self):
         name = 'SKAI NEWS'
         self.list = self.episodes_list(name, self.news_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
 
     def docs_list(self):
         try:
@@ -2595,12 +2627,12 @@ class skai:
                 name = common.replaceHTMLCodes(name)
                 name = name.encode('utf-8')
 
-                u = common.parseDOM(doc, "a", ret="href")[0]
-                u = '%s%s' % (self.base_link, u)
-                u = common.replaceHTMLCodes(u)
-                u = u.encode('utf-8')
+                url = common.parseDOM(doc, "a", ret="href")[0]
+                url = urlparse.urljoin(self.base_link, url)
+                url = common.replaceHTMLCodes(url)
+                url = url.encode('utf-8')
 
-                self.list.append({'name': name, 'u': u, 'url': '0', 'image': '0', 'genre': 'Greek', 'plot': '0'})
+                self.list.append({'name': name, 'u': url, 'url': '0', 'image': '0', 'genre': 'Greek', 'plot': '0'})
             except:
                 pass
 
@@ -2620,11 +2652,13 @@ class skai:
 
             url = common.parseDOM(result, "a", ret="href")[0]
             url = self.show_link % url.split('=')[-1]
+            url = urlparse.urljoin(self.base_link, url)
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             if not url == '0': self.list[i].update({'url': url})
 
             image = common.parseDOM(result, "img", ret="src")[0]
+            image = urlparse.urljoin(self.base_link, image)
             image = common.replaceHTMLCodes(image)
             image = image.encode('utf-8')
             if not image == '0': self.list[i].update({'image': image})
@@ -2666,12 +2700,13 @@ class skai:
 
                 url = common.parseDOM(show, "Link")[0]
                 url = url.split('[')[-1].split(']')[0]
-                url = '%s%s' % (self.base_link, url)
+                url = urlparse.urljoin(self.base_link, url)
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
                 image = common.parseDOM(show, "ShowImage")[0]
                 image = image.split('[')[-1].split(']')[0]
+                image = urlparse.urljoin(self.base_link, image)
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
@@ -2733,10 +2768,12 @@ class skai:
 
                 url = common.parseDOM(episode, "File")[0]
                 url = url.split('[')[-1].split(']')[0]
+                url = urlparse.urljoin(self.base_link, url)
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
                 image = common.parseDOM(episode, "Photo1")[0]
+                image = urlparse.urljoin(self.base_link, image)
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
@@ -2765,11 +2802,13 @@ class sigma:
     def shows(self):
         self.list = index().cache(self.shows_list, 24)
         index().showList(self.list)
+        return self.list
 
     def news(self):
         name = 'SIGMA NEWS'
         self.list = self.episodes_list(name, self.news_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
 
     def shows_list(self):
         try:
@@ -2788,13 +2827,14 @@ class sigma:
                 url = common.parseDOM(show, "a", ret="href")[0]
                 filter = ['/uefa-champions-league', '/seirestainies', '/tilenouveles', '/alpha']
                 if any(url.endswith(i) for i in filter): raise Exception()
-                url = '%s/%s/episodes' % (self.base_link, url)
+                url = '%s/episodes' % url
+                url = urlparse.urljoin(self.base_link, url)
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
                 image = common.parseDOM(show, "img", ret="src")[0]
                 image = image.replace('/./', '')
-                image = '%s/%s' % (self.base_link, image)
+                image = urlparse.urljoin(self.base_link, image)
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
@@ -2834,11 +2874,13 @@ class sigma:
                 name = name.encode('utf-8')
 
                 url = common.parseDOM(episode, "a", ret="href")[0]
+                url = urlparse.urljoin(self.base_link, url)
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
                 image = common.parseDOM(episode, "img", ret="src")[0]
                 if '/no-image' in image: raise Exception()
+                image = urlparse.urljoin(self.base_link, image)
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
@@ -2936,6 +2978,7 @@ class realfm:
     def podcasts(self):
         self.list = index().cache(self.shows_list, 24)
         index().showList(self.list)
+        return self.list
 
     def shows_list(self):
         try:
@@ -2961,7 +3004,7 @@ class realfm:
                 url = url.encode('utf-8')
 
                 image = common.parseDOM(show, "img", ret="src")[0]
-                image = '%s/%s' % (self.br_link, image)
+                image = urlparse.urljoin(self.br_link, image)
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
@@ -3017,6 +3060,7 @@ class realfm:
 
                 image = episode.split('thumbnail = ', 1)[-1]
                 image = re.compile("'%s'.+?'(.+?)'" % str(i)).findall(image)[0]
+                image = urlparse.urljoin(self.base_link, image)
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
@@ -3057,41 +3101,128 @@ class novasports:
     def __init__(self):
         self.list = []
         self.base_link = 'http://www.novasports.gr'
-        self.handler_link = 'http://www.novasports.gr/handlers/LiveWebTv/LiveWebTvMediaGallery.ashx?%s'
-        self.episodes_link = 'http://www.novasports.gr/LiveWebTV.aspx%s'
-        self.shows_link = 'http://www.novasports.gr/handlers/LiveWebTv/LiveWebTvMediaGallery.ashx?containerid=-1&mediafiletypeid=0&latest=true&isBroadcast=true&tabid=shows&page=1'
-        self.superleague_link = 'http://www.novasports.gr/handlers/LiveWebTv/LiveWebTvMediaGallery.ashx?mediafiletypeid=2&SearchQry=&IsPromo=False&IsBroadcast=False&latest=False&GetWeeks=False&Sport=1&Competition=1713&tabid=Tab_1713&page=1'
-        self.news_link = 'http://www.novasports.gr/handlers/LiveWebTv/LiveWebTvMediaGallery.ashx?containerid=-1&mediafiletypeid=2&latest=true&tabid=categories&page=1'
+        self.shows_link = 'http://www.novasports.gr/web-tv/shows'
+        self.show_link = 'http://www.novasports.gr/sys/novasports/ShowMore/ShowMore?pg=1&perPage=100&id=%s'
+        self.superleague_link = 'http://www.novasports.gr/web-tv/on-demand/categories/?catid=13'
+        self.news_link = 'http://www.novasports.gr/web-tv/on-demand/categories/?catid=0'
 
     def shows(self):
-        name = 'Novasports'
-        self.list = self.episodes_list(name, self.shows_link, '0', 'Greek', '0', name)
-        index().episodeList(self.list)
+        try:
+            name = 'Novasports'
+
+            self.list = index().cache(self.shows_list, 24, self.shows_link)
+
+            url = [i['url'] for i in self.list]
+            url = uniqueList(url).list
+            url = url[:5]
+
+            threads = []
+            self.list = []
+            for u in url: threads.append(Thread(self.episodes_list, name, u, '0', 'Greek', '0', name))
+            [i.start() for i in threads]
+            [i.join() for i in threads]
+
+            self.list = sorted(self.list, key=itemgetter('date'))[::-1]
+            index().episodeList(self.list)
+            return self.list
+        except:
+            return
 
     def news(self):
         name = 'Novasports News'
-        self.list = self.episodes_list(name, self.news_link, '0', 'Greek', '0', name)
+        self.list = self.episodes_list2(name, self.news_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
 
     def superleague(self):
         name = 'Super League'
-        self.list = self.episodes_list(name, self.superleague_link, '0', 'Greek', '0', name)
+        self.list = self.episodes_list2(name, self.superleague_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
+
+    def shows_list(self, url):
+        try:
+            result = getUrl(url).result
+            result = common.parseDOM(result, "div", attrs = { "class": "leftArticle.+?" })[0]
+
+            shows = common.parseDOM(result, "div", attrs = { "class": "g\d*" })
+        except:
+            return
+
+        for show in shows:
+            try:
+                name = common.parseDOM(show, "span", ret="data-title")[0]
+                name = common.replaceHTMLCodes(name)
+                name = name.encode('utf-8')
+
+                url = common.parseDOM(show, "span", ret="data-url")[0]
+                url = urlparse.urljoin(self.base_link, url)
+                url = self.show_link % urlparse.parse_qs(urlparse.urlparse(url).query)['show'][0]
+                url = common.replaceHTMLCodes(url)
+                url = url.encode('utf-8')
+
+                image = common.parseDOM(show, "img", ret="src")[0]
+                image = urlparse.urljoin(self.base_link, image)
+                image = common.replaceHTMLCodes(image)
+                image = image.encode('utf-8')
+
+                self.list.append({'name': name, 'url': url, 'image': '0', 'genre': 'Greek', 'plot': '0'})
+            except:
+                pass
+
+        return self.list
 
     def episodes_list(self, name, url, image, genre, plot, show):
         try:
             result = getUrl(url).result
-            result = json.loads(result)['HTML']
-            episodes = common.parseDOM(result, "li")
+            result = result.replace('\n','')
+
+            episodes = common.parseDOM(result, "div", attrs = { "class": "g\d*" })
+        except:
+            return
+
+        for episode in episodes:
+            try:
+                name = common.parseDOM(episode, "a")[-1]
+                name += ' (%s)' % re.compile('>(\d{2}-\d{2}-\d{4})<').findall(episode)[0]
+                name = common.replaceHTMLCodes(name)
+                name = name.encode('utf-8')
+
+                url = common.parseDOM(episode, "a", ret="href")[-1]
+                url = urlparse.urljoin(self.base_link, url)
+                url = common.replaceHTMLCodes(url)
+                url = url.encode('utf-8')
+
+                image = common.parseDOM(episode, "img", ret="src")[0]
+                image = urlparse.urljoin(self.base_link, image)
+                image = common.replaceHTMLCodes(image)
+                image = image.encode('utf-8')
+
+                date = re.compile('>(\d{2})-(\d{2})-(\d{4})<').findall(episode)[0]
+                date = '%s-%s-%s' % (date[2], date[1], date[0])
+                date = date.encode('utf-8')
+
+                self.list.append({'name': name, 'url': url, 'image': image, 'date': date, 'genre': genre, 'plot': plot, 'title': name, 'show': show})
+            except:
+                pass
+
+        self.list = sorted(self.list, key=itemgetter('date'))[::-1]
+
+        return self.list
+
+    def episodes_list2(self, name, url, image, genre, plot, show):
+        try:
+            result = getUrl(url).result
+            result = common.parseDOM(result, "div", attrs = { "class": "rightArticle.+?" })[0]
+
+            episodes = common.parseDOM(result, "div", attrs = { "class": "g\d*" })
         except:
             return
 
         try:
-            next = common.parseDOM(result, "div", attrs = { "id": "paginator" })[0]
-            next = next.split('page_link active_page', 1)[-1]
-            next = common.parseDOM(next, "span", ret="onclick")[0]
-            next = re.compile("'(.+?)'").findall(next)[0]
-            next = self.handler_link % next
+            next = common.parseDOM(result, "li", attrs = { "class": "nextButtonWrapper" })[0]
+            next = common.parseDOM(next, "a", ret="href")[0]
+            next = urlparse.urljoin(self.base_link, next)
             next = common.replaceHTMLCodes(next)
             next = next.encode('utf-8')
         except:
@@ -3099,30 +3230,21 @@ class novasports:
 
         for episode in episodes:
             try:
-                title = common.parseDOM(episode, "a", ret="title")[0]
-                title = common.replaceHTMLCodes(title)
-                title = title.encode('utf-8')
-
-                try:
-                    name = common.parseDOM(episode, "a", ret="title")[0]
-                    date = common.parseDOM(episode, "span", attrs = { "class": "date" })[0]
-                    name = '%s (%s)' % (name, date.rsplit(',', 1)[0])
-                except:
-                    pass
+                name = common.parseDOM(episode, "span", ret="data-title")[0]
                 name = common.replaceHTMLCodes(name)
                 name = name.encode('utf-8')
 
-                url = common.parseDOM(episode, "a", ret="href")[0]
-                url = self.episodes_link % url
+                url = common.parseDOM(episode, "span", ret="data-url")[0]
+                url = urlparse.urljoin(self.base_link, url)
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
                 image = common.parseDOM(episode, "img", ret="src")[0]
-                image = '%s/%s' % (self.base_link, image)
+                image = urlparse.urljoin(self.base_link, image)
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
-                self.list.append({'name': name, 'url': url, 'image': image, 'date': '0', 'genre': genre, 'plot': plot, 'title': title, 'show': show, 'next': next})
+                self.list.append({'name': name, 'url': url, 'image': image, 'date': '0', 'genre': genre, 'plot': plot, 'title': name, 'show': show, 'next': next})
             except:
                 pass
 
@@ -3131,7 +3253,8 @@ class novasports:
     def resolve(self, url):
         try:
             result = getUrl(url).result
-            url = re.compile("type *: *'html5'.+?'file' *: *'(.+?)'").findall(result)[0]
+
+            url = common.parseDOM(result, "div", ret="data-video-url", attrs = { "id": "webTvVideo" })[0]
             return url
         except:
             return
@@ -3170,6 +3293,7 @@ class eradio:
         except: pass
         self.list = index().cache(self.radios_list, 24, url)
         index().radioList(self.list)
+        return self.list
 
     def categories_list(self, url):
         try:
@@ -3276,21 +3400,25 @@ class mtvchart:
         name = 'MTV Hit List Hellas'
         self.list = self.episodes_list(name, self.mtvhitlisthellas_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
 
     def mtvdancefloor(self):
         name = 'MTV Dance Floor'
         self.list = self.episodes_list(name, self.mtvdancefloor_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
 
     def eurotop20(self):
         name = 'Euro Top 20'
         self.list = self.episodes_list(name, self.eurotop20_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
 
     def usatop20(self):
         name = 'U.S. Top 20'
         self.list = self.episodes_list(name, self.usatop20_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
 
     def episodes_list(self, name, url, image, genre, plot, show):
         try:
@@ -3331,6 +3459,7 @@ class rythmoschart:
         name = 'Rythmos Hit List'
         self.list = self.episodes_list(name, self.top20_link, '0', 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
 
     def episodes_list(self, name, url, image, genre, plot, show):
         try:
@@ -3376,6 +3505,7 @@ class dailymotion:
         url = self.playlist_link % channel
         self.list = self.episodes_list(name, url, '0', 'Greek', '0', name)
         index().episodeList(self.list)
+        return self.list
 
     def episodes_list(self, name, url, image, genre, plot, show):
         try:
@@ -3458,17 +3588,20 @@ class youtube:
         channel = 'kontrachannelhellas'
         self.list = index().cache(self.shows_list, 24, channel, [], [])
         index().showList(self.list)
+        return self.list
 
     def art(self):
         channel = 'artTileorasi'
         self.list = index().cache(self.shows_list, 24, channel, [], [])
         index().showList(self.list)
+        return self.list
 
     def madtv(self):
         channel = 'MADTVGREECE'
         exclude = ["PL1RY_6CEqdtnxJYgudDydiG4fKVoQouHf", "PL1RY_6CEqdtlu30q6SyuNe6Tk5IYjAiks", "PLE4B3F6B7F753D97C", "PL85C952EA930B9E90", "PL04B2C2D8B304BA48", "PL46B9D152167BA727"]
         self.list = index().cache(self.shows_list, 24, channel, [], exclude)
         index().showList(self.list)
+        return self.list
 
     def madgreekz(self):
         channel = 'madtvgreekz'
@@ -3477,23 +3610,27 @@ class youtube:
         try: self.list = sorted(self.list, key=itemgetter('name'))
         except: return
         index().showList(self.list)
+        return self.list
 
     def hellenictv1(self):
         channel = 'HellenicTV1'
         exclude = ["LLE1CQmHM-oeCQoaW3JTxHcw", "PLzaa5cr7QTutgpyGJd5E0BA2XTCpgEZAd", "FLE1CQmHM-oeCQoaW3JTxHcw"]
         self.list = index().cache(self.shows_list, 24, channel, [], exclude)
         index().showList(self.list)
+        return self.list
 
     def enikos(self):
         name = 'ENIKOS'
         self.list = self.episodes_list(name, self.enikos_link, '0', 'Greek', '0', name)
         index().episodeList(self.list[:100])
+        return self.list
 
     def cartoons_classics(self):
         self.list = index().cache(self.cartoons_classics_parser, 24)
         try: self.list = sorted(self.list, key=itemgetter('name'))
         except: return
         index().cartoonList(self.list)
+        return self.list
 
     def cartoons_classics_parser(self):
         self.list = self.shows_list('GreekTvCartoon', [], [])
@@ -3510,6 +3647,7 @@ class youtube:
         try: self.list = sorted(self.list, key=itemgetter('name'))
         except: return
         index().cartoonList(self.list)
+        return self.list
 
     def cartoons_songs_parser(self):
         self.list = self.shows_list('sapiensgr2', [], ['PLB3126415BC8BCDE3'])
@@ -3677,7 +3815,7 @@ class livestream:
 
             result = getUrl(url).result
             result = result.replace('\n','')
-            url = re.compile('RESOLUTION *= *(\d*)x\d*(http.+?\.m3u8)').findall(result)
+            url = re.compile('RESOLUTION *= *(\d*)x\d{1}.+?(http.+?\.m3u8)').findall(result)
             url = [(int(i[0]), i[1]) for i in url]
             url.sort()
             url = url[-1][1]
@@ -3726,7 +3864,7 @@ class livestream:
 
             result = getUrl(url).result
             result = result.replace('\n','')
-            url = re.compile('RESOLUTION *= *(\d*)x\d*(http.+?\.m3u8)').findall(result)
+            url = re.compile('RESOLUTION *= *(\d*)x\d{1}.+?(http.+?\.m3u8)').findall(result)
             url = [(int(i[0]), i[1]) for i in url]
             url.sort()
             url = url[-1][1]

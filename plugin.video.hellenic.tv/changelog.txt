@@ -1,4 +1,16 @@
 ------------------------
+Hellenic TV v3.3.4 (4-Apr-15)
+------------------------
+
+- Fixed live stream of SKAI.
+- Fixed live stream of MAD TV.
+- Fixed live stream of TELE EPILOGES.
+- Fixed novasports.gr listings.
+- Tweaked all listings.
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.3.3 (26-Mar-15)
 ------------------------
 

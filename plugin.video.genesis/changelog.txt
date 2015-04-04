@@ -1,4 +1,27 @@
 ------------------------
+Genesis v4.3.0 (4-Apr-15)
+------------------------
+
+- Re-work of TV Calendar.
+- TV Calendar: Added sorting by week.
+- TV Calendar: Removed sorting by date.
+- TV Calendar: Added Season Premieres.
+- TV Calendar: Added New TV Shows.
+- Re-work of scene episodes.
+- Re-work of Trakt episodes.
+- Added Alluc source.
+- Fixed issue with YIFY source.
+- Fixed issue with Moviezone source.
+- Fixed issue with Muchmovies source.
+- Fixed issue with Moviestorm source.
+- Fixed issue with Google resolvers.
+- Tweaked filtering of sources.
+- Updated translations.
+- Updated all themes.
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.2.0 (26-Mar-15)
 ------------------------
 

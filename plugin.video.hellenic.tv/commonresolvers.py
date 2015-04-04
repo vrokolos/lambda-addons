@@ -518,32 +518,18 @@ def filenuke(url):
     except:
         return
 
-def google(url):
-    try:
-        if any(x in url for x in ['&itag=37&', '&itag=137&', '&itag=299&', '&itag=96&', '&itag=248&', '&itag=303&', '&itag=46&']): quality = '1080p'
-        elif any(x in url for x in ['&itag=22&', '&itag=84&', '&itag=136&', '&itag=298&', '&itag=120&', '&itag=95&', '&itag=247&', '&itag=302&', '&itag=45&', '&itag=102&']): quality = 'HD'
-        else: raise Exception()
-
-        url = [{'quality': quality, 'url': url}]
-        return url
-    except:
-        return
-
 def googledocs(url):
     try:
         url = url.split('/preview', 1)[0]
 
         result = getUrl(url).result
         result = re.compile('"fmt_stream_map",(".+?")').findall(result)[0]
-        result = json.loads(result)
 
-        u = [i.split('|')[-1] for i in result.split(',')]
+        u = json.loads(result)
+        u = [i.split('|')[-1] for i in u.split(',')]
 
         url = []
-        try: url += [[{'quality': '1080p', 'url': i} for i in u if any(x in i for x in ['&itag=37&', '&itag=137&', '&itag=299&', '&itag=96&', '&itag=248&', '&itag=303&', '&itag=46&'])][0]]
-        except: pass
-        try: url += [[{'quality': 'HD', 'url': i} for i in u if any(x in i for x in ['&itag=22&', '&itag=84&', '&itag=136&', '&itag=298&', '&itag=120&', '&itag=95&', '&itag=247&', '&itag=302&', '&itag=45&', '&itag=102&'])][0]]
-        except: pass
+        for i in u: url += google(i)
 
         if url == []: return
         return url
@@ -553,28 +539,31 @@ def googledocs(url):
 def googleplus(url):
     try:
         result = getUrl(url).result
-        u = re.compile('"(http.+?videoplayback[?].+?)"').findall(result)
-        if len(u) == 0:
-            result = getUrl(url, mobile=True).result
-            u = re.compile('"(http.+?videoplayback[?].+?)"').findall(result)
+        result = result.replace('\\u003d','=').replace('\\u0026','&')
 
-        u = [i.replace('\\u003d','=').replace('\\u0026','&') for i in u]
-
-        d = []
-        try: d += [[{'quality': '1080p', 'url': i} for i in u if any(x in i for x in ['&itag=37&', '&itag=137&', '&itag=299&', '&itag=96&', '&itag=248&', '&itag=303&', '&itag=46&'])][0]]
-        except: pass
-        try: d += [[{'quality': 'HD', 'url': i} for i in u if any(x in i for x in ['&itag=22&', '&itag=84&', '&itag=136&', '&itag=298&', '&itag=120&', '&itag=95&', '&itag=247&', '&itag=302&', '&itag=45&', '&itag=102&'])][0]]
-        except: pass
+        u = re.compile('("http[s]*://.+?\d*[.]googleusercontent.com/.+?=m\d*)"').findall(result)
+        u = [i.split('"')[-1] for i in u]
 
         url = []
-        for i in d:
-            try: url.append({'quality': i['quality'], 'url': getUrl(i['url'], output='geturl').result})
-            except: pass
+        for i in u: url += google(i)
 
         if url == []: return
         return url
     except:
         return
+
+def google(url):
+    quality = re.compile('itag=(\d*)').findall(url)
+    quality += re.compile('=m(\d*)$').findall(url)
+    try: quality = quality[0]
+    except: return []
+
+    if quality in ['37', '137', '299', '96', '248', '303', '46']:
+        return [{'quality': '1080p', 'url': url}]
+    elif quality in ['22', '84', '136', '298', '120', '95', '247', '302', '45', '102']:
+        return [{'quality': 'HD', 'url': url}]
+    else:
+        return []
 
 def gorillavid(url):
     try:
@@ -1305,5 +1294,4 @@ def zettahost(url):
         return url
     except:
         return
-
 

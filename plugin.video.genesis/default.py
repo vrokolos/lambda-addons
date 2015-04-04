@@ -108,6 +108,7 @@ class main:
         if action == None:                            root().get()
         elif action == 'root_movies':                 root().movies()
         elif action == 'root_shows':                  root().shows()
+        elif action == 'root_calendar':               root().calendar()
         elif action == 'root_genesis':                root().genesis()
         elif action == 'root_tools':                  root().tools()
         elif action == 'root_search':                 root().search()
@@ -187,6 +188,8 @@ class main:
         elif action == 'shows_views':                 shows().views()
         elif action == 'shows_active':                shows().active()
         elif action == 'shows_trending':              shows().trending()
+        elif action == 'shows_season_premieres':      shows().season_premieres()
+        elif action == 'shows_premieres':             shows().premieres()
         elif action == 'shows_trakt_collection':      shows().trakt_collection()
         elif action == 'shows_trakt_watchlist':       shows().trakt_watchlist()
         elif action == 'shows_imdb_watchlist':        shows().imdb_watchlist()
@@ -195,10 +198,15 @@ class main:
         elif action == 'seasons':                     seasons().get(show, year, imdb, tvdb)
         elif action == 'episodes':                    episodes().get(show, year, imdb, tvdb, season)
         elif action == 'episodes2':                   episodes().get2(show, year, imdb, tvdb, season, episode)
+
+        elif action == 'episodes_calendar_1':         episodes().calendar(1)
+        elif action == 'episodes_calendar_2':         episodes().calendar(2)
+        elif action == 'episodes_calendar_3':         episodes().calendar(3)
+        elif action == 'episodes_calendar_4':         episodes().calendar(4)
         elif action == 'episodes_trakt_progress':     episodes().trakt_progress()
         elif action == 'episodes_trakt':              episodes().trakt_added()
         elif action == 'episodes_added':              episodes().added()
-        elif action == 'episodes_calendar':           episodes().calendar(url)
+
         elif action == 'people_movies':               people().movies(query)
         elif action == 'people_shows':                people().shows(query)
         elif action == 'genres_movies':               genres().movies()
@@ -207,7 +215,6 @@ class main:
         elif action == 'certificates_shows':          certificates().shows()
         elif action == 'languages_movies':            languages().movies()
         elif action == 'years_movies':                years().movies()
-        elif action == 'calendar_episodes':           calendar().episodes()
         elif action == 'channels_movies':             channels().movies()
         elif action == 'userlists_movies':            userlists().movies()
         elif action == 'userlists_shows':             userlists().shows()
@@ -263,13 +270,12 @@ class getUrl(object):
         self.result = result
 
 class getTrakt:
-    def result(self, url, auth=True, post=None):
+    def result(self, url, post=None):
         try:
             trakt_key = base64.urlsafe_b64decode(link().trakt_key)
             headers = {'Content-Type': 'application/json', 'trakt-api-key': trakt_key, 'trakt-api-version': '2'}
             if not post == None: post = json.dumps(post)
             if (link().trakt_user == '' or link().trakt_password == ''): pass
-            elif auth == False: pass
             else:
                 token = index().cache(self.auth, 24, link().trakt_user, link().trakt_password)
                 headers.update({'trakt-user-login': link().trakt_user, 'trakt-user-token': token})
@@ -1349,7 +1355,7 @@ class index:
                 name, title, year, imdb, tvdb, season, episode, show, show_alt, genre, url, poster, banner, thumb, fanart, studio, status, premiered, duration, rating, mpaa, director, writer, plot = i['name'], i['title'], i['year'], i['imdb'], i['tvdb'], i['season'], i['episode'], i['show'], i['show_alt'], i['genre'], i['url'], i['poster'], i['banner'], i['thumb'], i['fanart'], i['studio'], i['status'], i['date'], i['duration'], i['rating'], i['mpaa'], i['director'], i['writer'], i['plot']
 
                 label = season + 'x' + '%02d' % int(episode) + ' . ' + title
-                if action == 'episodes_added' or action == 'episodes_trakt_progress' or action == 'episodes_trakt' or action == 'episodes_calendar': label = show + ' - ' + label
+                if action == 'episodes_added' or action == 'episodes_trakt_progress' or action == 'episodes_trakt' or 'episodes_calendar' in action: label = show + ' - ' + label
 
                 if poster == '0': poster = addonPoster
                 if banner == '0': banner = addonBanner
@@ -2259,7 +2265,7 @@ class root:
 
         root_calendar = getSetting("root_calendar")
         if root_calendar == '1':
-            rootList.append({'name': 30507, 'image': 'calendar_episodes.jpg', 'action': 'calendar_episodes'})
+            rootList.append({'name': 30507, 'image': 'root_calendar.jpg', 'action': 'root_calendar'})
 
         rootList.append({'name': 30508, 'image': 'root_tools.jpg', 'action': 'root_tools'})
         rootList.append({'name': 30509, 'image': 'root_search.jpg', 'action': 'root_search'})
@@ -2294,71 +2300,81 @@ class root:
         rootList.append({'name': 30546, 'image': 'shows_rating.jpg', 'action': 'shows_rating'})
         rootList.append({'name': 30547, 'image': 'shows_views.jpg', 'action': 'shows_views'})
         rootList.append({'name': 30548, 'image': 'episodes_added.jpg', 'action': 'episodes_added'})
-        rootList.append({'name': 30549, 'image': 'calendar_episodes.jpg', 'action': 'calendar_episodes'})
+        rootList.append({'name': 30549, 'image': 'root_calendar.jpg', 'action': 'root_calendar'})
         rootList.append({'name': 30550, 'image': 'shows_favourites.jpg', 'action': 'shows_favourites'})
         rootList.append({'name': 30551, 'image': 'people_shows.jpg', 'action': 'people_shows'})
         rootList.append({'name': 30552, 'image': 'shows_search.jpg', 'action': 'shows_search'})
         index().rootList(rootList)
 
+    def calendar(self):
+        rootList = []
+        rootList.append({'name': 30561, 'image': 'root_calendar.jpg', 'action': 'episodes_calendar_1'})
+        rootList.append({'name': 30562, 'image': 'root_calendar.jpg', 'action': 'episodes_calendar_2'})
+        rootList.append({'name': 30563, 'image': 'root_calendar.jpg', 'action': 'episodes_calendar_3'})
+        rootList.append({'name': 30564, 'image': 'root_calendar.jpg', 'action': 'episodes_calendar_4'})
+        rootList.append({'name': 30565, 'image': 'root_calendar.jpg', 'action': 'shows_season_premieres'})
+        rootList.append({'name': 30566, 'image': 'root_calendar.jpg', 'action': 'shows_premieres'})
+        index().rootList(rootList)
+
     def genesis(self):
         rootList = []
         if not (link().trakt_user == '' or link().trakt_password == ''):
-            rootList.append({'name': 30561, 'image': 'movies_trakt_collection.jpg', 'action': 'movies_trakt_collection'})
-            rootList.append({'name': 30562, 'image': 'shows_trakt_collection.jpg', 'action': 'shows_trakt_collection'})
-            rootList.append({'name': 30563, 'image': 'movies_trakt_watchlist.jpg', 'action': 'movies_trakt_watchlist'})
-            rootList.append({'name': 30564, 'image': 'shows_trakt_watchlist.jpg', 'action': 'shows_trakt_watchlist'})
-            rootList.append({'name': 30565, 'image': 'episodes_trakt_progress.jpg', 'action': 'episodes_trakt_progress'})
-            rootList.append({'name': 30566, 'image': 'episodes_trakt.jpg', 'action': 'episodes_trakt'})
+            rootList.append({'name': 30581, 'image': 'movies_trakt_collection.jpg', 'action': 'movies_trakt_collection'})
+            rootList.append({'name': 30582, 'image': 'shows_trakt_collection.jpg', 'action': 'shows_trakt_collection'})
+            rootList.append({'name': 30583, 'image': 'movies_trakt_watchlist.jpg', 'action': 'movies_trakt_watchlist'})
+            rootList.append({'name': 30584, 'image': 'shows_trakt_watchlist.jpg', 'action': 'shows_trakt_watchlist'})
+            rootList.append({'name': 30585, 'image': 'episodes_trakt_progress.jpg', 'action': 'episodes_trakt_progress'})
+            rootList.append({'name': 30586, 'image': 'episodes_trakt.jpg', 'action': 'episodes_trakt'})
         if not (link().imdb_user == ''):
-            rootList.append({'name': 30567, 'image': 'movies_imdb_watchlist.jpg', 'action': 'movies_imdb_watchlist'})
-            rootList.append({'name': 30568, 'image': 'shows_imdb_watchlist.jpg', 'action': 'shows_imdb_watchlist'})
+            rootList.append({'name': 30587, 'image': 'movies_imdb_watchlist.jpg', 'action': 'movies_imdb_watchlist'})
+            rootList.append({'name': 30588, 'image': 'shows_imdb_watchlist.jpg', 'action': 'shows_imdb_watchlist'})
         if not (link().trakt_user == '' or link().trakt_password == '') or not (link().imdb_user == ''):
-            rootList.append({'name': 30569, 'image': 'userlists_movies.jpg', 'action': 'userlists_movies'})
-            rootList.append({'name': 30570, 'image': 'userlists_shows.jpg', 'action': 'userlists_shows'})
-        rootList.append({'name': 30571, 'image': 'movies_favourites.jpg', 'action': 'movies_favourites'})
-        rootList.append({'name': 30572, 'image': 'shows_favourites.jpg', 'action': 'shows_favourites'})
-        rootList.append({'name': 30573, 'image': 'downloads_movies.jpg', 'action': 'downloads_movies'})
-        rootList.append({'name': 30574, 'image': 'downloads_shows.jpg', 'action': 'downloads_shows'})
+            rootList.append({'name': 30589, 'image': 'userlists_movies.jpg', 'action': 'userlists_movies'})
+            rootList.append({'name': 30590, 'image': 'userlists_shows.jpg', 'action': 'userlists_shows'})
+        rootList.append({'name': 30591, 'image': 'movies_favourites.jpg', 'action': 'movies_favourites'})
+        rootList.append({'name': 30592, 'image': 'shows_favourites.jpg', 'action': 'shows_favourites'})
+        rootList.append({'name': 30593, 'image': 'downloads_movies.jpg', 'action': 'downloads_movies'})
+        rootList.append({'name': 30594, 'image': 'downloads_shows.jpg', 'action': 'downloads_shows'})
         index().rootList(rootList)
 
     def search(self):
         rootList = []
-        rootList.append({'name': 30581, 'image': 'movies_search.jpg', 'action': 'movies_search'})
-        rootList.append({'name': 30582, 'image': 'shows_search.jpg', 'action': 'shows_search'})
-        rootList.append({'name': 30583, 'image': 'people_movies.jpg', 'action': 'people_movies'})
-        rootList.append({'name': 30584, 'image': 'people_shows.jpg', 'action': 'people_shows'})
+        rootList.append({'name': 30601, 'image': 'movies_search.jpg', 'action': 'movies_search'})
+        rootList.append({'name': 30602, 'image': 'shows_search.jpg', 'action': 'shows_search'})
+        rootList.append({'name': 30603, 'image': 'people_movies.jpg', 'action': 'people_movies'})
+        rootList.append({'name': 30604, 'image': 'people_shows.jpg', 'action': 'people_shows'})
         index().rootList(rootList)
 
     def tools(self):
         rootList = []
-        rootList.append({'name': 30601, 'image': 'settings_open.jpg', 'action': 'settings_general'})
-        rootList.append({'name': 30602, 'image': 'settings_open.jpg', 'action': 'settings_accounts'})
-        rootList.append({'name': 30603, 'image': 'settings_open.jpg', 'action': 'settings_playback'})
-        rootList.append({'name': 30604, 'image': 'settings_open.jpg', 'action': 'settings_subtitles'})
-        rootList.append({'name': 30605, 'image': 'settings_open.jpg', 'action': 'settings_movies'})
-        rootList.append({'name': 30606, 'image': 'settings_open.jpg', 'action': 'settings_tv'})
-        rootList.append({'name': 30607, 'image': 'settings_open.jpg', 'action': 'settings_hostshd'})
-        rootList.append({'name': 30608, 'image': 'settings_open.jpg', 'action': 'settings_hostssd'})
-        rootList.append({'name': 30609, 'image': 'cache_clear.jpg', 'action': 'cache_clear_src'})
-        rootList.append({'name': 30610, 'image': 'cache_clear.jpg', 'action': 'cache_clear_list'})
-        rootList.append({'name': 30611, 'image': 'settings_open.jpg', 'action': 'settings_downloads'})
-        rootList.append({'name': 30612, 'image': 'root_library.jpg', 'action': 'root_library'})
+        rootList.append({'name': 30621, 'image': 'settings_open.jpg', 'action': 'settings_general'})
+        rootList.append({'name': 30622, 'image': 'settings_open.jpg', 'action': 'settings_accounts'})
+        rootList.append({'name': 30623, 'image': 'settings_open.jpg', 'action': 'settings_playback'})
+        rootList.append({'name': 30624, 'image': 'settings_open.jpg', 'action': 'settings_subtitles'})
+        rootList.append({'name': 30625, 'image': 'settings_open.jpg', 'action': 'settings_movies'})
+        rootList.append({'name': 30626, 'image': 'settings_open.jpg', 'action': 'settings_tv'})
+        rootList.append({'name': 30627, 'image': 'settings_open.jpg', 'action': 'settings_hostshd'})
+        rootList.append({'name': 30628, 'image': 'settings_open.jpg', 'action': 'settings_hostssd'})
+        rootList.append({'name': 30629, 'image': 'cache_clear.jpg', 'action': 'cache_clear_src'})
+        rootList.append({'name': 30630, 'image': 'cache_clear.jpg', 'action': 'cache_clear_list'})
+        rootList.append({'name': 30631, 'image': 'settings_open.jpg', 'action': 'settings_downloads'})
+        rootList.append({'name': 30632, 'image': 'root_library.jpg', 'action': 'root_library'})
         index().rootList(rootList)
 
     def library(self):
         rootList = []
-        rootList.append({'name': 30620, 'image': 'settings_open.jpg', 'action': 'settings_library'})
-        rootList.append({'name': 30621, 'image': 'library_update.jpg', 'action': 'library_update_tool'})
-        rootList.append({'name': 30622, 'image': 'library_movies.jpg', 'action': 'library_movies'})
-        rootList.append({'name': 30623, 'image': 'library_shows.jpg', 'action': 'library_shows'})
+        rootList.append({'name': 30640, 'image': 'settings_open.jpg', 'action': 'settings_library'})
+        rootList.append({'name': 30641, 'image': 'library_update.jpg', 'action': 'library_update_tool'})
+        rootList.append({'name': 30642, 'image': 'library_movies.jpg', 'action': 'library_movies'})
+        rootList.append({'name': 30643, 'image': 'library_shows.jpg', 'action': 'library_shows'})
         if not (link().trakt_user == '' or link().trakt_password == ''):
-            rootList.append({'name': 30624, 'image': 'movies_trakt_collection.jpg', 'action': 'library_trakt_collection'})
-            rootList.append({'name': 30625, 'image': 'shows_trakt_collection.jpg', 'action': 'library_tv_trakt_collection'})
-            rootList.append({'name': 30626, 'image': 'movies_trakt_watchlist.jpg', 'action': 'library_trakt_watchlist'})
-            rootList.append({'name': 30627, 'image': 'shows_trakt_watchlist.jpg', 'action': 'library_tv_trakt_watchlist'})
+            rootList.append({'name': 30644, 'image': 'movies_trakt_collection.jpg', 'action': 'library_trakt_collection'})
+            rootList.append({'name': 30645, 'image': 'shows_trakt_collection.jpg', 'action': 'library_tv_trakt_collection'})
+            rootList.append({'name': 30646, 'image': 'movies_trakt_watchlist.jpg', 'action': 'library_trakt_watchlist'})
+            rootList.append({'name': 30647, 'image': 'shows_trakt_watchlist.jpg', 'action': 'library_tv_trakt_watchlist'})
         if not (link().imdb_user == ''):
-            rootList.append({'name': 30628, 'image': 'movies_imdb_watchlist.jpg', 'action': 'library_imdb_watchlist'})
-            rootList.append({'name': 30629, 'image': 'shows_imdb_watchlist.jpg', 'action': 'library_tv_imdb_watchlist'})
+            rootList.append({'name': 30648, 'image': 'movies_imdb_watchlist.jpg', 'action': 'library_imdb_watchlist'})
+            rootList.append({'name': 30649, 'image': 'shows_imdb_watchlist.jpg', 'action': 'library_tv_imdb_watchlist'})
         index().rootList(rootList)
 
 
@@ -2424,7 +2440,10 @@ class link:
         self.trakt_tv_trending = 'http://api-v2launch.trakt.tv/shows/trending'
         self.trakt_tv_watchlist = 'http://api-v2launch.trakt.tv/users/%s/watchlist/shows'
         self.trakt_tv_collection = 'http://api-v2launch.trakt.tv/users/%s/collection/shows'
-        self.trakt_tv_calendar = 'http://api-v2launch.trakt.tv/calendars/shows/%s/%s'
+        self.trakt_tv_season_premieres = 'https://api-v2launch.trakt.tv/calendars/all/shows/premieres/%s/%s'
+        self.trakt_tv_premieres = 'https://api-v2launch.trakt.tv/calendars/all/shows/new/%s/%s'
+        self.trakt_tv_my_calendar = 'http://api-v2launch.trakt.tv/calendars/my/shows/%s/%s'
+        self.trakt_tv_calendar = 'http://api-v2launch.trakt.tv/calendars/all/shows/%s/%s'
         self.trakt_lists = 'http://api-v2launch.trakt.tv/users/%s/lists'
         self.trakt_list = 'http://api-v2launch.trakt.tv/users/%s/lists/%s/items'
         self.trakt_history = 'http://api-v2launch.trakt.tv/sync/history'
@@ -2674,28 +2693,6 @@ class years:
             url = link().imdb_years % (str(i), str(i))
             url = url.encode('utf-8')
             self.list.append({'name': name, 'url': url})
-
-        return self.list
-
-class calendar:
-    def __init__(self):
-        self.list = []
-
-    def episodes(self):
-        self.list = self.trakt_list()
-        for i in range(0, len(self.list)): self.list[i].update({'image': 'calendar_episodes.jpg', 'action': 'episodes_calendar'})
-        index().rootList(self.list)
-        return self.list
-
-    def trakt_list(self):
-        now = datetime.datetime.utcnow() - datetime.timedelta(hours = 5)
-        today = datetime.date(now.year, now.month, now.day)
-
-        for i in range(0, 14):
-            date = today - datetime.timedelta(days=i)
-            date = str(date)
-            date = date.encode('utf-8')
-            self.list.append({'name': date, 'url': date})
 
         return self.list
 
@@ -3839,6 +3836,28 @@ class shows:
         index().showList(self.list)
         return self.list
 
+    def season_premieres(self):
+        now = datetime.datetime.utcnow() - datetime.timedelta(hours = 5)
+        date = datetime.date(now.year, now.month, now.day) - datetime.timedelta(days=32)
+        url = link().trakt_tv_season_premieres % (str(date), '31')
+        self.list = index().cache(self.trakt_list, 24, url)
+        self.list = [i for i in self.list if not i['imdb'] == '0000000']
+        try: self.list = sorted(self.list, key=itemgetter('title'))
+        except: return
+        index().showList(self.list)
+        return self.list
+
+    def premieres(self):
+        now = datetime.datetime.utcnow() - datetime.timedelta(hours = 5)
+        date = datetime.date(now.year, now.month, now.day) - datetime.timedelta(days=32)
+        url = link().trakt_tv_premieres % (str(date), '31')
+        self.list = index().cache(self.trakt_list, 24, url)
+        self.list = [i for i in self.list if not i['imdb'] == '0000000']
+        try: self.list = sorted(self.list, key=itemgetter('title'))
+        except: return
+        index().showList(self.list)
+        return self.list
+
     def trakt_collection(self):
         url = link().trakt_tv_collection % link().trakt_user
         self.list = index().cache(self.trakt_list, 0, url)
@@ -4709,10 +4728,12 @@ class episodes:
         except:
             pass
 
-    def calendar(self, url):
-        date = url
-        url = link().trakt_tv_calendar % (str(date), '1')
-        self.list = index().cache(self.trakt_list, 24, url)
+    def calendar(self, week):
+        daysMap = {1:6, 2:13, 3:20, 4:27}
+        now = datetime.datetime.utcnow() - datetime.timedelta(hours = 5)
+        date = datetime.date(now.year, now.month, now.day) - datetime.timedelta(days=daysMap[week])
+        url = link().trakt_tv_calendar % (str(date), '5')
+        self.list = index().cache(self.trakt_list, 1, url)
         try: self.list = sorted(self.list, key=itemgetter('name'))
         except: return
         index().episodeList(self.list)
@@ -4727,9 +4748,9 @@ class episodes:
 
     def trakt_added(self):
         now = datetime.datetime.utcnow() - datetime.timedelta(hours = 5)
-        date = datetime.date(now.year, now.month, now.day) - datetime.timedelta(days=30)
-        url = link().trakt_tv_calendar % (str(date), '31')
-        self.list = index().cache(self.trakt_list, 1, url, True)
+        date = datetime.date(now.year, now.month, now.day) - datetime.timedelta(days=32)
+        url = link().trakt_tv_my_calendar % (str(date), '31')
+        self.list = index().cache(self.trakt_list, 1, url)
         try: self.list = sorted(self.list, key=itemgetter('date'))[::-1]
         except: return
         index().episodeList(self.list)
@@ -4737,6 +4758,8 @@ class episodes:
 
     def added(self):
         self.list = index().cache(self.scn_list, 1)
+        try: self.list = sorted(self.list, key=itemgetter('date'))[::-1]
+        except: return
         index().episodeList(self.list)
         return self.list
 
@@ -4825,16 +4848,13 @@ class episodes:
         except:
             pass
 
-    def trakt_list(self, url, auth=False):
+    def trakt_list(self, url):
         try:
             url += '?extended=full,images'
-            result = getTrakt().result(url, auth=auth)
+            result = getTrakt().result(url)
             result = json.loads(result)
 
-            episodes = []
-            for i in result.iteritems():
-                try: episodes += i[1]
-                except: pass
+            episodes = result
         except:
             return
 
@@ -5202,9 +5222,7 @@ class episodes:
 
             dates = [re.compile('(\d{4}-\d{2}-\d{2})').findall(i) for i in result]
             dates = [i[0] for i in dates if not len(i) == 0]
-            dates = [link().trakt_tv_calendar % (i, '1') for i in dates]
             dates = uniqueList(dates).list
-            dates = dates[:7]
 
             shows = [common.parseDOM(i, "a")[0] for i in result]
             shows = [re.compile('(.*)[.](S\d+?E\d+?)[.]').findall(i) for i in shows]
@@ -5213,18 +5231,10 @@ class episodes:
             shows = [i.encode('utf-8') for i in shows]
             shows = uniqueList(shows).list
 
-            threads = []
-            for url in dates: threads.append(Thread(self.trakt_list, url, False))
-            [i.start() for i in threads]
-            [i.join() for i in threads]
+            url = link().trakt_tv_calendar % (str(dates[-1]), len(dates))
 
+            self.list = self.trakt_list(url)
             self.list = [i for i in self.list if self.cleantitle_tv(i['show']) + ' S' + '%02d' % int(i['season']) + 'E' + '%02d' % int(i['episode']) in shows]
-
-            filter = [i['name'] for i in self.list]
-            filter = uniqueList(filter).list
-            filter = [[i for i in self.list if i['name'] == x][0] for x in filter]
-            filter = sorted(filter, key=itemgetter('date'))[::-1]
-            self.list = filter
 
             return self.list
         except:
@@ -5394,11 +5404,11 @@ class resolver:
         else: content = 'episode'
 
         if content == 'movie':
-            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('movie25', 'true'), ('iwatchonline', 'true'), ('gvcenter', 'true'), ('movietube', 'true'), ('moviezone', 'true'), ('yify', 'true'), ('zumvo', 'true'), ('g2g', 'true'), ('muchmovies', 'true'), ('sweflix', 'true'), ('movieshd', 'true'), ('onlinemovies', 'true'), ('vkbox', 'true'), ('moviestorm', 'true'), ('watchfree', 'true'), ('merdb', 'true'), ('wso', 'true'), ('einthusan', 'true'), ('noobroom', 'true'), ('furk', 'true')]
-            sourceDict = [('icefilms', getSetting("icefilms")), ('primewire', getSetting("primewire")), ('movie25', getSetting("movie25")), ('iwatchonline', getSetting("iwatchonline")), ('gvcenter', getSetting("gvcenter")), ('movietube', getSetting("movietube")), ('moviezone', getSetting("moviezone")), ('yify', getSetting("yify")), ('zumvo', getSetting("zumvo")), ('g2g', getSetting("g2g")), ('muchmovies', getSetting("muchmovies")), ('sweflix', getSetting("sweflix")), ('movieshd', getSetting("movieshd")), ('onlinemovies', getSetting("onlinemovies")), ('vkbox', getSetting("vkbox")), ('moviestorm', getSetting("moviestorm")), ('watchfree', getSetting("watchfree")), ('merdb', getSetting("merdb")), ('wso', getSetting("wso")), ('einthusan', getSetting("einthusan")), ('noobroom', getSetting("noobroom")), ('furk', getSetting("furk"))]
+            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('movie25', 'true'), ('iwatchonline', 'true'), ('gvcenter', 'true'), ('movietube', 'true'), ('moviezone', 'true'), ('yify', 'true'), ('zumvo', 'true'), ('g2g', 'true'), ('muchmovies', 'true'), ('sweflix', 'true'), ('movieshd', 'true'), ('onlinemovies', 'true'), ('vkbox', 'true'), ('moviestorm', 'true'), ('watchfree', 'true'), ('merdb', 'true'), ('wso', 'true'), ('einthusan', 'true'), ('alluc', 'true'), ('noobroom', 'true'), ('furk', 'true')]
+            sourceDict = [('icefilms', getSetting("icefilms")), ('primewire', getSetting("primewire")), ('movie25', getSetting("movie25")), ('iwatchonline', getSetting("iwatchonline")), ('gvcenter', getSetting("gvcenter")), ('movietube', getSetting("movietube")), ('moviezone', getSetting("moviezone")), ('yify', getSetting("yify")), ('zumvo', getSetting("zumvo")), ('g2g', getSetting("g2g")), ('muchmovies', getSetting("muchmovies")), ('sweflix', getSetting("sweflix")), ('movieshd', getSetting("movieshd")), ('onlinemovies', getSetting("onlinemovies")), ('vkbox', getSetting("vkbox")), ('moviestorm', getSetting("moviestorm")), ('watchfree', getSetting("watchfree")), ('merdb', getSetting("merdb")), ('wso', getSetting("wso")), ('einthusan', getSetting("einthusan")), ('alluc', getSetting("alluc")), ('noobroom', getSetting("noobroom")), ('furk', getSetting("furk"))]
         else:
-            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('watchseries', 'true'), ('iwatchonline', 'true'), ('gvcenter', 'true'), ('movietube', 'true'), ('ororo', 'true'), ('vkbox', 'true'), ('clickplay', 'true'), ('moviestorm', 'true'), ('watchfree', 'true'), ('merdb', 'true'), ('wso', 'true'), ('animeultima', 'true'), ('tvrelease', 'true'), ('directdl', 'true'), ('noobroom', 'true'), ('furk', 'true')]
-            sourceDict = [('icefilms', getSetting("icefilms_tv")), ('primewire', getSetting("primewire_tv")), ('watchseries', getSetting("watchseries_tv")), ('iwatchonline', getSetting("iwatchonline_tv")), ('gvcenter', getSetting("gvcenter_tv")), ('movietube', getSetting("movietube_tv")), ('ororo', getSetting("ororo_tv")), ('vkbox', getSetting("vkbox_tv")), ('clickplay', getSetting("clickplay_tv")), ('moviestorm', getSetting("moviestorm_tv")), ('watchfree', getSetting("watchfree_tv")), ('merdb', getSetting("merdb_tv")), ('wso', getSetting("wso_tv")), ('animeultima', getSetting("animeultima_tv")), ('tvrelease', getSetting("tvrelease_tv")), ('directdl', getSetting("directdl_tv")), ('noobroom', getSetting("noobroom_tv")), ('furk', getSetting("furk_tv"))]
+            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('watchseries', 'true'), ('iwatchonline', 'true'), ('gvcenter', 'true'), ('movietube', 'true'), ('ororo', 'true'), ('vkbox', 'true'), ('clickplay', 'true'), ('moviestorm', 'true'), ('watchfree', 'true'), ('merdb', 'true'), ('wso', 'true'), ('animeultima', 'true'), ('alluc', 'true'), ('tvrelease', 'true'), ('directdl', 'true'), ('noobroom', 'true'), ('furk', 'true')]
+            sourceDict = [('icefilms', getSetting("icefilms_tv")), ('primewire', getSetting("primewire_tv")), ('watchseries', getSetting("watchseries_tv")), ('iwatchonline', getSetting("iwatchonline_tv")), ('gvcenter', getSetting("gvcenter_tv")), ('movietube', getSetting("movietube_tv")), ('ororo', getSetting("ororo_tv")), ('vkbox', getSetting("vkbox_tv")), ('clickplay', getSetting("clickplay_tv")), ('moviestorm', getSetting("moviestorm_tv")), ('watchfree', getSetting("watchfree_tv")), ('merdb', getSetting("merdb_tv")), ('wso', getSetting("wso_tv")), ('animeultima', getSetting("animeultima_tv")), ('alluc', getSetting("alluc_tv")), ('tvrelease', getSetting("tvrelease_tv")), ('directdl', getSetting("directdl_tv")), ('noobroom', getSetting("noobroom_tv")), ('furk', getSetting("furk_tv"))]
 
 
         global global_sources
@@ -5632,8 +5642,9 @@ class resolver:
             s = self.sources[i]['source'].lower()
             q = self.sources[i]['quality']
 
-            try: d = ' | [I]%s [/I]' % self.sources[i]['info']
+            try: d = self.sources[i]['info']
             except: d = ''
+            if not d == '': d = ' | [I]%s [/I]' % d
 
             if s in pz_hosts: label = '%02d | [B]premiumize[/B] | ' % count
             elif s in rd_hosts: label = '%02d | [B]realdebrid[/B] | ' % count

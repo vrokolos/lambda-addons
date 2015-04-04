@@ -48,6 +48,7 @@
 		<setting id="watchfree" type="bool" label="Watchfree" default="true"/>
 		<setting id="merdb" type="bool" label="MerDB" default="true"/>
 		<setting id="wso" type="bool" label="WSO" default="true"/>
+		<setting id="alluc" type="bool" label="Alluc" default="true"/>
 		<setting id="einthusan" type="bool" label="Einthusan (India)" default="true"/>
 		<setting id="noobroom" type="bool" label="Noobroom" default="false"/>
 		<setting id="furk" type="bool" label="Furk" default="false"/>
@@ -68,6 +69,7 @@
 		<setting id="merdb_tv" type="bool" label="MerDB" default="true"/>
 		<setting id="wso_tv" type="bool" label="WSO" default="true"/>
 		<setting id="animeultima_tv" type="bool" label="Animeultima" default="true"/>
+		<setting id="alluc_tv" type="bool" label="Alluc" default="true"/>
 		<setting id="tvrelease_tv" type="bool" label="TVrelease" default="true"/>
 		<setting id="directdl_tv" type="bool" label="Directdownload" default="true"/>
 		<setting id="noobroom_tv" type="bool" label="Noobroom" default="false"/>

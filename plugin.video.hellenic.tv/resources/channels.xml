@@ -695,7 +695,7 @@
 		<channel active="True">
 			<name>TELE EPILOGES</name>
 			<type>ustream</type>
-			<url>http://www.ustream.tv/channel/epilogestv</url>
+			<url>http://www.ustream.tv/channel/tv-epiloges</url>
 			<base>http://www.epiloges.tv/</base>
 		</channel>
 		<channel active="True">

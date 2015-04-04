@@ -912,15 +912,15 @@ class root:
 
 class link:
     def __init__(self):
-        self.muchmovies_base = 'http://aws.123movies.me'
-        self.muchmovies_sort = 'http://aws.123movies.me/session/sort'
-        self.muchmovies_title = 'http://aws.123movies.me/movies?sort_by=title'
-        self.muchmovies_release = 'http://aws.123movies.me/movies?sort_by=release'
-        self.muchmovies_added = 'http://aws.123movies.me/movies?sort_by=date_added'
-        self.muchmovies_rating = 'http://aws.123movies.me/movies?sort_by=rating'
-        self.muchmovies_root = 'http://aws.123movies.me/movies'
-        self.muchmovies_search = 'http://aws.123movies.me/search'
-        self.muchmovies_genre = 'http://aws.123movies.me/genres'
+        self.muchmovies_base = 'http://umovies.me'
+        self.muchmovies_sort = 'http://umovies.me/session/sort'
+        self.muchmovies_title = 'http://umovies.me/movies?sort_by=title'
+        self.muchmovies_release = 'http://umovies.me/movies?sort_by=release'
+        self.muchmovies_added = 'http://umovies.me/movies?sort_by=date_added'
+        self.muchmovies_rating = 'http://umovies.me/movies?sort_by=rating'
+        self.muchmovies_root = 'http://umovies.me/movies'
+        self.muchmovies_search = 'http://umovies.me/search'
+        self.muchmovies_genre = 'http://umovies.me/genres'
 
 class pages:
     def __init__(self):
