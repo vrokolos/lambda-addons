@@ -252,6 +252,140 @@ class icefilms:
         except:
             return
 
+class alluc:
+    def __init__(self):
+        self.base_link = 'https://www.alluc.com'
+        self.download_link = '/api/search/download/?apikey=%s&count=100&from=0&getmeta=0&query=%s'
+        self.stream_link = '/api/search/stream/?apikey=%s&count=100&from=0&getmeta=0&query=%s'
+        self.key_link = 'OGRmNzlkYTkyMDc4MDhkNmMyOTA5Njg5MTJlMjc4Nzc='
+        self.filter_link = '+lang%3Aen'
+
+    def get_movie(self, imdb, title, year):
+        try:
+            url = '%s %s' % (title, year)
+            url = common.replaceHTMLCodes(url)
+            url = url.encode('utf-8')
+            return url
+        except:
+            return
+
+    def get_show(self, imdb, tvdb, show, show_alt, year):
+        try:
+            url = show
+            url = common.replaceHTMLCodes(url)
+            url = url.encode('utf-8')
+            return url
+        except:
+            return
+
+    def get_episode(self, url, imdb, tvdb, title, date, season, episode):
+        try:
+            if url == None: return
+            url = '%s S%02dE%02d' % (url, int(season), int(episode))
+            url = common.replaceHTMLCodes(url)
+            url = url.encode('utf-8')
+            return url
+        except:
+            return
+
+    def get_sources(self, url, hosthdDict, hostDict):
+        try:
+            sources = []
+
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20110101 Firefox/34.0'}
+            query = urllib.quote_plus(url)
+
+            links = []
+
+            q = self.base_link + self.download_link % (base64.urlsafe_b64decode(self.key_link), query) + self.filter_link
+            result = getUrl(q, headers=headers).result
+            links += json.loads(result)['result']
+
+            q = self.base_link + self.stream_link % (base64.urlsafe_b64decode(self.key_link), query) + self.filter_link
+            result = getUrl(q, headers=headers).result
+            links += json.loads(result)['result']
+
+            title, hdlr = re.compile('(.+?) (\d{4}|S\d*E\d*)$').findall(url)[0]
+
+            if hdlr.isdigit():
+                type = 'movie'
+                title = cleantitle().movie(title)
+                hdlr = [str(hdlr), str(int(hdlr)+1), str(int(hdlr)-1)]
+            else:
+                type = 'episode'
+                title = cleantitle().tv(title)
+                hdlr = [hdlr]
+
+            for i in links:
+                try:
+                    if len(i['hosterurls']) > 1: raise Exception()
+                    if not i['extension'] in ['mkv', 'mp4']: raise Exception()
+
+                    host = i['hostername']
+                    host = host.rsplit('.', 1)[0]
+                    host = host.strip().lower()
+                    if not (host in hosthdDict or host in hostDict): raise Exception()
+                    host = common.replaceHTMLCodes(host)
+                    host = host.encode('utf-8')
+
+                    T = common.replaceHTMLCodes(i['title'])
+                    N = common.replaceHTMLCodes(i['sourcetitle'])
+
+                    t = re.sub('(\.|\_|\(|\[|\s)(\d{4}|S\d*E\d*|3D)(\.|\_|\)|\]|\s)(.+)', '', T)
+                    if type == 'movie': t = cleantitle().movie(t)
+                    else: t = cleantitle().tv(t)
+                    n = re.sub('(\.|\_|\(|\[|\s)(\d{4}|S\d*E\d*|3D)(\.|\_|\)|\]|\s)(.+)', '', N)
+                    if type == 'movie': n = cleantitle().movie(n)
+                    else: n = cleantitle().tv(n)
+                    if not (t == title or n == title): raise Exception()
+
+                    y = re.compile('[\.|\_|\(|\[|\s](\d{4}|S\d*E\d*)[\.|\_|\)|\]|\s]').findall(T)
+                    y += re.compile('[\.|\_|\(|\[|\s](\d{4}|S\d*E\d*)[\.|\_|\)|\]|\s]').findall(N)
+                    y = y[0]
+                    if not any(x == y for x in hdlr): raise Exception()
+
+                    fmt = re.sub('(.+)(\.|\_|\(|\[|\s)(\d{4}|S\d*E\d*)(\.|\_|\)|\]|\s)', '', T)
+                    fmt += ' ' + re.sub('(.+)(\.|\_|\(|\[|\s)(\d{4}|S\d*E\d*)(\.|\_|\)|\]|\s)', '', N)
+                    fmt = re.split('\.|\_|\(|\)|\[|\]|\s|\-', fmt)
+                    fmt = [x.lower() for x in fmt]
+
+                    if '1080p' in fmt: quality = '1080p'
+                    elif '720p' in fmt: quality = 'HD'
+                    else: quality = 'SD'
+
+                    if any(x in ['dvdscr', 'r5', 'r6', 'camrip', 'tsrip', 'hdcam', 'hdts', 'dvdcam', 'dvdts', 'cam', 'ts'] for x in fmt): raise Exception()
+
+                    if quality in ['1080p', 'HD']  and not host in hosthdDict: raise Exception()
+                    if quality == 'SD' and not host in hostDict: raise Exception()
+
+                    url = i['hosterurls'][0]['url']
+                    url = common.replaceHTMLCodes(url)
+                    url = url.encode('utf-8')
+
+                    info = []
+                    size = i['sizeinternal']
+                    if type == 'movie' and 1 < size < 100000000: raise Exception()
+                    size = float(size)/1073741824
+                    if not size == 0: info.append('%.2f GB' % size)
+                    if '3d' in fmt: info.append('3D')
+                    info = ' | '.join(info)
+
+                    sources.append({'source': host, 'quality': quality, 'provider': 'Alluc', 'url': url, 'info': info})
+                except:
+                    pass
+
+            return sources
+        except:
+            return sources
+
+    def resolve(self, url):
+        try:
+            import commonresolvers
+            url = commonresolvers.get(url)
+            return url
+        except:
+            return
+
 class primewire:
     def __init__(self):
         self.base_link = 'http://www.primewire.ag'
@@ -2454,139 +2588,6 @@ class einthusan:
         try:
             result = getUrl(url).result
             url = re.compile("'file': '(.+?)'").findall(result)[0]
-            return url
-        except:
-            return
-
-class alluc:
-    def __init__(self):
-        self.base_link = 'https://www.alluc.com'
-        self.download_link = '/api/search/download/?apikey=%s&count=100&from=0&getmeta=0&query=%s'
-        self.stream_link = '/api/search/stream/?apikey=%s&count=100&from=0&getmeta=0&query=%s'
-        self.key_link = 'MjBiMThmYzkyNGIzMjQzNDdmNWVjYjFhZTQzMjQ3NDQ='
-
-    def get_movie(self, imdb, title, year):
-        try:
-            url = '%s %s' % (title, year)
-            url = common.replaceHTMLCodes(url)
-            url = url.encode('utf-8')
-            return url
-        except:
-            return
-
-    def get_show(self, imdb, tvdb, show, show_alt, year):
-        try:
-            url = show
-            url = common.replaceHTMLCodes(url)
-            url = url.encode('utf-8')
-            return url
-        except:
-            return
-
-    def get_episode(self, url, imdb, tvdb, title, date, season, episode):
-        try:
-            if url == None: return
-            url = '%s S%02dE%02d' % (url, int(season), int(episode))
-            url = common.replaceHTMLCodes(url)
-            url = url.encode('utf-8')
-            return url
-        except:
-            return
-
-    def get_sources(self, url, hosthdDict, hostDict):
-        try:
-            sources = []
-
-            query = urllib.quote_plus(url)
-
-            links = []
-
-            q = self.base_link + self.download_link % (base64.urlsafe_b64decode(self.key_link), query)
-            result = getUrl(q).result
-            links += json.loads(result)['result']
-
-            q = self.base_link + self.stream_link % (base64.urlsafe_b64decode(self.key_link), query)
-            result = getUrl(q).result
-            links += json.loads(result)['result']
-
-            title, hdlr = re.compile('(.+?) (\d{4}|S\d*E\d*)$').findall(url)[0]
-
-            if hdlr.isdigit():
-                type = 'movie'
-                title = cleantitle().movie(title)
-                hdlr = [str(hdlr), str(int(hdlr)+1), str(int(hdlr)-1)]
-            else:
-                type = 'episode'
-                title = cleantitle().tv(title)
-                hdlr = [hdlr]
-
-            for i in links:
-                try:
-                    if len(i['hosterurls']) > 1: raise Exception()
-                    if not i['extension'] in ['mkv', 'mp4']: raise Exception()
-                    if not i['lang'] == 'en': raise Exception()
-
-                    host = i['hostername']
-                    host = host.rsplit('.', 1)[0]
-                    host = host.strip().lower()
-                    if not (host in hosthdDict or host in hostDict): raise Exception()
-                    host = common.replaceHTMLCodes(host)
-                    host = host.encode('utf-8')
-
-                    T = common.replaceHTMLCodes(i['title'])
-                    N = common.replaceHTMLCodes(i['sourcetitle'])
-
-                    t = re.sub('(\.|\_|\(|\[|\s)(\d{4}|S\d*E\d*|3D)(\.|\_|\)|\]|\s)(.+)', '', T)
-                    if type == 'movie': t = cleantitle().movie(t)
-                    else: t = cleantitle().tv(t)
-                    n = re.sub('(\.|\_|\(|\[|\s)(\d{4}|S\d*E\d*|3D)(\.|\_|\)|\]|\s)(.+)', '', N)
-                    if type == 'movie': n = cleantitle().movie(n)
-                    else: n = cleantitle().tv(n)
-                    if not (t == title or n == title): raise Exception()
-
-                    y = re.compile('[\.|\_|\(|\[|\s](\d{4}|S\d*E\d*)[\.|\_|\)|\]|\s]').findall(T)
-                    y += re.compile('[\.|\_|\(|\[|\s](\d{4}|S\d*E\d*)[\.|\_|\)|\]|\s]').findall(N)
-                    y = y[0]
-                    if not any(x == y for x in hdlr): raise Exception()
-
-                    fmt = re.sub('(.+)(\.|\_|\(|\[|\s)(\d{4}|S\d*E\d*)(\.|\_|\)|\]|\s)', '', T)
-                    fmt += ' ' + re.sub('(.+)(\.|\_|\(|\[|\s)(\d{4}|S\d*E\d*)(\.|\_|\)|\]|\s)', '', N)
-                    fmt = re.split('\.|\_|\(|\)|\[|\]|\s|\-', fmt)
-                    fmt = [x.lower() for x in fmt]
-
-                    if '1080p' in fmt: quality = '1080p'
-                    elif '720p' in fmt: quality = 'HD'
-                    else: quality = 'SD'
-
-                    if any(x in ['dvdscr', 'r5', 'r6', 'camrip', 'tsrip', 'hdcam', 'hdts', 'dvdcam', 'dvdts', 'cam', 'ts'] for x in fmt): raise Exception()
-
-                    if quality in ['1080p', 'HD']  and not host in hosthdDict: raise Exception()
-                    if quality == 'SD' and not host in hostDict: raise Exception()
-
-                    url = i['hosterurls'][0]['url']
-                    url = common.replaceHTMLCodes(url)
-                    url = url.encode('utf-8')
-
-                    info = []
-                    size = i['sizeinternal']
-                    if type == 'movie' and 1 < size < 100000000: raise Exception()
-                    size = float(size)/1073741824
-                    if not size == 0: info.append('%.2f GB' % size)
-                    if '3d' in fmt: info.append('3D')
-                    info = ' | '.join(info)
-
-                    sources.append({'source': host, 'quality': quality, 'provider': 'Alluc', 'url': url, 'info': info})
-                except:
-                    pass
-
-            return sources
-        except:
-            return sources
-
-    def resolve(self, url):
-        try:
-            import commonresolvers
-            url = commonresolvers.get(url)
             return url
         except:
             return

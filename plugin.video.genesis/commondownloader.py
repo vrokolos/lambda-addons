@@ -126,13 +126,6 @@ def doDownload(url, dest, title, referer, agent, cookie):
 
     print 'Download File Size : %dMB %s ' % (mb, dest)
 
-    #Create directory of file
-    dirs = os.path.dirname(os.path.abspath(dest))
-    dirs = dirs.split(os.sep)
-    dirs = [str.join(os.sep, dirs[:dirs.index(i)+2]) for i in dirs]
-    for dir in dirs: xbmcvfs.mkdir(dir)
-
-
     #f = open(dest, mode='wb')
     f = xbmcvfs.File(dest, 'w')
 

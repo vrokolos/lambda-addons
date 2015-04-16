@@ -1,4 +1,36 @@
 ------------------------
+Genesis v4.4.0 (16-Apr-15)
+------------------------
+
+- Tweaked Alluc source.
+- Fixed Google resolvers.
+- Fixed 180upload resolver.
+- Fixed Mightyupload resolver.
+- Fixed Mrfile resolver.
+- Fixed Vidplay resolver.
+- Fixed V-vids resolver.
+- Fixed Thevideo resolver.
+- Fixed Uploadrocket resolver.
+- Added Clicknupload resolver.
+- Added Tusfiles resolver.
+- Added Xfileload resolver.
+- Removed Cloudyvideos resolver.
+- Removed Filecloud resolver.
+- Removed Promptfile resolver.
+- Tweaked loading of resolvers.
+- Tweaked loading of sources.
+- Tweaked Auto-play.
+- Re-work of source filtering.
+- Added option for max quality.
+- Added options for file hosting services.
+- Added new options for Auto-play.
+- NOTE: Host priorities will be reset.
+- Tweaked downloading support.
+- Updated translations.
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.3.0 (4-Apr-15)
 ------------------------
 

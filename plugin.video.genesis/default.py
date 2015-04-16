@@ -2185,11 +2185,16 @@ class contextMenu:
 
             if len(content) == 0:
             	dest = xbmc.translatePath(getSetting("movie_downloads"))
+            	xbmcvfs.mkdir(dest)
             	dest = os.path.join(dest, name)
+            	xbmcvfs.mkdir(dest)
             else:
             	dest = xbmc.translatePath(getSetting("tv_downloads"))
+            	xbmcvfs.mkdir(dest)
             	dest = os.path.join(dest, content[0][0])
+            	xbmcvfs.mkdir(dest)
             	dest = os.path.join(dest, 'Season %01d' % int(content[0][1]))
+            	xbmcvfs.mkdir(dest)
 
             ext = os.path.splitext(urlparse.urlparse(url).path)[1][1:]
             if ext in ['', 'php']: ext = 'mp4'
@@ -5400,16 +5405,21 @@ class resolver:
             return title
 
     def sources_get(self, name, title, year, imdb, tvdb, season, episode, show, show_alt, date, genre):
+        import inspect
+        sourceDict = inspect.getmembers(commonsources)
+        sourceDict = [i for i in sourceDict if inspect.isclass(i[1]) and hasattr(i[1], 'get_sources')]
+
         if show == None: content = 'movie'
         else: content = 'episode'
 
         if content == 'movie':
-            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('movie25', 'true'), ('iwatchonline', 'true'), ('gvcenter', 'true'), ('movietube', 'true'), ('moviezone', 'true'), ('yify', 'true'), ('zumvo', 'true'), ('g2g', 'true'), ('muchmovies', 'true'), ('sweflix', 'true'), ('movieshd', 'true'), ('onlinemovies', 'true'), ('vkbox', 'true'), ('moviestorm', 'true'), ('watchfree', 'true'), ('merdb', 'true'), ('wso', 'true'), ('einthusan', 'true'), ('alluc', 'true'), ('noobroom', 'true'), ('furk', 'true')]
-            sourceDict = [('icefilms', getSetting("icefilms")), ('primewire', getSetting("primewire")), ('movie25', getSetting("movie25")), ('iwatchonline', getSetting("iwatchonline")), ('gvcenter', getSetting("gvcenter")), ('movietube', getSetting("movietube")), ('moviezone', getSetting("moviezone")), ('yify', getSetting("yify")), ('zumvo', getSetting("zumvo")), ('g2g', getSetting("g2g")), ('muchmovies', getSetting("muchmovies")), ('sweflix', getSetting("sweflix")), ('movieshd', getSetting("movieshd")), ('onlinemovies', getSetting("onlinemovies")), ('vkbox', getSetting("vkbox")), ('moviestorm', getSetting("moviestorm")), ('watchfree', getSetting("watchfree")), ('merdb', getSetting("merdb")), ('wso', getSetting("wso")), ('einthusan', getSetting("einthusan")), ('alluc', getSetting("alluc")), ('noobroom', getSetting("noobroom")), ('furk', getSetting("furk"))]
+            sourceDict = [str(i[0]) for i in sourceDict if hasattr(i[1], 'get_movie')]
+            try: sourceDict = [(i, getSetting(i)) for i in sourceDict]
+            except: sourceDict = [(i, 'true') for i in sourceDict]
         else:
-            #sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('watchseries', 'true'), ('iwatchonline', 'true'), ('gvcenter', 'true'), ('movietube', 'true'), ('ororo', 'true'), ('vkbox', 'true'), ('clickplay', 'true'), ('moviestorm', 'true'), ('watchfree', 'true'), ('merdb', 'true'), ('wso', 'true'), ('animeultima', 'true'), ('alluc', 'true'), ('tvrelease', 'true'), ('directdl', 'true'), ('noobroom', 'true'), ('furk', 'true')]
-            sourceDict = [('icefilms', getSetting("icefilms_tv")), ('primewire', getSetting("primewire_tv")), ('watchseries', getSetting("watchseries_tv")), ('iwatchonline', getSetting("iwatchonline_tv")), ('gvcenter', getSetting("gvcenter_tv")), ('movietube', getSetting("movietube_tv")), ('ororo', getSetting("ororo_tv")), ('vkbox', getSetting("vkbox_tv")), ('clickplay', getSetting("clickplay_tv")), ('moviestorm', getSetting("moviestorm_tv")), ('watchfree', getSetting("watchfree_tv")), ('merdb', getSetting("merdb_tv")), ('wso', getSetting("wso_tv")), ('animeultima', getSetting("animeultima_tv")), ('alluc', getSetting("alluc_tv")), ('tvrelease', getSetting("tvrelease_tv")), ('directdl', getSetting("directdl_tv")), ('noobroom', getSetting("noobroom_tv")), ('furk', getSetting("furk_tv"))]
-
+            sourceDict = [str(i[0]) for i in sourceDict if hasattr(i[1], 'get_show')]
+            try: sourceDict = [(i, getSetting(i + '_tv')) for i in sourceDict]
+            except: sourceDict = [(i, 'true') for i in sourceDict]
 
         global global_sources
         global_sources = []
@@ -5578,42 +5588,26 @@ class resolver:
     def sources_filter(self):
         self.sources_reset()
 
-        pz_hosts = []
-        if (getSetting("premiumize_user") == '' or getSetting("premiumize_password") == ''): pz_mode = False
-        else: pz_mode = True
-
-        rd_hosts = []
-        if (getSetting("realdedrid_user") == '' or getSetting("realdedrid_password") == ''): rd_mode = False
-        else: rd_mode = True
-
-        if pz_mode == True:
-            import commonresolvers
-            pz_hosts = index().cache(commonresolvers.premiumize_hosts, 24)
-            if pz_hosts == None: pz_hosts = []
-
-        if rd_mode == True:
-            import commonresolvers
-            rd_hosts = index().cache(commonresolvers.realdebrid_hosts, 24)
-            if rd_hosts == None: rd_hosts = []
+        try: customhdDict = [getSetting("hosthd1"), getSetting("hosthd2"), getSetting("hosthd3"), getSetting("hosthd4"), getSetting("hosthd5"), getSetting("hosthd6"), getSetting("hosthd7"), getSetting("hosthd8"), getSetting("hosthd9"), getSetting("hosthd10"), getSetting("hosthd11"), getSetting("hosthd12"), getSetting("hosthd13"), getSetting("hosthd14"), getSetting("hosthd15"), getSetting("hosthd16"), getSetting("hosthd17"), getSetting("hosthd18"), getSetting("hosthd19"), getSetting("hosthd20")]
+        except: customhdDict = []
+        try: customsdDict = [getSetting("host1"), getSetting("host2"), getSetting("host3"), getSetting("host4"), getSetting("host5"), getSetting("host6"), getSetting("host7"), getSetting("host8"), getSetting("host9"), getSetting("host10"), getSetting("host11"), getSetting("host12"), getSetting("host13"), getSetting("host14"), getSetting("host15"), getSetting("host16"), getSetting("host17"), getSetting("host18"), getSetting("host19"), getSetting("host20")]
+        except: customsdDict = []
 
         hd_rank = []
-        hd_rank += [i for i in pz_hosts if i in self.hostprDict + self.hosthdDict]
-        hd_rank += [i for i in rd_hosts if i in self.hostprDict + self.hosthdDict]
-        hd_rank += self.directprDict
-        #hd_rank += ['VK', 'GVideo', 'Muchmovies', 'Sweflix', 'Videomega', 'YIFY', 'Einthusan', 'Movreel', '180upload', 'Vidplay', 'Uptobox', 'Mrfile', 'Mightyupload', 'Hugefiles', 'Filecloud', 'Uploadrocket', 'Kingfiles']
-        hd_rank += [getSetting("hosthd1"), getSetting("hosthd2"), getSetting("hosthd3"), getSetting("hosthd4"), getSetting("hosthd5"), getSetting("hosthd6"), getSetting("hosthd7"), getSetting("hosthd8"), getSetting("hosthd9"), getSetting("hosthd10"), getSetting("hosthd11"), getSetting("hosthd12"), getSetting("hosthd13"), getSetting("hosthd14"), getSetting("hosthd15"), getSetting("hosthd16"), getSetting("hosthd17")]
-
+        hd_rank += [i for i in self.pzDict if i in self.hostprDict + self.hosthdDict]
+        hd_rank += [i for i in self.rdDict if i in self.hostprDict + self.hosthdDict]
+        hd_rank += customhdDict
+        hd_rank += [i['source'] for i in self.sources if i['quality'] in ['1080p', 'HD'] and not i['source'] in customhdDict + self.hostprDict + self.hosthdDict]
+        hd_rank += self.hosthdDict
         hd_rank = [i.lower() for i in hd_rank]
         hd_rank = uniqueList(hd_rank).list
 
         sd_rank = []
-        sd_rank += self.directprDict
-        sd_rank += [i for i in pz_hosts if i in self.hostprDict + self.hosthqDict]
-        sd_rank += [i for i in rd_hosts if i in self.hostprDict + self.hosthqDict]
-        #sd_rank += ['Movreel', '180upload', 'Vidplay', 'Ororo', 'Animeultima', 'Grifthost', 'Openload', 'Primeshare', 'Promptfile', 'Mrfile', 'Mightyupload', 'Cloudyvideos', 'iShared', 'Uptobox', 'V-vids', 'Ipithos', 'Zettahost', 'Uploadc', 'Zalaa', 'Streamin']
-        sd_rank += [getSetting("host1"), getSetting("host2"), getSetting("host3"), getSetting("host4"), getSetting("host5"), getSetting("host6"), getSetting("host7"), getSetting("host8"), getSetting("host9"), getSetting("host10"), getSetting("host11"), getSetting("host12"), getSetting("host13"), getSetting("host14"), getSetting("host15"), getSetting("host16"), getSetting("host17"), getSetting("host18"), getSetting("host19"), getSetting("host20")]
-        sd_rank += self.directsdDict + self.hosthqDict + self.hostmqDict + self.hostlqDict
-
+        sd_rank += [i for i in self.pzDict if i in self.hostprDict + self.hosthqDict]
+        sd_rank += [i for i in self.rdDict if i in self.hostprDict + self.hosthqDict]
+        sd_rank += customsdDict
+        sd_rank += [i['source'] for i in self.sources if i['quality'] == 'SD' and not i['source'] in customsdDict + self.hostprDict + self.hosthqDict + self.hostmqDict + self.hostlqDict]
+        sd_rank += self.hosthqDict + self.hostmqDict + self.hostlqDict
         sd_rank = [i.lower() for i in sd_rank]
         sd_rank = uniqueList(sd_rank).list
 
@@ -5621,46 +5615,62 @@ class resolver:
         self.sources = sorted(self.sources, key=itemgetter('source'))
 
         filter = []
-        for host in hd_rank: filter += [i for i in self.sources if i['quality'] == '1080p' and i['source'].lower() == host.lower()]
-        for host in hd_rank: filter += [i for i in self.sources if i['quality'] == 'HD' and i['source'].lower() == host.lower()]
-        for host in sd_rank: filter += [i for i in self.sources if not i['quality'] in ['1080p', 'HD'] and i['source'].lower() == host.lower()]
-        self.sources = filter
-
-        filter = []
-        filter += [i for i in self.sources if i['quality'] == '1080p']
-        filter += [i for i in self.sources if i['quality'] == 'HD']
-        filter += [i for i in self.sources if i['quality'] == 'SD']
+        for host in hd_rank: filter += [i for i in self.sources if i['quality'] == '1080p' and i['source'] == host]
+        for host in hd_rank: filter += [i for i in self.sources if i['quality'] == 'HD' and i['source'] == host]
+        for host in sd_rank: filter += [i for i in self.sources if i['quality'] == 'SD' and i['source'] == host]
         if len(filter) < 10: filter += [i for i in self.sources if i['quality'] == 'SCR']
         if len(filter) < 10: filter += [i for i in self.sources if i['quality'] == 'CAM']
         self.sources = filter
 
-        if getSetting("play_hd") == 'false':
+        try: playback_quality = getSetting("playback_quality")
+        except: playback_quality = '0'
+
+        if playback_quality == '1':
+            self.sources = [i for i in self.sources if not i['quality'] == '1080p']
+        elif playback_quality == '2':
             self.sources = [i for i in self.sources if not i['quality'] in ['1080p', 'HD']]
+        elif playback_quality == '3':
+            self.sources = [i for i in self.sources if not i['quality'] in ['1080p', 'HD'] and i['source'] in self.hostmqDict + self.hostlqDict]
+        elif playback_quality == '4':
+            self.sources = [i for i in self.sources if not i['quality'] in ['1080p', 'HD'] and i['source'] in self.hostlqDict]
+
+        try: playback_captcha = getSetting("playback_captcha")
+        except: playback_captcha = 'false'
+
+        try: playback_1080p_hosts = getSetting("playback_1080p_hosts")
+        except: playback_1080p_hosts = 'true'
+
+        try: playback_720p_hosts = getSetting("playback_720p_hosts")
+        except: playback_720p_hosts = 'true'
+
+        if playback_captcha == 'false':
+            self.sources = [i for i in self.sources if not i['source'] in self.hostcapDict]
+
+        if playback_1080p_hosts == 'false':
+            self.sources = [i for i in self.sources if not (i['quality'] == '1080p' and i['source'] in self.hosthdDict and not i['source'] in self.pzDict + self.rdDict)]
+
+        if playback_720p_hosts == 'false':
+            self.sources = [i for i in self.sources if not (i['quality'] == 'HD' and i['source'] in self.hosthdDict and not i['source'] in self.pzDict + self.rdDict)]
 
         count = 1
         for i in range(len(self.sources)):
             s = self.sources[i]['source'].lower()
+
             q = self.sources[i]['quality']
+            if q == 'SD' and s in self.hostmqDict: q = 'MQ'
+            elif q == 'SD' and s in self.hostlqDict: q = 'LQ'
+            elif q == 'SD': q = 'HQ'
 
             try: d = self.sources[i]['info']
             except: d = ''
             if not d == '': d = ' | [I]%s [/I]' % d
 
-            if s in pz_hosts: label = '%02d | [B]premiumize[/B] | ' % count
-            elif s in rd_hosts: label = '%02d | [B]realdebrid[/B] | ' % count
+            if s in self.pzDict: label = '%02d | [B]premiumize[/B] | ' % count
+            elif s in self.rdDict: label = '%02d | [B]realdebrid[/B] | ' % count
             else: label = '%02d | [B]%s[/B] | ' % (count, self.sources[i]['provider'])
 
             if q in ['1080p', 'HD']: label += '%s%s | [B][I]%s [/I][/B]' % (s, d, q)
-            elif q == 'SD' and s in self.directprDict: label += '%s%s | [I]HQ [/I]' % (s, d)
-            elif q == 'SD' and s in self.directsdDict: label += '%s%s | [I]HQ [/I]' % (s, d)
-            elif q == 'SD' and s in self.hostprDict: label += '%s%s | [I]HQ [/I]' % (s, d)
-            elif q == 'SD' and s in self.hosthqDict: label += '%s%s | [I]HQ [/I]' % (s, d)
-            elif q == 'SD' and s in self.hostmqDict: label += '%s%s | [I]MQ [/I]' % (s, d)
-            elif q == 'SD' and s in self.hostlqDict: label += '%s%s | [I]LQ [/I]' % (s, d)
             else: label += '%s%s | [I]%s [/I]' % (s, d, q)
-
-            if 'premiumize' in label: self.sources[i]['source'] = 'premiumize'
-            if 'realdebrid' in label: self.sources[i]['source'] = 'realdebrid'
 
             self.sources[i]['host'] = self.sources[i]['source']
             self.sources[i]['source'] = label.upper()
@@ -5707,14 +5717,16 @@ class resolver:
             return
 
     def sources_direct(self):
-        hd_access = ['premiumize', 'realdebrid', 'noobroom', 'vk', 'gvideo', 'sweflix', 'videomega', 'yify', 'einthusan']
-        blocks = ['furk']
+        self.sources = [i for i in self.sources if not i['host'] in self.hostcapDict]
 
-        self.sources = [i for i in self.sources if not i['host'] in blocks]
+        self.sources = [i for i in self.sources if not (i['quality'] in ['1080p', 'HD'] and i['host'] in self.hosthdDict and not i['host'] in self.pzDict + self.rdDict)]
 
-        self.sources = [i for i in self.sources if not (i['quality'] in ['1080p', 'HD'] and not i['host'] in hd_access)]
+        self.sources = [i for i in self.sources if not i['host'] in ['furk']]
 
-        if getSetting("autoplay_hd") == 'false':
+        try: playback_auto_sd = getSetting("playback_auto_sd")
+        except: playback_auto_sd = 'true'
+
+        if playback_auto_sd == 'true':
             self.sources = [i for i in self.sources if not i['quality'] in ['1080p', 'HD']]
 
         u = None
@@ -5726,14 +5738,14 @@ class resolver:
                 if url == None: raise Exception()
                 if u == None: u = url
 
-                if url.startswith('http://'):
-                    request = urllib2.Request(url.rsplit('|', 1)[0])
-                    request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36')
-                    request.add_header('Cookie', 'video=true')
-                    response = urllib2.urlopen(request, timeout=20)
-                    chunk = response.read(16 * 1024)
-                    response.close()
-                    if 'text/html' in str(response.info()["Content-Type"]): raise Exception()
+                try: headers = dict(urlparse.parse_qsl(url.rsplit('|', 1)[1]))
+                except: headers = dict('')
+
+                request = urllib2.Request(url.split('|')[0], headers=headers)
+                response = urllib2.urlopen(request, timeout=10)
+                content = int(response.headers['Content-Length'])
+                chunk = response.read(16 * 1024)
+                response.close()
 
                 self.selectedSource = i['source']
                 return url
@@ -5744,7 +5756,7 @@ class resolver:
 
     def sources_reset(self):
         try:
-            v = '4.2.0'
+            v = '4.4.0'
             if getSetting("sources_version") == v: return
 
             settings = os.path.join(dataPath,'settings.xml')
@@ -5769,21 +5781,30 @@ class resolver:
             return
 
     def sources_dict(self):
-        self.directprDict = ['noobroom', 'furk']
+        import commonresolvers
 
-        self.directhdDict = ['vk', 'gvideo', 'muchmovies', 'sweflix', 'videomega', 'yify', 'einthusan']
+        hosts = commonresolvers.info()
+        for i in range(len(hosts)): hosts[i]['host'] = hosts[i]['host'].lower()
 
-        self.directsdDict = ['ororo', 'animeultima', 'vk']
+        self.pzDict = index().cache(commonresolvers.premiumize_hosts, 24)
+        if (getSetting("premiumize_user") == '' or getSetting("premiumize_password") == ''): self.pzDict = []
+        if self.pzDict == None: self.pzDict = []
 
-        self.hostprDict = ['uploaded', 'rapidgator', 'filefactory', 'bitshare', 'uploadable']
+        self.rdDict = index().cache(commonresolvers.realdebrid_hosts, 24)
+        if (getSetting("realdedrid_user") == '' or getSetting("realdedrid_password") == ''): self.rdDict = []
+        if self.rdDict == None: self.rdDict = []
 
-        self.hosthdDict = ['movreel', '180upload', 'vidplay', 'mrfile', 'mightyupload', 'uptobox', 'hugefiles', 'filecloud', 'uploadrocket', 'kingfiles']
+        self.hostprDict = [i['host'] for i in hosts if i['a/c'] == True]
 
-        self.hosthqDict = ['movreel', '180upload', 'vidplay', 'grifthost', 'openload', 'primeshare', 'promptfile', 'mrfile', 'mightyupload', 'cloudyvideos', 'ishared', 'uptobox', 'v-vids', 'ipithos', 'zettahost', 'uploadc', 'zalaa']
+        self.hostcapDict = [i['host'] for i in hosts if i['captcha'] == True]
+        self.hostcapDict = [i for i in self.hostcapDict if not i in self.pzDict + self.rdDict]
 
-        self.hostmqDict = ['youtube', 'streamin', 'xvidstage', 'vidspot', 'allmyvideos', 'cloudzilla', 'streamcloud']
+        self.hosthdDict = [i['host'] for i in hosts if i['quality'] == 'High' and i['a/c'] == False and i['captcha'] == False]
+        self.hosthdDict += [i['host'] for i in hosts if i['quality'] == 'High' and i['a/c'] == False and i['captcha'] == True]
 
-        self.hostlqDict = ['played', 'vidto', 'bestreams', 'mooshare', 'thefile', 'faststream', 'fastvideo', 'filenuke', 'sharerepo', 'sharesix', 'nowvideo', 'movshare', 'videoweed', 'novamov', 'vidbull', 'filehoot', 'nosvideo', 'daclips', 'gorillavid', 'movpod', 'vidzi', 'vodlocker', 'thevideo', 'movdivx', 'stagevu']
+        self.hosthqDict = [i['host'] for i in hosts if i['quality'] == 'High' and i['a/c'] == False and i['captcha'] == False]
+        self.hostmqDict = [i['host'] for i in hosts if i['quality'] == 'Medium' and i['a/c'] == False and i['captcha'] == False]
+        self.hostlqDict = [i['host'] for i in hosts if i['quality'] == 'Low' and i['a/c'] == False and i['captcha'] == False]
 
         self.hostsdfullDict = self.hostprDict + self.hosthqDict + self.hostmqDict + self.hostlqDict
 

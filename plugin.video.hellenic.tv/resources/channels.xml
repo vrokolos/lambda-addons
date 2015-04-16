@@ -56,7 +56,7 @@
 		<channel active="True">
 			<name>ART CHANNEL</name>
 			<type>ustream</type>
-			<url>http://www.ustream.tv/embed/19497099</url>
+			<url>http://www.ustream.tv/embed/16900854</url>
 			<base>http://www.arttv.info/</base>
 		</channel>
 		<channel active="True">
@@ -99,17 +99,17 @@
 		</channel>
 		<channel active="True">
 			<name>ANT1 CYPRUS</name>
-			<url>rtmpe://l.xuscacamusca.se/r/ playpath=ant1new877 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
+			<url>rtmpe://l.mybeststream.xyz/r/ playpath=ant1new877 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
 			<base>http://www.lakatamia.tv/share/ant1.html</base>
 		</channel>
 		<channel active="True">
 			<name>SIGMA</name>
-			<url>rtmpe://l.xuscacamusca.se/r/ playpath=sigma1678 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
+			<url>rtmpe://l.mybeststream.xyz/r/ playpath=sigma1678 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
 			<base>http://www.lakatamia.tv/share/sigma.html</base>
 		</channel>
 		<channel active="True">
 			<name>CAPITAL</name>
-			<url>rtmpe://l.xuscacamusca.se/r/ playpath=capnew886 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
+			<url>rtmpe://l.mybeststream.xyz/r/ playpath=capnew886 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
 			<base>http://www.lakatamia.tv/share/capital.html</base>
 		</channel>
 		<channel active="True">
@@ -139,6 +139,11 @@
 			<name>GREEK CINEMA 80s</name>
 			<type>gm</type>
 			<url>y=4&amp;l=&amp;g=&amp;p=1</url>
+		</channel>
+		<channel active="True">
+			<name>GREEK CINEMA</name>
+			<type>hls</type>
+			<url>http://wpc.68FC.edgecastcdn.net/8068FC/INFINITY/m3u8/cinema.m3u8</url>
 		</channel>
 		<channel active="True">
 			<name>CY SPORTS</name>
@@ -244,7 +249,8 @@
 	<area name="CENTRAL MACEDONIA">
 		<channel active="True">
 			<name>TV 100</name>
-			<url>rtmp://178.62.176.153:1935/TV100/TV100 live=1 timeout=10</url>
+			<type>hls</type>
+			<url>http://188.226.161.133:1935/TV100/TV100/playlist.m3u8</url>
 			<base>http://www.fm100.gr/</base>
 		</channel>
 		<channel active="True">
@@ -532,7 +538,8 @@
 		</channel>
 		<channel active="True">
 			<name>DIRAS TV</name>
-			<url>rtmp://www.cityofkos.gr/live/livetv live=1 timeout=10</url>
+			<type>hls</type>
+			<url>http://www.cityofkos.gr:1935/live/livetv/playlist.m3u8</url>
 			<base>http://www.diras.gr/</base>
 		</channel>
 		<channel active="True">

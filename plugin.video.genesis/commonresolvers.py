@@ -31,85 +31,447 @@ except:
 
 
 def get(url):
+    hostMap = {
+        '180upload.com': _180upload,
+        'allmyvideos.net': allmyvideos,
+        'bestreams.net': bestreams,
+        'clicknupload.com': clicknupload,
+        'cloudzilla.to': cloudzilla,
+        'daclips.in': daclips,
+        'datemule.com': datemule,
+        'docs.google.com': googledocs,
+        'faststream.in': fastvideo,
+        'fastvideo.in': fastvideo,
+        'filehoot.com': filehoot,
+        'filenuke.com': filenuke,
+        'gorillavid.com': gorillavid,
+        'gorillavid.in': gorillavid,
+        'grifthost.com': grifthost,
+        'hugefiles.net': hugefiles,
+        'ipithos.to': ipithos,
+        'ishared.eu': ishared,
+        'kingfiles.net': kingfiles,
+        'mail.ru': mailru,
+        'mightyupload.com': mightyupload,
+        'mooshare.biz': mooshare,
+        'movdivx.com': movdivx,
+        'movpod.in': movpod,
+        'movpod.net': movpod,
+        'movreel.com': movreel,
+        'movshare.net': coolcdn,
+        'mrfile.me': mrfile,
+        'my.mail.ru': mailru,
+        'nosvideo.com': nosvideo,
+        'novamov.com': coolcdn,
+        'nowvideo.sx': coolcdn,
+        'openload.io': openload,
+        'picasaweb.google.com': googleplus,
+        'played.to': played,
+        'plus.google.com': googleplus,
+        'primeshare.tv': primeshare,
+        'sharerepo.com': sharerepo,
+        'sharesix.com': filenuke,
+        'stagevu.com': stagevu,
+        'streamcloud.eu': streamcloud,
+        'streamin.to': streamin,
+        'thefile.me': thefile,
+        'thevideo.me': thevideo,
+        'tusfiles.net': tusfiles,
+        'uploadc.com': uploadc,
+        'uploadrocket.net': uploadrocket,
+        'uptobox.com': uptobox,
+        'v-vids.com': v_vids,
+        'vidbull.com': vidbull,
+        'videomega.tv': videomega,
+        'videoweed.es': coolcdn,
+        'vidplay.net': vidplay,
+        'vidspot.net': vidspot,
+        'vidto.me': vidto,
+        'vidzi.tv': vidzi,
+        'vimeo.com': vimeo,
+        'vk.com': vk,
+        'vodlocker.com': vodlocker,
+        'xfileload.com': xfileload,
+        'xvidstage.com': xvidstage,
+        'youtube.com': youtube,
+        'zalaa.com': uploadc,
+        'zettahost.tv': zettahost,
+        }
+
     pz = premiumize(url)
     if not pz == None: return pz
     rd = realdebrid(url)
     if not rd == None: return rd
 
     try:
-        u = None
         u = urlparse.urlparse(url).netloc
         u = u.replace('www.', '').replace('embed.', '')
         u = u.lower()
     except:
         pass
 
-    if u == '180upload.com': url = _180upload(url)
-    elif u == 'allmyvideos.net': url = allmyvideos(url)
-    elif u == 'bestreams.net': url = bestreams(url)
-    elif u == 'cloudyvideos.com': url = cloudyvideos(url)
-    elif u == 'cloudzilla.to': url = cloudzilla(url)
-    elif u == 'daclips.in': url = daclips(url)
-    elif u == 'datemule.com': url = datemule(url)
-    elif u == 'faststream.in': url = fastvideo(url)
-    elif u == 'fastvideo.in': url = fastvideo(url)
-    elif u == 'filecloud.io': url = filecloud(url)
-    elif u == 'filehoot.com': url = filehoot(url)
-    elif u == 'filenuke.com': url = filenuke(url)
-    elif u == 'picasaweb.google.com': url = googleplus(url)
-    elif u == 'plus.google.com': url = googleplus(url)
-    elif u == 'docs.google.com': url = googledocs(url)
-    elif u == 'gorillavid.in': url = gorillavid(url)
-    elif u == 'gorillavid.com': url = gorillavid(url)
-    elif u == 'grifthost.com': url = grifthost(url)
-    elif u == 'hugefiles.net': url = hugefiles(url)
-    elif u == 'ipithos.to': url = ipithos(url)
-    elif u == 'ishared.eu': url = ishared(url)
-    elif u == 'kingfiles.net': url = kingfiles(url)
-    elif u == 'my.mail.ru': url = mailru(url)
-    elif u == 'mail.ru': url = mailru(url)
-    elif u == 'mightyupload.com': url = mightyupload(url)
-    elif u == 'mooshare.biz': url = mooshare(url)
-    elif u == 'movdivx.com': url = movdivx(url)
-    elif u == 'movpod.in': url = movpod(url)
-    elif u == 'movpod.net': url = movpod(url)
-    elif u == 'movreel.com': url = movreel(url)
-    elif u == 'movshare.net': url = coolcdn(url)
-    elif u == 'mrfile.me': url = mrfile(url)
-    elif u == 'nosvideo.com': url = nosvideo(url)
-    elif u == 'novamov.com': url = coolcdn(url)
-    elif u == 'nowvideo.sx': url = coolcdn(url)
-    elif u == 'openload.io': url = openload(url)
-    elif u == 'played.to': url = played(url)
-    elif u == 'primeshare.tv': url = primeshare(url)
-    elif u == 'promptfile.com': url = promptfile(url)
-    elif u == 'sharerepo.com': url = sharerepo(url)
-    elif u == 'sharesix.com': url = filenuke(url)
-    elif u == 'stagevu.com': url = stagevu(url)
-    elif u == 'streamcloud.eu': url = streamcloud(url)
-    elif u == 'streamin.to': url = streamin(url)
-    elif u == 'thefile.me': url = thefile(url)
-    elif u == 'thevideo.me': url = thevideo(url)
-    elif u == 'uploadc.com': url = uploadc(url)
-    elif u == 'uploadrocket.net': url = uploadrocket(url)
-    elif u == 'uptobox.com': url = uptobox(url)
-    elif u == 'v-vids.com': url = v_vids(url)
-    elif u == 'vidbull.com': url = vidbull(url)
-    elif u == 'videomega.tv': url = videomega(url)
-    elif u == 'vidplay.net': url = vidplay(url)
-    elif u == 'videoweed.es': url = coolcdn(url)
-    elif u == 'vidspot.net': url = vidspot(url)
-    elif u == 'vidto.me': url = vidto(url)
-    elif u == 'vidzi.tv': url = vidzi(url)
-    elif u == 'vimeo.com': url = vimeo(url)
-    elif u == 'vk.com': url = vk(url)
-    elif u == 'vodlocker.com': url = vodlocker(url)
-    elif u == 'xvidstage.com': url = xvidstage(url)
-    elif u == 'youtube.com': url = youtube(url)
-    elif u == 'zalaa.com': url = uploadc(url)
-    elif u == 'zettahost.tv': url = zettahost(url)
+    try:
+        return hostMap[u](url)
+    except:
+        return url
 
-    return url
+def info():
+    return [
+        {
+            'host': '180upload',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Allmyvideos',
+            'quality': 'Medium',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Bestreams',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Bitshare',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': True,
+            },
+        {
+            'host': 'Clicknupload',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Cloudzilla',
+            'quality': 'Medium',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Daclips',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Faststream',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Fastvideo',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Filefactory',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': True,
+            },
+        {
+            'host': 'Filehoot',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Filenuke',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Gorillavid',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Grifthost',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Hugefiles',
+            'quality': 'High',
+            'captcha': True,
+            'a/c': False,
+            },
+        {
+            'host': 'Ipithos',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'iShared',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'K2S',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': True,
+            },
+        {
+            'host': 'Kingfiles',
+            'quality': 'High',
+            'captcha': True,
+            'a/c': False,
+            },
+        {
+            'host': 'Mightyupload',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Mooshare',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Movdivx',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Movpod',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Movreel',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Movshare',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Mrfile',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Nosvideo',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Novamov',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Nowvideo',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Oboom',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': True,
+            },
+        {
+            'host': 'Openload',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Played',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Primeshare',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Rapidgator',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': True,
+            },
+        {
+            'host': 'Sharerepo',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Sharesix',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'StageVu',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Streamcloud',
+            'quality': 'Medium',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Streamin',
+            'quality': 'Medium',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Thefile',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Thevideo',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Tusfiles',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Uploadc',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Uploaded',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': True,
+            },
+        {
+            'host': 'Uploadrocket',
+            'quality': 'High',
+            'captcha': True,
+            'a/c': False,
+            },
+        {
+            'host': 'Uptobox',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'V-vids',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Vidbull',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Videoweed',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Vidplay',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Vidspot',
+            'quality': 'Medium',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Vidto',
+            'quality': 'Medium',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Vidzi',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Vodlocker',
+            'quality': 'Low',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Xfileload',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Xvidstage',
+            'quality': 'Medium',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Youtube',
+            'quality': 'Medium',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Zalaa',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        {
+            'host': 'Zettahost',
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False,
+            },
+        ]
 
 
 class getUrl(object):
@@ -258,7 +620,6 @@ def captcha(data):
         return captcha
 
 
-
 def premiumize(url):
     try:
         user = xbmcaddon.Addon().getSetting("premiumize_user")
@@ -313,13 +674,17 @@ def realdebrid(url):
 
 def realdebrid_hosts():
     try:
-        rd = getUrl('https://real-debrid.com/api/hosters.php').result
+        user = xbmcaddon.Addon().getSetting("realdedrid_user")
+        password = xbmcaddon.Addon().getSetting("realdedrid_password")
+
+        if (user == '' or password == ''): raise Exception()
+
+        rd = getUrl('http://real-debrid.com/api/hosters.php').result
         rd = json.loads('[%s]' % rd)
         rd = [i.rsplit('.' ,1)[0].lower() for i in rd]
         return rd
     except:
         return
-
 
 
 def _180upload(url):
@@ -344,6 +709,7 @@ def _180upload(url):
         url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
         url += common.parseDOM(result, "embed", ret="src")
         url = 'http://' + url[-1].split('://', 1)[-1]
+        url += '|User-Agent=%s' % urllib.quote_plus('Apple-iPhone')
         return url
     except:
         return
@@ -372,30 +738,32 @@ def bestreams(url):
     except:
         return
 
-def cloudyvideos(url):
+def clicknupload(url):
     try:
         result = getUrl(url).result
 
         post = {}
-        f = common.parseDOM(result, "Form", attrs = { "name": "F1" })[-1]
+        f = common.parseDOM(result, "Form", attrs = { "action": "" })
         k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
         for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-        post.update({'method_free': '', 'method_premium': ''})
+        post.update({'method_free': 'Free Download'})
         post = urllib.urlencode(post)
 
-        import time
-        request = urllib2.Request(url, post)
+        result = getUrl(url, post=post).result
 
-        for i in range(0, 4):
-            try:
-                response = urllib2.urlopen(request, timeout=10)
-                result = response.read()
-                response.close()
-                btn = common.parseDOM(result, "input", ret="value", attrs = { "class": "graybt.+?" })[0]
-                url = re.compile('href=[\'|\"](.+?)[\'|\"]><input.+?class=[\'|\"]graybt.+?[\'|\"]').findall(result)[0]
-                return url
-            except:
-                time.sleep(1)
+        post = {}
+        f = common.parseDOM(result, "Form", attrs = { "action": "" })
+        k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
+        for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
+        post.update({'method_free': 'Free Download'})
+        post = urllib.urlencode(post)
+
+        result = getUrl(url, post=post).result
+
+        url = common.parseDOM(result, "a", ret="onClick")
+        url = [i for i in url if i.startswith('window.open')][0]
+        url = re.compile('[\'|\"](.+?)[\'|\"]').findall(url)[0]
+        return url
     except:
         return
 
@@ -462,32 +830,6 @@ def fastvideo(url):
     except:
         return
 
-def filecloud(url):
-    try:
-        result = getUrl(url, close=False).result
-        result = getUrl('http://filecloud.io/download.html').result
-
-        url = re.compile("__requestUrl\s+=\s+'(.+?)'").findall(result)[0]
-
-        ukey = re.compile("'ukey'\s+:\s+'(.+?)'").findall(result)[0]
-        __ab1 = re.compile("__ab1\s+=\s+(\d+);").findall(result)[0]
-        ctype = re.compile("'ctype'\s+:\s+'(.+?)'").findall(result)[0]
-
-        challenge = re.compile("__recaptcha_public\s+=\s+'(.+?)'").findall(result)[0]
-        challenge = 'http://www.google.com/recaptcha/api/challenge?k=' + challenge
-
-        post = {'ukey': ukey, '__ab1': str(__ab1), 'ctype': ctype}
-        post.update(captcha(challenge))
-        post = urllib.urlencode(post)
-
-        result = getUrl(url, post=post).result
-        result = getUrl('http://filecloud.io/download.html').result
-
-        url = common.parseDOM(result, "a", ret="href", attrs = { "id": "downloadBtn" })[0]
-        return url
-    except:
-        return
-
 def filehoot(url):
     try:
         url = url.replace('/embed-', '/')
@@ -538,11 +880,20 @@ def googledocs(url):
 
 def googleplus(url):
     try:
-        result = getUrl(url).result
-        result = result.replace('\\u003d','=').replace('\\u0026','&')
+        if 'picasaweb' in url.lower():
+            result = getUrl(url).result
+            aid = re.compile('aid=(\d*)').findall(result)[0]
 
-        u = re.compile('("http[s]*://.+?\d*[.]googleusercontent.com/.+?=m\d*)"').findall(result)
-        u = [i.split('"')[-1] for i in u]
+            pid = urlparse.urlparse(url).fragment
+            oid = re.compile('/(\d*)/').findall(urlparse.urlparse(url).path)[0]
+            key = urlparse.parse_qs(urlparse.urlparse(url).query)['authkey'][0]
+
+            url = 'https://plus.google.com/photos/%s/albums/%s/%s?authkey=%s' % (oid, aid, pid, key)
+
+        result = getUrl(url, mobile=True).result
+
+        u = re.compile('"(http[s]*://.+?videoplayback[?].+?)"').findall(result)
+        u = [i.replace('\\u003d','=').replace('\\u0026','&') for i in u]
 
         url = []
         for i in u: url += google(i)
@@ -732,6 +1083,7 @@ def mightyupload(url):
         url += re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
         url += common.parseDOM(result, "embed", ret="src")
         url = 'http://' + url[-1].split('://', 1)[-1]
+        url += '|User-Agent=%s' % urllib.quote_plus('Apple-iPhone')
         return url
     except:
         return
@@ -849,6 +1201,7 @@ def mrfile(url):
 
         url = re.compile('(<a\s+href=.+?>Download\s+.+?</a>)').findall(result)[-1]
         url = common.parseDOM(url, "a", ret="href")[0]
+        url += '|User-Agent=%s' % urllib.quote_plus('Apple-iPhone')
         return url
     except:
         return
@@ -906,24 +1259,6 @@ def primeshare(url):
 
         url = common.parseDOM(result, "video")[0]
         url = common.parseDOM(url, "source", ret="src", attrs = { "type": ".+?" })[0]
-        return url
-    except:
-        return
-
-def promptfile(url):
-    try:
-        result = getUrl(url).result
-
-        post = {}
-        f = common.parseDOM(result, "form", attrs = { "method": "post" })[0]
-        k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
-        for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-        post = urllib.urlencode(post)
-
-        result = getUrl(url, post=post).result
-
-        url = common.parseDOM(result, "a", ret="href", attrs = { "class": "view_dl_link" })[0]
-        url = getUrl(url, output='geturl', post=post).result
         return url
     except:
         return
@@ -1004,7 +1339,20 @@ def thevideo(url):
         url = re.compile('//.+?/([\w]+)').findall(url)[0]
         url = 'http://thevideo.me/embed-%s.html' % url
 
-        result = getUrl(url, mobile=True).result
+        result = getUrl(url).result
+        result = result.replace('\n','')
+
+        import ast
+        url = re.compile("'sources' *: *(\[.+?\])").findall(result)[-1]
+        url = ast.literal_eval(url)
+        url = url[-1]['file']
+        return url
+    except:
+        return
+
+def tusfiles(url):
+    try:
+        result = getUrl(url).result
 
         result = re.compile('(eval.*?\)\)\))').findall(result)[-1]
         result = jsunpack(result)
@@ -1050,7 +1398,7 @@ def uploadrocket(url):
         f = common.parseDOM(result, "Form", attrs = { "name": "freeorpremium" })[0]
         k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
         for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-        post.update({'method_free': 'Free Download'})
+        post.update({'method_isfree': 'Click for Free Download'})
         post = urllib.urlencode(post)
 
         result = getUrl(url, post=post).result
@@ -1102,6 +1450,7 @@ def v_vids(url):
         result = getUrl(url, post=post).result
 
         url = common.parseDOM(result, "a", ret="href", attrs = { "id": "downloadbutton" })[0]
+        url += '|User-Agent=%s' % urllib.quote_plus('Apple-iPhone')
         return url
     except:
         return
@@ -1135,6 +1484,7 @@ def vidplay(url):
 
         url = getUrl(u, output='geturl').result
         if u == url: raise Exception()
+        url += '|User-Agent=%s' % urllib.quote_plus('Apple-iPhone')
         return url
     except:
         return
@@ -1236,6 +1586,24 @@ def vodlocker(url):
 
         result = getUrl(url, mobile=True).result
         url = re.compile('file *: *"(http.+?)"').findall(result)[-1]
+        return url
+    except:
+        return
+
+def xfileload(url):
+    try:
+        result = getUrl(url).result
+
+        post = {}
+        f = common.parseDOM(result, "Form", attrs = { "action": "" })
+        k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
+        for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
+        post.update({'method_free': 'Free Download'})
+        post = urllib.urlencode(post)
+
+        result = getUrl(url, post=post).result
+
+        url = common.parseDOM(result, "a", ret="href", attrs = { "target": "" })[0]
         return url
     except:
         return

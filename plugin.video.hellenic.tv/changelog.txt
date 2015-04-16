@@ -1,4 +1,13 @@
 ------------------------
+Hellenic TV v3.3.5 (16-Apr-15)
+------------------------
+
+- Added GREEK CINEMA.
+- Updated ART CHANNEL, ANT1 CYPRUS, SIGMA, CAPITAL and TV 100.
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.3.4 (4-Apr-15)
 ------------------------
 
