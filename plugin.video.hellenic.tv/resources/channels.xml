@@ -104,7 +104,7 @@
 		</channel>
 		<channel active="True">
 			<name>SIGMA</name>
-			<url>rtmpe://l.mybeststream.xyz/r/ playpath=sigma1678 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
+			<url>rtmpe://l.mybeststream.xyz/r/ playpath=sigmanew926 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
 			<base>http://www.lakatamia.tv/share/sigma.html</base>
 		</channel>
 		<channel active="True">
@@ -115,47 +115,8 @@
 		<channel active="True">
 			<name>RIK SAT</name>
 			<type>hls</type>
-			<url>http://player.webvideocore.net/eq473601t9w8.m3u8</url>
+			<url>http://cdnvideo.webvideocore.net/livenl/out_2xtqzyrq6gysc48ko0cs/index.m3u8</url>
 			<base>http://www.riknews.com.cy/index.php/tv/sat-live</base>
-		</channel>
-	</area>
-	<area name="THEMATIC">
-		<channel active="True">
-			<name>GREEK CINEMA 50s</name>
-			<type>gm</type>
-			<url>y=7&amp;l=&amp;g=&amp;p=1</url>
-		</channel>
-		<channel active="True">
-			<name>GREEK CINEMA 60s</name>
-			<type>gm</type>
-			<url>y=6&amp;l=&amp;g=&amp;p=1</url>
-		</channel>
-		<channel active="True">
-			<name>GREEK CINEMA 70s</name>
-			<type>gm</type>
-			<url>y=5&amp;l=&amp;g=&amp;p=1</url>
-		</channel>
-		<channel active="True">
-			<name>GREEK CINEMA 80s</name>
-			<type>gm</type>
-			<url>y=4&amp;l=&amp;g=&amp;p=1</url>
-		</channel>
-		<channel active="True">
-			<name>GREEK CINEMA</name>
-			<type>hls</type>
-			<url>http://wpc.68FC.edgecastcdn.net/8068FC/INFINITY/m3u8/cinema.m3u8</url>
-		</channel>
-		<channel active="True">
-			<name>CY SPORTS</name>
-			<type>hls</type>
-			<url>http://mlivenews.istoikona.net/cysports.isml/manifest(format=m3u8-aapl).m3u8</url>
-			<base>http://cysports.tv/</base>
-		</channel>
-		<channel active="True">
-			<name>ODIE TV</name>
-			<type>ustream</type>
-			<url>http://www.ustream.tv/channel/odie-tv-live</url>
-			<base>http://www.odie.tv/</base>
 		</channel>
 	</area>
 	<area name="ATTICA">
@@ -202,15 +163,10 @@
 			<base>http://live24.gr/webtv/kontrachannel/</base>
 		</channel>
 		<channel active="True">
-			<name>MAD TV</name>
-			<type>madtv</type>
-			<url>http://www.mad.tv/players/madtv/</url>
-			<base>http://www.mad.tv/</base>
-		</channel>
-		<channel active="True">
-			<name>MAD TV CYPRUS</name>
-			<url>rtmp://144.76.2.213/live/livestream swfUrl=http://jwplayer.mediaserve.com/player.swf live=1 timeout=10</url>
-			<base>http://www.madtv.com.cy/</base>
+			<name>SBC</name>
+			<type>livestream</type>
+			<url>http://www.livestream.com/sbcgr</url>
+			<base>http://www.sbctv.gr/</base>
 		</channel>
 		<channel active="False">
 			<name>MTV GREECE</name>
@@ -224,33 +180,12 @@
 			<name>NICKELODEON+</name>
 			<base>http://www.nickelodeon.gr/</base>
 		</channel>
-		<channel active="False">
-			<name>SMILE</name>
-			<base>http://tvsmile.gr/</base>
-		</channel>
-		<channel active="False">
-			<name>SBC</name>
-			<type>livestream</type>
-			<url>http://www.livestream.com/sbcgr</url>
-			<base>http://www.sbctv.gr/</base>
-		</channel>
-		<channel active="True">
-			<name>ZOUGLA TV</name>
-			<type>hls</type>
-			<url>http://zouglahd-f.akamaihd.net/i/zougla_1@56341/index_700_av-b.m3u8?rebase=on</url>
-			<base>http://www.zougla.gr/zouglatv</base>
-		</channel>
-		<channel active="True">
-			<name>HELLAS TV</name>
-			<url>rtmp://176.9.123.140:1935/leveltgp/leveltgp live=1 timeout=10</url>
-			<base>http://www.hellastv.org/</base>
-		</channel>
 	</area>
 	<area name="CENTRAL MACEDONIA">
 		<channel active="True">
 			<name>TV 100</name>
 			<type>hls</type>
-			<url>http://188.226.161.133:1935/TV100/TV100/playlist.m3u8</url>
+			<url>http://178.62.176.153:1935/TV100/myStream/playlist.m3u8</url>
 			<base>http://www.fm100.gr/</base>
 		</channel>
 		<channel active="True">
@@ -315,6 +250,96 @@
 			<base>http://timechannel.gr/</base>
 		</channel>
 	</area>
+	<area name="THEMATIC">
+		<channel active="True">
+			<name>MAD TV</name>
+			<type>madtv</type>
+			<url>http://www.mad.tv/players/madtv/</url>
+			<base>http://www.mad.tv/</base>
+		</channel>
+		<channel active="True">
+			<name>MAD TV CYPRUS</name>
+			<url>rtmp://144.76.2.213/live/livestream swfUrl=http://jwplayer.mediaserve.com/player.swf live=1 timeout=10</url>
+			<base>http://www.madtv.com.cy/</base>
+		</channel>
+		<channel active="True">
+			<name>SMILE</name>
+			<type>videopublishing</type>
+			<url>7404d61a842f48a01919a680708bdef5</url>
+			<base>http://tvsmile.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>WZRA KIDS</name>
+			<url>mmsh://wpso.com:200/kids</url>
+			<base>http://www.wzratv.com/</base>
+		</channel>
+		<channel active="True">
+			<name>CY SPORTS</name>
+			<type>hls</type>
+			<url>http://mlivenews.istoikona.net/cysports.isml/manifest(format=m3u8-aapl).m3u8</url>
+			<base>http://cysports.tv/</base>
+		</channel>
+		<channel active="True">
+			<name>ODIE TV</name>
+			<type>ustream</type>
+			<url>http://www.ustream.tv/channel/odie-tv-live</url>
+			<base>http://www.odie.tv/</base>
+		</channel>
+		<channel active="True">
+			<name>GREEK CINEMA 50s</name>
+			<type>gm</type>
+			<url>y=7&amp;l=&amp;g=&amp;p=1</url>
+		</channel>
+		<channel active="True">
+			<name>GREEK CINEMA 60s</name>
+			<type>gm</type>
+			<url>y=6&amp;l=&amp;g=&amp;p=1</url>
+		</channel>
+		<channel active="True">
+			<name>GREEK CINEMA 70s</name>
+			<type>gm</type>
+			<url>y=5&amp;l=&amp;g=&amp;p=1</url>
+		</channel>
+		<channel active="True">
+			<name>GREEK CINEMA 80s</name>
+			<type>gm</type>
+			<url>y=4&amp;l=&amp;g=&amp;p=1</url>
+		</channel>
+		<channel active="True">
+			<name>GREEK CINEMA</name>
+			<type>hls</type>
+			<url>http://wpc.68FC.edgecastcdn.net/8068FC/INFINITY/m3u8/cinema.m3u8</url>
+		</channel>
+		<channel active="True">
+			<name>LAMPSI TV</name>
+			<type>livestream_new</type>
+			<url>http://new.livestream.com/accounts/1044356/lampsitv</url>
+			<base>http://www.gamostv.eu/</base>
+		</channel>
+		<channel active="True">
+			<name>ZOUGLA TV</name>
+			<type>hls</type>
+			<url>http://zouglahd-f.akamaihd.net/i/zougla_1@56341/index_700_av-b.m3u8?rebase=on</url>
+			<base>http://www.zougla.gr/zouglatv</base>
+		</channel>
+		<channel active="True">
+			<name>GREEK VOICE TV</name>
+			<type>ustream</type>
+			<url>http://www.ustream.tv/embed/1989576</url>
+			<base>http://wpso.com/</base>
+		</channel>
+		<channel active="True">
+			<name>HELLAS TV</name>
+			<url>rtmp://176.9.123.140:1935/leveltgp/leveltgp live=1 timeout=10</url>
+			<base>http://www.hellastv.org/</base>
+		</channel>
+		<channel active="True">
+			<name>LYXNOS TV</name>
+			<type>hls</type>
+			<url>http://erato.multiserver.gr:1935/imp/imp/playlist.m3u8</url>
+			<base>http://www.i-m-patron.gr/</base>
+		</channel>
+	</area>
 	<area name="CENTRAL GREECE">
 		<channel active="False">
 			<name>ETV</name>
@@ -368,10 +393,6 @@
 			<url>http://www.livestream.com/epirustv1live</url>
 			<base>http://epirustv1.gr/</base>
 		</channel>
-		<channel active="False">
-			<name>ART TV</name>
-			<base>http://www.arttv.gr/</base>
-		</channel>
 		<channel active="True">
 			<name>ACHELOOS TV</name>
 			<type>viiideo</type>
@@ -383,6 +404,12 @@
 			<type>ustream</type>
 			<url>http://www.ustream.tv/channel/corfu-tv</url>
 			<base>http://www.corfutv.gr/</base>
+		</channel>
+		<channel active="True">
+			<name>ART TV</name>
+			<type>ustream</type>
+			<url>http://www.ustream.tv/channel/arttv-arta</url>
+			<base>http://www.arttv.gr/</base>
 		</channel>
 		<channel active="True">
 			<name>ITV</name>
@@ -407,15 +434,13 @@
 		</channel>
 	</area>
 	<area name="PELOPONNESE AND WEST GREECE">
-		<channel active="True">
+		<channel active="False">
 			<name>ACHAIA CHANNEL</name>
 			<url>rtmp://78.129.184.15:11056/streaming/stream pageUrl=http://achaianews.listen2myradio.com/ live=1 timeout=10</url>
 			<base>http://www.achaianews.gr/</base>
 		</channel>
 		<channel active="False">
 			<name>ARKADIKI TV</name>
-			<url>http://www.arttv.com.gr/</url>
-			<base></base>
 		</channel>
 		<channel active="False">
 			<name>AXION TV</name>

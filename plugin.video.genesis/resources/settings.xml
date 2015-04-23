@@ -34,8 +34,8 @@
 	</category>
 
 	<category label="30040">
-		<setting id="icefilms" type="bool" label="Icefilms" default="true"/>
 		<setting id="alluc" type="bool" label="Alluc" default="true"/>
+		<setting id="icefilms" type="bool" label="Icefilms" default="true"/>
 		<setting id="primewire" type="bool" label="Primewire" default="true"/>
 		<setting id="movie25" type="bool" label="Movie25" default="true"/>
 		<setting id="iwatchonline" type="bool" label="Iwatchonline" default="true"/>
@@ -60,8 +60,8 @@
 	</category>
 
 	<category label="30041">
-		<setting id="icefilms_tv" type="bool" label="Icefilms" default="true"/>
 		<setting id="alluc_tv" type="bool" label="Alluc" default="true"/>
+		<setting id="icefilms_tv" type="bool" label="Icefilms" default="true"/>
 		<setting id="primewire_tv" type="bool" label="Primewire" default="true"/>
 		<setting id="watchseries_tv" type="bool" label="Watchseries" default="true"/>
 		<setting id="iwatchonline_tv" type="bool" label="Iwatchonline" default="true"/>

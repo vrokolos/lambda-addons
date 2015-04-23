@@ -1256,7 +1256,7 @@ class channels:
 
         self.entertainmentMap = ['ET3', 'CAPITAL']
         self.movieMap = ['GREEK CINEMA 50s', 'GREEK CINEMA 60s', 'GREEK CINEMA 70s', 'GREEK CINEMA 80s', 'GREEK CINEMA']
-        self.childrenMap = ['NICKELODEON', 'NICKELODEON+', 'SMILE']
+        self.childrenMap = ['NICKELODEON', 'NICKELODEON+', 'SMILE', 'WZRA KIDS']
         self.sportMap = ['CY SPORTS', 'ODIE TV']
         self.musicMap = ['MAD TV', 'MAD TV CYPRUS']
         self.newsMap = ['SBC']
@@ -1634,6 +1634,7 @@ class resolver:
     def sources_resolve(self, url):
         try:
             import commonresolvers
+
             if url.startswith('archives_'): url = archives().resolve(url)
 
             elif url.startswith(gm().base_link): url = gm().resolve(url)
@@ -1652,9 +1653,7 @@ class resolver:
             elif url.startswith(youtube().search_link): url = youtube().resolve_search(url)
             elif url.startswith(youtube().base_link): url = youtube().resolve(url)
 
-            elif 'vimeo.com' in url: url = commonresolvers.vimeo(url)
-            elif 'streamin.to' in url: url = commonresolvers.streamin(url)
-            elif 'datemule.com' in url: url = commonresolvers.datemule(url)
+            else: url = commonresolvers.get(url).result
 
             return url
         except:
@@ -2477,7 +2476,7 @@ class alpha:
                 url = common.parseDOM(result, "embed", ret="src")
                 url = [i for i in url if 'youtube' in i][0]
                 import commonresolvers
-                url = commonresolvers.youtube(url)
+                url = commonresolvers.youtube().resolve(url)
                 return url
             except:
                 pass
@@ -3741,12 +3740,13 @@ class youtube:
         try:
             query = url.split("?q=")[-1].split("/")[-1].split("?")[0]
             url = url.replace(query, urllib.quote_plus(query))
+
             result = getUrl(url).result
             result = common.parseDOM(result, "entry")
             result = common.parseDOM(result, "id")
+            result = [i.split("/")[-1] for i in result if not 'UKY3scPIMd8' in i][:5]
 
-            for url in result[:5]:
-                url = url.split("/")[-1]
+            for url in result:
                 url = self.watch_link % url
                 url = self.resolve(url)
                 if not url is None: return url
@@ -3763,7 +3763,7 @@ class youtube:
                 reason = common.parseDOM(result, "yt:state", ret="reasonCode")[0]
             except:
                 pass
-            if state == 'deleted' or state == 'rejected' or state == 'failed' or reason == 'requesterRegion' : return
+            if state in ['deleted', 'rejected', 'failed'] or reason == 'requesterRegion': return
             try:
                 result = getUrl(self.watch_link % id).result
                 alert = common.parseDOM(result, "div", attrs = { "id": "watch7-notification-area" })[0]
@@ -3952,11 +3952,24 @@ class livestream:
         except:
             return
 
+    def livestream_new(self, url):
+        try:
+            result = getUrl(url).result
+            url = re.compile('"m3u8_url" *: *"(.+?)"').findall(result)
+            url = [i for i in url if not i.endswith('m3u8')][-1]
+            url = getUrl(url, output='geturl').result
+            return url
+        except:
+            return
+
     def streamago(self, url):
         try:
             result = getUrl(url + '/xml/').result
-            url = common.parseDOM(result, "path_rtsp")[0]
+
+            url = common.parseDOM(result, "path_hls")[0]
             url = url.split('[')[-1].split(']')[0]
+
+            url = getUrl(url, output='geturl').result
             return url
         except:
             return

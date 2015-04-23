@@ -1,4 +1,18 @@
 ------------------------
+Genesis v4.4.1 (24-Apr-15)
+------------------------
+
+- Fixed trailers.
+- Fixed Zumvo source.
+- Re-work of resolvers.
+- Tweaked addon settings.
+- Tweaked loading of resolvers.
+- Tweaked loading of sources.
+- Tweaked downloading support.
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.4.0 (16-Apr-15)
 ------------------------
 

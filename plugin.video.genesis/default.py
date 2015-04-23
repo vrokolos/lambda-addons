@@ -198,7 +198,6 @@ class main:
         elif action == 'seasons':                     seasons().get(show, year, imdb, tvdb)
         elif action == 'episodes':                    episodes().get(show, year, imdb, tvdb, season)
         elif action == 'episodes2':                   episodes().get2(show, year, imdb, tvdb, season, episode)
-
         elif action == 'episodes_calendar_1':         episodes().calendar(1)
         elif action == 'episodes_calendar_2':         episodes().calendar(2)
         elif action == 'episodes_calendar_3':         episodes().calendar(3)
@@ -206,7 +205,6 @@ class main:
         elif action == 'episodes_trakt_progress':     episodes().trakt_progress()
         elif action == 'episodes_trakt':              episodes().trakt_added()
         elif action == 'episodes_added':              episodes().added()
-
         elif action == 'people_movies':               people().movies(query)
         elif action == 'people_shows':                people().shows(query)
         elif action == 'genres_movies':               genres().movies()
@@ -2197,7 +2195,7 @@ class contextMenu:
             	xbmcvfs.mkdir(dest)
 
             ext = os.path.splitext(urlparse.urlparse(url).path)[1][1:]
-            if ext in ['', 'php']: ext = 'mp4'
+            if not ext in ['mp4', 'mkv', 'flv', 'avi', 'mpg']: ext = 'mp4'
             dest = os.path.join(dest, name + '.' + ext)
 
             import commondownloader
@@ -5266,21 +5264,21 @@ class trailer:
             else:
                 raise Exception()
         except:
-            url = self.youtube_query + name + ' trailer'
-            url = self.youtube_search(url)
+            query = name + ' trailer'
+            url = self.youtube_search(query)
             if url == None: return
             return url
 
-    def youtube_search(self, url):
+    def youtube_search(self, query):
         try:
-            query = url.split("?q=")[-1].split("/")[-1].split("?")[0]
-            url = url.replace(query, urllib.quote_plus(query))
+            url = self.youtube_query + urllib.quote_plus(query)
+
             result = getUrl(url, timeout='10').result
             result = common.parseDOM(result, "entry")
-            result = common.parseDOM(result, "id")
+            result = [(common.parseDOM(i, "title")[0], common.parseDOM(i, "id")[0]) for i in result]
+            result = [i[1].split("/")[-1] for i in result if 'trailer' in i[0].lower()][:5]
 
-            for url in result[:5]:
-                url = url.split("/")[-1]
+            for url in result:
                 url = self.youtube_watch % url
                 url = self.youtube(url)
                 if not url == None: return url
@@ -5290,6 +5288,7 @@ class trailer:
     def youtube(self, url):
         try:
             id = url.split("?v=")[-1].split("/")[-1].split("?")[0].split("&")[0]
+
             state, reason = None, None
             result = getUrl(self.youtube_info % id, timeout='10').result
             try:
@@ -5297,7 +5296,8 @@ class trailer:
                 reason = common.parseDOM(result, "yt:state", ret="reasonCode")[0]
             except:
                 pass
-            if state == 'deleted' or state == 'rejected' or state == 'failed' or reason == 'requesterRegion' : return
+
+            if state in ['deleted', 'rejected', 'failed'] or reason == 'requesterRegion': return
             try:
                 result = getUrl(self.youtube_watch % id, timeout='10').result
                 alert = common.parseDOM(result, "div", attrs = { "id": "watch7-notification-area" })[0]
@@ -5406,8 +5406,8 @@ class resolver:
 
     def sources_get(self, name, title, year, imdb, tvdb, season, episode, show, show_alt, date, genre):
         import inspect
-        sourceDict = inspect.getmembers(commonsources)
-        sourceDict = [i for i in sourceDict if inspect.isclass(i[1]) and hasattr(i[1], 'get_sources')]
+        sourceDict = inspect.getmembers(commonsources, inspect.isclass)
+        sourceDict = [i for i in sourceDict if hasattr(i[1], 'get_sources')]
 
         if show == None: content = 'movie'
         else: content = 'episode'
@@ -5781,30 +5781,46 @@ class resolver:
             return
 
     def sources_dict(self):
-        import commonresolvers
+        import commonresolvers, inspect
 
-        hosts = commonresolvers.info()
-        for i in range(len(hosts)): hosts[i]['host'] = hosts[i]['host'].lower()
+        hosts = inspect.getmembers(commonresolvers, inspect.isclass)
+        hosts = [i[1]().info() for i in hosts if hasattr(i[1], 'info')]
+        hosts = [i for i in hosts if 'host' in i]
 
-        self.pzDict = index().cache(commonresolvers.premiumize_hosts, 24)
-        if (getSetting("premiumize_user") == '' or getSetting("premiumize_password") == ''): self.pzDict = []
+        self.pzDict = index().cache(commonresolvers.premiumize().hosts, 24)
+        if commonresolvers.premiumize().status() == False: self.pzDict = []
         if self.pzDict == None: self.pzDict = []
 
-        self.rdDict = index().cache(commonresolvers.realdebrid_hosts, 24)
-        if (getSetting("realdedrid_user") == '' or getSetting("realdedrid_password") == ''): self.rdDict = []
+        self.rdDict = index().cache(commonresolvers.realdebrid().hosts, 24)
+        if commonresolvers.realdebrid().status() == False: self.rdDict = []
         if self.rdDict == None: self.rdDict = []
 
         self.hostprDict = [i['host'] for i in hosts if i['a/c'] == True]
+        try: self.hostprDict = [i.lower() for i in reduce(lambda x, y: x+y, self.hostprDict)]
+        except: pass
+        self.hostprDict = uniqueList(self.hostprDict).list
 
         self.hostcapDict = [i['host'] for i in hosts if i['captcha'] == True]
+        try: self.hostcapDict = [i.lower() for i in reduce(lambda x, y: x+y, self.hostcapDict)]
+        except: pass
         self.hostcapDict = [i for i in self.hostcapDict if not i in self.pzDict + self.rdDict]
 
         self.hosthdDict = [i['host'] for i in hosts if i['quality'] == 'High' and i['a/c'] == False and i['captcha'] == False]
         self.hosthdDict += [i['host'] for i in hosts if i['quality'] == 'High' and i['a/c'] == False and i['captcha'] == True]
+        try: self.hosthdDict = [i.lower() for i in reduce(lambda x, y: x+y, self.hosthdDict)]
+        except: pass
 
         self.hosthqDict = [i['host'] for i in hosts if i['quality'] == 'High' and i['a/c'] == False and i['captcha'] == False]
+        try: self.hosthqDict = [i.lower() for i in reduce(lambda x, y: x+y, self.hosthqDict)]
+        except: pass
+
         self.hostmqDict = [i['host'] for i in hosts if i['quality'] == 'Medium' and i['a/c'] == False and i['captcha'] == False]
+        try: self.hostmqDict = [i.lower() for i in reduce(lambda x, y: x+y, self.hostmqDict)]
+        except: pass
+
         self.hostlqDict = [i['host'] for i in hosts if i['quality'] == 'Low' and i['a/c'] == False and i['captcha'] == False]
+        try: self.hostlqDict = [i.lower() for i in reduce(lambda x, y: x+y, self.hostlqDict)]
+        except: pass
 
         self.hostsdfullDict = self.hostprDict + self.hosthqDict + self.hostmqDict + self.hostlqDict
 

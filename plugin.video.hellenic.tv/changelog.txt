@@ -1,4 +1,19 @@
 ------------------------
+Hellenic TV v3.3.6 (24-Apr-15)
+------------------------
+
+- Updated SIGMA, ACTION 24, RIK SAT and TV 100.
+- Added SBC, SMILE, WZRA KIDS, LAMPSI TV, ART TV, GREEK VOICE TV and LYXNOS TV.
+- Removed ACHAIA CHANNEL.
+- Fixed music charts.
+- Fixed new.livestream resolver.
+- Fixed streamago resolver.
+- Re-work of resolvers.
+- Tweaked loading of resolvers.
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.3.5 (16-Apr-15)
 ------------------------
 
