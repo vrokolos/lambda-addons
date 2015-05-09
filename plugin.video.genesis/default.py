@@ -164,7 +164,7 @@ class main:
         elif action == 'toggle_episode_playback':     contextMenu().toggle_playback('episode', name, title, year, imdb, tvdb, season, episode, show, show_alt, date, genre)
         elif action == 'download':                    contextMenu().download(name, url, provider)
         elif action == 'service':                     contextMenu().service()
-        elif action == 'trailer':                     contextMenu().trailer(name, url)
+        elif action == 'trailer':                     trailer().play(name, url)
         elif action == 'movies':                      movies().get(url)
         elif action == 'movies_userlist':             movies().get(url)
         elif action == 'movies_popular':              movies().popular()
@@ -2232,12 +2232,6 @@ class contextMenu:
         item.setProperty("IsPlayable", "true")
         xbmc.Player().play(u, item)
 
-    def trailer(self, name, url):
-        url = trailer().run(name, url)
-        if url == None: return
-        item = xbmcgui.ListItem(path=url)
-        item.setProperty("IsPlayable", "true")
-        xbmc.Player().play(url, item)
 
 class root:
     def get(self):
@@ -5246,68 +5240,74 @@ class episodes:
 class trailer:
     def __init__(self):
         self.youtube_base = 'http://www.youtube.com'
-        self.youtube_query = 'http://gdata.youtube.com/feeds/api/videos?q='
+        self.key_link = 'QUl6YVN5QkN3QkxTaFVFelhpT2NlTnVsaUNsWTBpY0U2TTRBZGRV'
+        self.key_link = '&key=%s' % base64.urlsafe_b64decode(self.key_link)
+        self.search_link = 'https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&q=%s'
+        self.youtube_search = 'https://www.googleapis.com/youtube/v3/search?q='
         self.youtube_watch = 'http://www.youtube.com/watch?v=%s'
-        self.youtube_info = 'http://gdata.youtube.com/feeds/api/videos/%s?v=2'
 
-    def run(self, name, url):
+    def play(self, name, url):
+        url = self.worker(name, url)
+        if url == None: return
+        item = xbmcgui.ListItem(path=url)
+        item.setProperty("IsPlayable", "true")
+        xbmc.Player().play(url, item)
+
+    def worker(self, name, url):
         try:
             if url.startswith(self.youtube_base):
-                url = self.youtube(url)
+                url = self.resolve(url)
                 if url == None: raise Exception()
                 return url
             elif not url.startswith('http://'):
                 url = self.youtube_watch % url
-                url = self.youtube(url)
+                url = self.resolve(url)
                 if url == None: raise Exception()
                 return url
             else:
                 raise Exception()
         except:
             query = name + ' trailer'
-            url = self.youtube_search(query)
+            query = self.youtube_search + query
+            url = self.resolve_search(query)
             if url == None: return
             return url
 
-    def youtube_search(self, query):
+    def resolve_search(self, url):
         try:
-            url = self.youtube_query + urllib.quote_plus(query)
+            query = urlparse.parse_qs(urlparse.urlparse(url).query)['q'][0]
 
-            result = getUrl(url, timeout='10').result
-            result = common.parseDOM(result, "entry")
-            result = [(common.parseDOM(i, "title")[0], common.parseDOM(i, "id")[0]) for i in result]
-            result = [i[1].split("/")[-1] for i in result if 'trailer' in i[0].lower()][:5]
+            url = self.search_link % urllib.quote_plus(query) + self.key_link
 
-            for url in result:
-                url = self.youtube_watch % url
-                url = self.youtube(url)
-                if not url == None: return url
+            result = getUrl(url).result
+
+            items = json.loads(result)['items']
+            items = [(i['id']['videoId']) for i in items]
+
+            for url in items:
+                url = self.resolve(url)
+                if not url is None: return url
         except:
             return
 
-    def youtube(self, url):
+    def resolve(self, url):
         try:
             id = url.split("?v=")[-1].split("/")[-1].split("?")[0].split("&")[0]
+            result = getUrl('http://www.youtube.com/watch?v=%s' % id).result
 
-            state, reason = None, None
-            result = getUrl(self.youtube_info % id, timeout='10').result
-            try:
-                state = common.parseDOM(result, "yt:state", ret="name")[0]
-                reason = common.parseDOM(result, "yt:state", ret="reasonCode")[0]
-            except:
-                pass
+            message = common.parseDOM(result, "div", attrs = { "id": "unavailable-submessage" })
+            message = ''.join(message)
 
-            if state in ['deleted', 'rejected', 'failed'] or reason == 'requesterRegion': return
-            try:
-                result = getUrl(self.youtube_watch % id, timeout='10').result
-                alert = common.parseDOM(result, "div", attrs = { "id": "watch7-notification-area" })[0]
-                return
-            except:
-                pass
+            alert = common.parseDOM(result, "div", attrs = { "id": "watch7-notification-area" })
+
+            if len(alert) > 0: raise Exception()
+            if re.search('[a-zA-Z]', message): raise Exception()
+
             url = 'plugin://plugin.video.youtube/?action=play_video&videoid=%s' % id
             return url
         except:
             return
+
 
 
 class resolver:
@@ -5498,7 +5498,7 @@ class resolver:
 
         try:
             sources = []
-            sources = commonsource.get_sources(url, self.hosthdfullDict, self.hostsdfullDict)
+            sources = commonsource.get_sources(url, self.hosthdfullDict, self.hostsdfullDict, self.hostlocDict)
             if sources == None: sources = []
             global_sources.extend(sources)
             dbcur.execute("DELETE FROM rel_src WHERE source = '%s' AND imdb_id = '%s' AND season = '%s' AND episode = '%s'" % (source, 'tt' + imdb, '', ''))
@@ -5567,7 +5567,7 @@ class resolver:
 
         try:
             sources = []
-            sources = commonsource.get_sources(ep_url, self.hosthdfullDict, self.hostsdfullDict)
+            sources = commonsource.get_sources(ep_url, self.hosthdfullDict, self.hostsdfullDict, self.hostlocDict)
             if sources == None: sources = []
             global_sources.extend(sources)
             dbcur.execute("DELETE FROM rel_src WHERE source = '%s' AND imdb_id = '%s' AND season = '%s' AND episode = '%s'" % (source, 'tt' + imdb, season, episode))
@@ -5794,6 +5794,11 @@ class resolver:
         self.rdDict = index().cache(commonresolvers.realdebrid().hosts, 24)
         if commonresolvers.realdebrid().status() == False: self.rdDict = []
         if self.rdDict == None: self.rdDict = []
+
+        self.hostlocDict = [i['netloc'] for i in hosts if i['quality'] == 'High' and i['captcha'] == False]
+        try: self.hostlocDict = [i.lower() for i in reduce(lambda x, y: x+y, self.hostlocDict)]
+        except: pass
+        self.hostlocDict = uniqueList(self.hostlocDict).list
 
         self.hostprDict = [i['host'] for i in hosts if i['a/c'] == True]
         try: self.hostprDict = [i.lower() for i in reduce(lambda x, y: x+y, self.hostprDict)]

@@ -640,21 +640,28 @@ class filenuke:
 class googledocs:
     def info(self):
         return {
-            'netloc': ['docs.google.com']
+            'netloc': ['docs.google.com', 'drive.google.com']
         }
 
     def resolve(self, url):
         try:
             url = url.split('/preview', 1)[0]
+            url = url.replace('drive.google.com', 'docs.google.com')
 
             result = getUrl(url).result
             result = re.compile('"fmt_stream_map",(".+?")').findall(result)[0]
 
             u = json.loads(result)
             u = [i.split('|')[-1] for i in u.split(',')]
+            u = sum([self.tag(i) for i in u], [])
 
             url = []
-            for i in u: url += self.tag(i)
+            try: url += [[i for i in u if i['quality'] == '1080p'][0]]
+            except: pass
+            try: url += [[i for i in u if i['quality'] == 'HD'][0]]
+            except: pass
+            try: url += [[i for i in u if i['quality'] == 'SD'][0]]
+            except: pass
 
             if url == []: return
             return url
@@ -671,6 +678,12 @@ class googledocs:
             return [{'quality': '1080p', 'url': url}]
         elif quality in ['22', '84', '136', '298', '120', '95', '247', '302', '45', '102']:
             return [{'quality': 'HD', 'url': url}]
+        elif quality in ['35', '44', '135', '244', '94']:
+            return [{'quality': 'SD', 'url': url}]
+        elif quality in ['18', '34', '43', '82', '100', '101', '134', '243', '93']:
+            return [{'quality': 'SD', 'url': url}]
+        elif quality in ['5', '6', '36', '83', '133', '242', '92', '132']:
+            return [{'quality': 'SD', 'url': url}]
         else:
             return []
 
@@ -694,11 +707,17 @@ class googleplus:
 
             result = getUrl(url, mobile=True).result
 
-            u = re.compile('"(http[s]*://.+?videoplayback[?].+?)"').findall(result)
+            u = re.compile('"(http[s]*://.+?videoplayback[?].+?)"').findall(result)[::-1]
             u = [i.replace('\\u003d','=').replace('\\u0026','&') for i in u]
+            u = sum([self.tag(i) for i in u], [])
 
             url = []
-            for i in u: url += self.tag(i)
+            try: url += [[i for i in u if i['quality'] == '1080p'][0]]
+            except: pass
+            try: url += [[i for i in u if i['quality'] == 'HD'][0]]
+            except: pass
+            try: url += [[i for i in u if i['quality'] == 'SD'][0]]
+            except: pass
 
             if url == []: return
             return url
@@ -715,6 +734,12 @@ class googleplus:
             return [{'quality': '1080p', 'url': url}]
         elif quality in ['22', '84', '136', '298', '120', '95', '247', '302', '45', '102']:
             return [{'quality': 'HD', 'url': url}]
+        elif quality in ['35', '44', '135', '244', '94']:
+            return [{'quality': 'SD', 'url': url}]
+        elif quality in ['18', '34', '43', '82', '100', '101', '134', '243', '93']:
+            return [{'quality': 'SD', 'url': url}]
+        elif quality in ['5', '6', '36', '83', '133', '242', '92', '132']:
+            return [{'quality': 'SD', 'url': url}]
         else:
             return []
 
@@ -992,10 +1017,10 @@ class movdivx:
             result = getUrl(url).result
 
             post = {}
-            f = common.parseDOM(result, "Form", attrs = { "name": "myForm" })[0]
+            f = common.parseDOM(result, "Form", attrs = { "action": "" })[0]
             k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
             for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-            post.update({'method_free': 'Continue to Stream'})
+            post.update({'method_free': 'Free Download'})
             post = urllib.urlencode(post)
 
             result = getUrl(url, post=post).result
@@ -1025,8 +1050,15 @@ class movpod:
             url = 'http://movpod.in/embed-%s.html' % url
 
             result = getUrl(url).result
-
             url = re.compile('file *: *"(http.+?)"').findall(result)[-1]
+
+            request = urllib2.Request(url)
+            response = urllib2.urlopen(request, timeout=30)
+            response.close()
+
+            type = str(response.info()["Content-Type"])
+
+            if type == 'text/html': raise Exception()
             return url
         except:
             return
@@ -1285,7 +1317,7 @@ class streamin:
             url = 'http://streamin.to/embed-%s.html' % url
 
             result = getUrl(url, mobile=True).result
-            url = re.compile("file *: *'(http.+?)'").findall(result)[-1]
+            url = re.compile("file *: *[\'|\"](http.+?)[\'|\"]").findall(result)[-1]
             return url
         except:
             return
@@ -1450,6 +1482,7 @@ class uptobox:
             url = common.parseDOM(result, "div", attrs = { "align": ".+?" })
             url = [i for i in url if 'button_upload' in i][0]
             url = common.parseDOM(url, "a", ret="href")[0]
+            url = ['http' + i for i in url.split('http') if 'uptobox.com' in i][0]
             return url
         except:
             return
@@ -1539,7 +1572,7 @@ class videomega:
     def resolve(self, url):
         try:
             url = urlparse.urlparse(url).query
-            url = urlparse.parse_qs(url)['ref'][0]
+            url = urlparse.parse_qsl(url)[0][1]
             url = 'http://videomega.tv/cdn.php?ref=%s' % url
 
             result = getUrl(url, mobile=True).result
@@ -1680,7 +1713,7 @@ class vk:
             url = url.replace('http://', 'https://')
             result = getUrl(url).result
 
-            u = re.compile('url(720|540|480)=(.+?)&').findall(result)
+            u = re.compile('url(720|540|480|360|240)=(.+?)&').findall(result)
 
             url = []
             try: url += [[{'quality': 'HD', 'url': i[1]} for i in u if i[0] == '720'][0]]
@@ -1688,6 +1721,12 @@ class vk:
             try: url += [[{'quality': 'SD', 'url': i[1]} for i in u if i[0] == '540'][0]]
             except: pass
             try: url += [[{'quality': 'SD', 'url': i[1]} for i in u if i[0] == '480'][0]]
+            except: pass
+            if not url == []: return url
+            try: url += [[{'quality': 'SD', 'url': i[1]} for i in u if i[0] == '360'][0]]
+            except: pass
+            if not url == []: return url
+            try: url += [[{'quality': 'SD', 'url': i[1]} for i in u if i[0] == '240'][0]]
             except: pass
 
             if url == []: return
@@ -1791,14 +1830,15 @@ class youtube:
     def resolve(self, url):
         try:
             id = url.split("?v=")[-1].split("/")[-1].split("?")[0].split("&")[0]
-            result = getUrl('http://gdata.youtube.com/feeds/api/videos/%s?v=2' % id).result
+            result = getUrl('http://www.youtube.com/watch?v=%s' % id).result
 
-            state, reason = None, None
-            try: state = common.parseDOM(result, "yt:state", ret="name")[0]
-            except: pass
-            try: reason = common.parseDOM(result, "yt:state", ret="reasonCode")[0]
-            except: pass
-            if state in ['deleted', 'rejected', 'failed'] or reason == 'requesterRegion': return
+            message = common.parseDOM(result, "div", attrs = { "id": "unavailable-submessage" })
+            message = ''.join(message)
+
+            alert = common.parseDOM(result, "div", attrs = { "id": "watch7-notification-area" })
+
+            if len(alert) > 0: raise Exception()
+            if re.search('[a-zA-Z]', message): raise Exception()
 
             url = 'plugin://plugin.video.youtube/?action=play_video&videoid=%s' % id
             return url

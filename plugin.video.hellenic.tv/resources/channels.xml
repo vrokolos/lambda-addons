@@ -93,24 +93,43 @@
 	<area name="CYPRUS">
 		<channel active="True">
 			<name>MEGA CYPRUS</name>
-			<type>hls</type>
-			<url>http://mlivenews.istoikona.net/livenews.isml/manifest(format=m3u8-aapl).m3u8</url>
-			<base>http://www.livenews.com.cy/cgibin/hweb?-A=5&amp;-V=livestreaming</base>
+			<url>rtmpe://l.mybeststream.xyz/r/ playpath=meganew371 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
+			<base>http://beta.lakatamia.tv/kupros-tv/mega-cyprus-server.html</base>
 		</channel>
 		<channel active="True">
 			<name>ANT1 CYPRUS</name>
 			<url>rtmpe://l.mybeststream.xyz/r/ playpath=ant1new877 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
-			<base>http://www.lakatamia.tv/share/ant1.html</base>
+			<base>http://beta.lakatamia.tv/kupros-tv/ant1-cyprus.html</base>
 		</channel>
 		<channel active="True">
 			<name>SIGMA</name>
 			<url>rtmpe://l.mybeststream.xyz/r/ playpath=sigmanew926 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
-			<base>http://www.lakatamia.tv/share/sigma.html</base>
+			<base>http://beta.lakatamia.tv/kupros-tv/sigma-tv.html</base>
 		</channel>
 		<channel active="True">
 			<name>CAPITAL</name>
 			<url>rtmpe://l.mybeststream.xyz/r/ playpath=capnew886 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
-			<base>http://www.lakatamia.tv/share/capital.html</base>
+			<base>http://beta.lakatamia.tv/kupros-tv/capital-cyprus.html</base>
+		</channel>
+		<channel active="True">
+			<name>PLUS TV</name>
+			<url>rtmpe://l.mybeststream.xyz/r/ playpath=plusnew716 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
+			<base>http://beta.lakatamia.tv/kupros-tv/plus-tv.html</base>
+		</channel>
+		<channel active="True">
+			<name>EXTRA TV</name>
+			<url>rtmpe://l.mybeststream.xyz/r/ playpath=extranew982 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
+			<base>http://beta.lakatamia.tv/kupros-tv/extra-tv-cyprus.html</base>
+		</channel>
+		<channel active="True">
+			<name>RIK 1</name>
+			<url>rtmpe://l.mybeststream.xyz/r/ playpath=rik1new273 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
+			<base>http://beta.lakatamia.tv/kupros-tv/rik1-tv.html</base>
+		</channel>
+		<channel active="True">
+			<name>RIK 2</name>
+			<url>rtmpe://l.mybeststream.xyz/r/ playpath=rik2new481 pageUrl=http://mybeststream.xyz live=1 timeout=10</url>
+			<base>http://beta.lakatamia.tv/kupros-tv/rik2-tv.html</base>
 		</channel>
 		<channel active="True">
 			<name>RIK SAT</name>
@@ -511,7 +530,8 @@
 		</channel>
 		<channel active="True">
 			<name>SUPER B</name>
-			<url>rtmp://37.220.27.70/live/livestream live=1 timeout=10</url>
+			<type>ustream</type>
+			<url>http://www.ustream.tv/channel/s-b-live</url>
 			<base>http://www.superb.gr/</base>
 		</channel>
 	</area>

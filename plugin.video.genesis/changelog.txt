@@ -1,4 +1,32 @@
 ------------------------
+Genesis v4.4.5 (9-May-15)
+------------------------
+
+- Added Afdah source.
+- Removed Zumvo source.
+- Tweaked Alluc source.
+- Tweaked Movietube source.
+- Tweaked Moviezone source.
+- Tweaked G2G source.
+- Tweaked MoviesHD source.
+- Tweaked Onlinemovies source.
+- Tweaked VKBox source.
+- Tweaked Clickplay source.
+- Tweaked Animeultima source.
+- Tweaked loading of sources.
+- Tweaked Google resolvers.
+- Tweaked Movpod resolver.
+- Tweaked Videomega resolver.
+- Tweaked VK resolver.
+- Fixed Movdivx resolver.
+- Fixed Streamin resolver.
+- Fixed Uptobox resolver.
+- Added Spanish translation.
+- Fixed trailers.
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.4.1 (24-Apr-15)
 ------------------------
 

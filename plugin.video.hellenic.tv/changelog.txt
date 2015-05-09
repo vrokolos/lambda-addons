@@ -1,4 +1,18 @@
 ------------------------
+Hellenic TV v3.4.0 (9-May-15)
+------------------------
+
+- Updated MEGA CYPRUS and SUPER B.
+- Added PLUS TV, EXTRA TV, RIK 1 and RIK 2.
+- Fixed issues with various listings.
+- Fixed issues with cartoons section.
+- Fixed issues with music section.
+- Tweaked available resolvers.
+- Tweaked ustream streams.
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.3.6 (24-Apr-15)
 ------------------------
 

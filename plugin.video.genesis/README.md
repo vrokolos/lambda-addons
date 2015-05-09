@@ -21,6 +21,7 @@ Attributions
 - Hebrew translation by finalmakerr | http://tvaddons.ag
 - Polish translation by kodishu | http://tvaddons.ag
 - Portuguese translation by Mafarricos | http://tvaddons.ag
+- Spanish translation by CaBrA | http://tvaddons.ag
 
 
 License
