@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import urllib,urllib2,urlparse,re,os,xbmc,xbmcgui,xbmcaddon,xbmcvfs
+import urllib,urllib2,urlparse,re,os,sys,xbmc,xbmcgui,xbmcaddon,xbmcvfs
 
 try:
     import CommonFunctions as common
@@ -70,16 +70,28 @@ class get(object):
 
 class getUrl(object):
     def __init__(self, url, close=True, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
+        handlers = []
         if not proxy == None:
-            proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
-            opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
+            handlers += [urllib2.ProxyHandler({'http':'%s' % (proxy)}), urllib2.HTTPHandler]
+            opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
         if output == 'cookie' or not close == True:
             import cookielib
             cookies = cookielib.LWPCookieJar()
-            handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
+            handlers += [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
             opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
+        try:
+            if not (url.startswith('https') and sys.version_info >= (2, 7, 9)): raise Exception()
+            import ssl
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            handlers += [urllib2.HTTPSHandler(context=ssl_context)]
+            opener = urllib2.build_opener(*handlers)
+            opener = urllib2.install_opener(opener)
+        except:
+            pass
         try: headers.update(headers)
         except: headers = {}
         if 'User-Agent' in headers:
@@ -289,7 +301,7 @@ class premiumize:
         try:
             if self.status() == False: raise Exception()
 
-            url = 'https://api.premiumize.me/pm-api/v1.php?method=hosterlist&params[login]=%s&params[pass]=%s' % (self.user, self.password)
+            url = 'http://api.premiumize.me/pm-api/v1.php?method=hosterlist&params[login]=%s&params[pass]=%s' % (self.user, self.password)
 
             result = getUrl(url).result
 
@@ -303,7 +315,7 @@ class premiumize:
         try:
             if self.status() == False: raise Exception()
 
-            url = 'https://api.premiumize.me/pm-api/v1.php?method=directdownloadlink&params[login]=%s&params[pass]=%s&params[link]=%s' % (self.user, self.password, url)
+            url = 'http://api.premiumize.me/pm-api/v1.php?method=directdownloadlink&params[login]=%s&params[pass]=%s&params[link]=%s' % (self.user, self.password, urllib.quote_plus(url))
 
             result = getUrl(url, close=False).result
 
@@ -349,13 +361,13 @@ class realdebrid:
             if self.status() == False: raise Exception()
 
             login_data = urllib.urlencode({'user' : self.user, 'pass' : self.password})
-            login_link = 'https://real-debrid.com/ajax/login.php?%s' % login_data
+            login_link = 'http://real-debrid.com/ajax/login.php?%s' % login_data
             result = getUrl(login_link, close=False).result
             result = json.loads(result)
             error = result['error']
             if not error == 0: raise Exception()
 
-            url = 'https://real-debrid.com/ajax/unrestrict.php?link=%s' % url
+            url = 'http://real-debrid.com/ajax/unrestrict.php?link=%s' % url
             url = url.replace('filefactory.com/stream/', 'filefactory.com/file/')
             result = getUrl(url).result
             result = json.loads(result)
@@ -703,7 +715,7 @@ class googleplus:
                 oid = re.compile('/(\d*)/').findall(urlparse.urlparse(url).path)[0]
                 key = urlparse.parse_qs(urlparse.urlparse(url).query)['authkey'][0]
 
-                url = 'https://plus.google.com/photos/%s/albums/%s/%s?authkey=%s' % (oid, aid, pid, key)
+                url = 'http://plus.google.com/photos/%s/albums/%s/%s?authkey=%s' % (oid, aid, pid, key)
 
             result = getUrl(url, mobile=True).result
 
@@ -1710,7 +1722,7 @@ class vk:
 
     def resolve(self, url):
         try:
-            url = url.replace('http://', 'https://')
+            url = url.replace('https://', 'http://')
             result = getUrl(url).result
 
             u = re.compile('url(720|540|480|360|240)=(.+?)&').findall(result)

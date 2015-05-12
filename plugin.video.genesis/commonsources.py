@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import urllib,urllib2,urlparse,re,os,datetime,base64,xbmcaddon
+import urllib,urllib2,urlparse,re,os,sys,datetime,base64,xbmcaddon
 
 try:
     import CommonFunctions as common
@@ -31,17 +31,29 @@ except:
 
 
 class getUrl(object):
-    def __init__(self, url, close=True, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='5'):
+    def __init__(self, url, close=True, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
+        handlers = []
         if not proxy == None:
-            proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
-            opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
+            handlers += [urllib2.ProxyHandler({'http':'%s' % (proxy)}), urllib2.HTTPHandler]
+            opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
         if output == 'cookie' or not close == True:
             import cookielib
             cookies = cookielib.LWPCookieJar()
-            handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
+            handlers += [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
             opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
+        try:
+            if not (url.startswith('https') and sys.version_info >= (2, 7, 9)): raise Exception()
+            import ssl
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            handlers += [urllib2.HTTPSHandler(context=ssl_context)]
+            opener = urllib2.build_opener(*handlers)
+            opener = urllib2.install_opener(opener)
+        except:
+            pass
         try: headers.update(headers)
         except: headers = {}
         if 'User-Agent' in headers:
@@ -99,8 +111,10 @@ class cleantitle:
 class alluc:
     def __init__(self):
         self.base_link = 'https://www.alluc.com'
-        self.download_link = '/api/search/download/?apikey=%s&count=20&from=0&getmeta=0&query=%s+lang%%3Aen+host%%3A%s'
-        self.stream_link = '/api/search/stream/?apikey=%s&count=20&from=0&getmeta=0&query=%s+lang%%3Aen+host%%3A%s'
+        #self.download_link = '/api/search/download/?apikey=%s&count=20&from=0&getmeta=0&query=%s+lang%%3Aen+host%%3A%s'
+        #self.stream_link = '/api/search/stream/?apikey=%s&count=20&from=0&getmeta=0&query=%s+lang%%3Aen+host%%3A%s'
+        self.download_link = '/api/search/download/?apikey=%s&count=100&from=0&getmeta=0&query=%s+lang%%3Aen'
+        self.stream_link = '/api/search/stream/?apikey=%s&count=100&from=0&getmeta=0&query=%s+lang%%3Aen'
         self.key_link = 'OGRmNzlkYTkyMDc4MDhkNmMyOTA5Njg5MTJlMjc4Nzc='
 
     def get_movie(self, imdb, title, year):
@@ -136,7 +150,8 @@ class alluc:
             sources = []
 
             headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20110101 Firefox/34.0'}
-            params = (base64.urlsafe_b64decode(self.key_link), urllib.quote_plus(url), urllib.quote_plus(','.join(locDict)))
+            #params = (base64.urlsafe_b64decode(self.key_link), urllib.quote_plus(url), urllib.quote_plus(','.join(locDict)))
+            params = (base64.urlsafe_b64decode(self.key_link), urllib.quote_plus(url))
 
             links = []
 
@@ -1850,7 +1865,7 @@ class vkbox:
         self.movie_link = '/api/serials/get_movie_data/?id=%s'
         self.show_link = '/api/serials/es?id=%s'
         self.episode_link = '/api/serials/e/?h=%s&u=%01d&y=%01d'
-        self.vk_link = 'https://vk.com/video_ext.php?oid=%s&id=%s&hash=%s'
+        self.vk_link = 'http://vk.com/video_ext.php?oid=%s&id=%s&hash=%s'
 
     def get_movie(self, imdb, title, year):
         try:

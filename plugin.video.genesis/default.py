@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import urllib,urllib2,urlparse,re,os,threading,datetime,time,base64,xbmc,xbmcplugin,xbmcgui,xbmcaddon,xbmcvfs
+import urllib,urllib2,urlparse,re,os,sys,threading,datetime,time,base64,xbmc,xbmcplugin,xbmcgui,xbmcaddon,xbmcvfs
 from operator import itemgetter
 import commonsources
 
@@ -223,16 +223,28 @@ class main:
 
 class getUrl(object):
     def __init__(self, url, close=True, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
+        handlers = []
         if not proxy == None:
-            proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
-            opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
+            handlers += [urllib2.ProxyHandler({'http':'%s' % (proxy)}), urllib2.HTTPHandler]
+            opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
         if output == 'cookie' or not close == True:
             import cookielib
             cookies = cookielib.LWPCookieJar()
-            handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
+            handlers += [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
             opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
+        try:
+            if not (url.startswith('https') and sys.version_info >= (2, 7, 9)): raise Exception()
+            import ssl
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            handlers += [urllib2.HTTPSHandler(context=ssl_context)]
+            opener = urllib2.build_opener(*handlers)
+            opener = urllib2.install_opener(opener)
+        except:
+            pass
         try: headers.update(headers)
         except: headers = {}
         if 'User-Agent' in headers:
@@ -2437,8 +2449,8 @@ class link:
         self.trakt_tv_trending = 'http://api-v2launch.trakt.tv/shows/trending'
         self.trakt_tv_watchlist = 'http://api-v2launch.trakt.tv/users/%s/watchlist/shows'
         self.trakt_tv_collection = 'http://api-v2launch.trakt.tv/users/%s/collection/shows'
-        self.trakt_tv_season_premieres = 'https://api-v2launch.trakt.tv/calendars/all/shows/premieres/%s/%s'
-        self.trakt_tv_premieres = 'https://api-v2launch.trakt.tv/calendars/all/shows/new/%s/%s'
+        self.trakt_tv_season_premieres = 'http://api-v2launch.trakt.tv/calendars/all/shows/premieres/%s/%s'
+        self.trakt_tv_premieres = 'http://api-v2launch.trakt.tv/calendars/all/shows/new/%s/%s'
         self.trakt_tv_my_calendar = 'http://api-v2launch.trakt.tv/calendars/my/shows/%s/%s'
         self.trakt_tv_calendar = 'http://api-v2launch.trakt.tv/calendars/all/shows/%s/%s'
         self.trakt_lists = 'http://api-v2launch.trakt.tv/users/%s/lists'

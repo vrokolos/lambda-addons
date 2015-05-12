@@ -1,4 +1,12 @@
 ------------------------
+Hellenic TV v3.4.1 (13-May-15)
+------------------------
+
+- Fixed issue on unix systems (Python 2.7.9).
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.4.0 (9-May-15)
 ------------------------
 

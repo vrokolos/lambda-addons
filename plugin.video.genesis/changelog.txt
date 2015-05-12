@@ -1,4 +1,13 @@
 ------------------------
+Genesis v4.4.6 (13-May-15)
+------------------------
+
+- Tweaked Alluc source.
+- Fixed issue on unix systems (Python 2.7.9).
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.4.5 (9-May-15)
 ------------------------
 
