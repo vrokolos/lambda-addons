@@ -82,9 +82,8 @@ class getUrl(object):
             opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
         try:
-            if not (url.startswith('https') and sys.version_info >= (2, 7, 9)): raise Exception()
-            import ssl
-            ssl_context = ssl.create_default_context()
+            if sys.version_info < (2, 7, 9): raise Exception()
+            import ssl; ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
             handlers += [urllib2.HTTPSHandler(context=ssl_context)]
@@ -235,6 +234,45 @@ class captcha:
             return c
         except:
             return
+
+class regex:
+    def worker(self, data):
+        try:
+            data = str(data).replace('\r','').replace('\n','').replace('\t','')
+
+            url = re.compile('(.+?)<regex>').findall(data)[0]
+            regex = re.compile('<regex>(.+?)</regex>').findall(data)
+        except:
+            return
+
+        for x in regex:
+            try:
+                name = re.compile('<name>(.+?)</name>').findall(x)[0]
+
+                expres = re.compile('<expres>(.+?)</expres>').findall(x)[0]
+
+                referer = re.compile('<referer>(.+?)</referer>').findall(x)[0]
+                referer = urllib.unquote_plus(referer)
+                referer = common.replaceHTMLCodes(referer)
+                referer = referer.encode('utf-8')
+
+                page = re.compile('<page>(.+?)</page>').findall(x)[0]
+                page = urllib.unquote_plus(page)
+                page = common.replaceHTMLCodes(page)
+                page = page.encode('utf-8')
+
+                result = getUrl(page, referer=referer).result
+                result = str(result).replace('\r','').replace('\n','').replace('\t','')
+                result = str(result).replace('\/','/')
+
+                r = re.compile(expres).findall(result)[0]
+                url = url.replace('$doregex[%s]' % name, r)
+            except:
+                pass
+
+        url = common.replaceHTMLCodes(url)
+        url = url.encode('utf-8')
+        return url
 
 class js:
     def worker(self, script):

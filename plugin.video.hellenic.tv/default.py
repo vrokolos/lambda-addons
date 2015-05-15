@@ -226,9 +226,8 @@ class getUrl(object):
             opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
         try:
-            if not (url.startswith('https') and sys.version_info >= (2, 7, 9)): raise Exception()
-            import ssl
-            ssl_context = ssl.create_default_context()
+            if sys.version_info < (2, 7, 9): raise Exception()
+            import ssl; ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
             handlers += [urllib2.HTTPSHandler(context=ssl_context)]

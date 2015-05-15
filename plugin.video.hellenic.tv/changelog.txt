@@ -1,4 +1,13 @@
 ------------------------
+Hellenic TV v3.4.2 (15-May-15)
+------------------------
+
+- Updated Live TV channels.
+- Tweaked unix systems (Python 2.7.9).
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.4.1 (13-May-15)
 ------------------------
 

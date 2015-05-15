@@ -1,4 +1,19 @@
 ------------------------
+Genesis v4.4.7 (15-May-15)
+------------------------
+
+- Added Vidics source.
+- Fixed Icefilms source.
+- Tweaked G2G source.
+- Removed MerDB source.
+- Fixed issue with scene "Latest HD Movies".
+- Fixed issue with scene "Latest Movies".
+- Tweaked unix systems (Python 2.7.9).
+- Updated Portuguese translation.
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.4.6 (13-May-15)
 ------------------------
 

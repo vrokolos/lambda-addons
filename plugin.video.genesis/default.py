@@ -235,9 +235,8 @@ class getUrl(object):
             opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
         try:
-            if not (url.startswith('https') and sys.version_info >= (2, 7, 9)): raise Exception()
-            import ssl
-            ssl_context = ssl.create_default_context()
+            if sys.version_info < (2, 7, 9): raise Exception()
+            import ssl; ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
             handlers += [urllib2.HTTPSHandler(context=ssl_context)]
@@ -2471,11 +2470,9 @@ class link:
         self.tvrage_info = 'http://www.tvrage.com/shows/id-%s/episode_list/all'
         self.epguides_info = 'http://epguides.com/common/exportToCSV.asp?rage=%s'
 
-        self.gtranslator = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=%s'
-
-        self.scn_base = 'http://www.movie25.ag'
-        self.scn_added = 'http://www.movie25.ag/new-releases/1'
-        self.scn_added_hd = 'http://www.movie25.ag/latest-hd-movies/1'
+        self.scn_base = 'https://movie25.unblocked.pw'
+        self.scn_added = 'https://movie25.unblocked.pw/new-releases/1'
+        self.scn_added_hd = 'https://movie25.unblocked.pw/latest-hd-movies/1'
         self.scn_tv_base = 'http://m2v.ru'
         self.scn_tv_added = 'http://m2v.ru/?Part=11&func=part&page=1'
 
@@ -3539,9 +3536,7 @@ class movies:
 
     def scn_list(self, url):
         try:
-            #result = getUrl(url).result
-            #if not "movie_table" in result: result = getUrl(link().gtranslator % url).result
-            result = getUrl(link().gtranslator % url).result
+            result = getUrl(url).result
             result = result.decode('iso-8859-1').encode('utf-8')
             movies = common.parseDOM(result, "div", attrs = { "class": "movie_table" })
         except:
@@ -5743,6 +5738,9 @@ class resolver:
 
         u = None
 
+        try: import ssl
+        except: pass
+
         for i in self.sources:
             try:
                 url = self.sources_resolve(i['url'], i['provider'])
@@ -5752,6 +5750,17 @@ class resolver:
 
                 try: headers = dict(urlparse.parse_qsl(url.rsplit('|', 1)[1]))
                 except: headers = dict('')
+
+                try:
+                    if sys.version_info < (2, 7, 9): raise Exception()
+                    ssl_context = ssl.create_default_context()
+                    ssl_context.check_hostname = False
+                    ssl_context.verify_mode = ssl.CERT_NONE
+                    handlers = [urllib2.HTTPSHandler(context=ssl_context)]
+                    opener = urllib2.build_opener(*handlers)
+                    opener = urllib2.install_opener(opener)
+                except:
+                    pass
 
                 request = urllib2.Request(url.split('|')[0], headers=headers)
                 response = urllib2.urlopen(request, timeout=10)
