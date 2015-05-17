@@ -2470,9 +2470,13 @@ class link:
         self.tvrage_info = 'http://www.tvrage.com/shows/id-%s/episode_list/all'
         self.epguides_info = 'http://epguides.com/common/exportToCSV.asp?rage=%s'
 
-        self.scn_base = 'https://movie25.unblocked.pw'
-        self.scn_added = 'https://movie25.unblocked.pw/new-releases/1'
-        self.scn_added_hd = 'https://movie25.unblocked.pw/latest-hd-movies/1'
+        self.scn_base = 'http://www.movie25.ag'
+        self.scn_link_1 = 'http://www.movie25.ag'
+        self.scn_link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://www.movie25.ag'
+        self.scn_link_3 = 'https://movie25.unblocked.pw'
+        self.scn_added = '/new-releases/1'
+        self.scn_added_hd = '/latest-hd-movies/1'
+
         self.scn_tv_base = 'http://m2v.ru'
         self.scn_tv_added = 'http://m2v.ru/?Part=11&func=part&page=1'
 
@@ -3536,7 +3540,15 @@ class movies:
 
     def scn_list(self, url):
         try:
-            result = getUrl(url).result
+            result = ''
+            try: url = re.compile('//.+?(/.+)').findall(url)[0]
+            except: pass
+            links = [link().scn_link_1, link().scn_link_2, link().scn_link_3]
+            for base_link in links:
+                try: result = getUrl(base_link + url).result
+                except: result = ''
+                if 'movie_table' in result: break
+
             result = result.decode('iso-8859-1').encode('utf-8')
             movies = common.parseDOM(result, "div", attrs = { "class": "movie_table" })
         except:
@@ -3551,7 +3563,7 @@ class movies:
             next = common.replaceHTMLCodes(next)
             try: next = urlparse.parse_qs(urlparse.urlparse(next).query)['u'][0]
             except: pass
-            if not next.startswith('http'): next = urlparse.urljoin(link().scn_base, next)
+            next = urlparse.urljoin(link().scn_base, next)
             next = next.encode('utf-8')
         except:
             next = ''
@@ -3575,7 +3587,7 @@ class movies:
                 url = common.replaceHTMLCodes(url)
                 try: url = urlparse.parse_qs(urlparse.urlparse(url).query)['u'][0]
                 except: pass
-                if not url.startswith('http'): url = urlparse.urljoin(link().scn_base, url)
+                url = urlparse.urljoin(link().scn_base, url)
                 url = url.encode('utf-8')
 
                 poster = '0'

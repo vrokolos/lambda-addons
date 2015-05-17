@@ -53,8 +53,8 @@ movieImage          = os.path.join(addonArt,'image_movie.jpg')
 tvImage             = os.path.join(addonArt,'image_tv.jpg')
 episodeImage        = os.path.join(addonArt,'image_episode.jpg')
 musicImage          = os.path.join(addonArt,'image_music.jpg')
-addonArchives       = os.path.join(addonPath,'resources/archives.db')
-addonChannels       = os.path.join(addonPath,'resources/channels.xml')
+addonChannels       = 'http://olympia.watchkodi.com/hellenic-tv/channels.xml'
+addonCartoons       = 'http://olympia.watchkodi.com/hellenic-tv/cartoons.xml'
 addonSettings       = os.path.join(dataPath,'settings.db')
 addonCache          = os.path.join(dataPath,'cache.db')
 
@@ -1284,10 +1284,7 @@ class channels:
 
     def channel_list(self):
         try:
-            file = xbmcvfs.File(addonChannels)
-            result = file.read()
-            file.close()
-
+            result = getUrl(addonChannels).result
             channels = common.parseDOM(result, "channel", attrs = { "active": "True" })
         except:
             return
@@ -1394,70 +1391,71 @@ class archives:
         self.list = []
 
     def cartoons(self):
-        self.list = self.arc_list('cartoons_collection')
+        self.list = index().cache(self.item_list, 0.02, 'cartoons_collection')
         index().cartoonList(self.list)
 
     def cartoons_gr(self):
-        self.list = self.arc_list('cartoons_collection')
+        self.list = index().cache(self.item_list, 0.02, 'cartoons_collection')
         try: self.list = [i for i in self.list if i['lang'] == 'el']
         except: return
         index().cartoonList(self.list)
 
-    def arc_list(self, arc):
+    def item_list(self, arc):
         try:
-            dbcon = database.connect(addonArchives)
-            dbcur = dbcon.cursor()
-            dbcur.execute("SELECT * FROM arc_list WHERE arc = '%s'" % arc)
-            match = dbcur.fetchone()
-            archives = eval(match[1].encode('utf-8'))
+            if arc == 'cartoons_collection': u = addonCartoons
+            result = getUrl(u).result
+
+            items = common.parseDOM(result, "item")
         except:
-            pass
+            return
 
-        for i in archives:
+        for item in items:
             try:
-                title = i['title']
-                title = common.replaceHTMLCodes(title)
-                title = title.encode('utf-8')
+                name = common.parseDOM(item, "title")[0]
+                name = common.replaceHTMLCodes(name)
+                name = name.encode('utf-8')
 
-                year = i['year']
-                year = year.encode('utf-8')
-
-                name = '%s (%s)' % (title, year)
-                try: name = name.encode('utf-8')
+                title = re.compile('(.+?) [(]\d{4}[)]$').findall(name)[0]
+                try: title = title.encode('utf-8')
                 except: pass
 
-                url = 'archives_%s_%s_0' % (arc, i['imdb'])
+                year = re.compile('.+? [(](\d{4})[)]$').findall(name)[0]
+                try: year = year.encode('utf-8')
+                except: pass
+
+                url = common.parseDOM(item, "imdb_id")[0]
+                url = 'archives_%s_%s_0' % (arc, url)
                 url = url.encode('utf-8')
 
-                image = i['image']
+                image = common.parseDOM(item, "image")[0]
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
-                try: fanart = i['fanart']
+                try: fanart = common.parseDOM(item, "fanart")[0]
                 except: fanart = '0'
                 fanart = common.replaceHTMLCodes(fanart)
                 fanart = fanart.encode('utf-8')
 
-                try: genre = i['genre']
+                try: genre = common.parseDOM(item, "genre")[0]
                 except: genre = 'Greek'
                 genre = common.replaceHTMLCodes(genre)
                 genre = genre.encode('utf-8')
 
-                try: plot = i['plot']
+                try: plot = common.parseDOM(item, "plot")[0]
                 except: plot = '0'
                 plot = common.replaceHTMLCodes(plot)
                 plot = plot.encode('utf-8')
 
-                try: imdb = i['imdb']
+                try: imdb = common.parseDOM(item, "imdb_id")[0]
                 except: imdb = '0'
                 imdb = common.replaceHTMLCodes(imdb)
                 imdb = imdb.encode('utf-8')
 
-                try: lang = i['language']
+                try: lang = common.parseDOM(item, "language")[0]
                 except: lang = '0'
                 lang = lang.encode('utf-8')
 
-                try: type = i['type']
+                try: type = common.parseDOM(item, "type")[0]
                 except: type = '0'
                 type = type.encode('utf-8')
 
@@ -1471,38 +1469,36 @@ class archives:
         try:
             arc, imdb = re.compile('archives_(.+?)_(\d*)_\d*').findall(url)[0]
 
-            dbcon = database.connect(addonArchives)
-            dbcur = dbcon.cursor()
-            dbcur.execute("SELECT * FROM arc_list WHERE arc = '%s'" % arc)
-            match = dbcur.fetchone()
+            if arc == 'cartoons_collection': u = addonCartoons
+            result = getUrl(u).result
 
-            u = eval(match[1].encode('utf-8'))
-            i = [i for i in u if i['imdb'] == imdb][0]
+            item = common.parseDOM(result, "item")
+            item = [i for i in item if common.parseDOM(i, "imdb_id")[0] == imdb][0]
 
-            show = i['title']
+            show = common.parseDOM(item, "title")[0]
             show = common.replaceHTMLCodes(show)
             show = show.encode('utf-8')
 
-            image = i['image']
+            image = common.parseDOM(item, "image")[0]
             image = common.replaceHTMLCodes(image)
             image = image.encode('utf-8')
 
-            try: fanart = i['fanart']
+            try: fanart = common.parseDOM(item, "fanart")[0]
             except: fanart = '0'
             fanart = common.replaceHTMLCodes(fanart)
             fanart = fanart.encode('utf-8')
 
-            try: genre = i['genre']
+            try: genre = common.parseDOM(item, "genre")[0]
             except: genre = 'Greek'
             genre = common.replaceHTMLCodes(genre)
             genre = genre.encode('utf-8')
 
-            try: plot = i['plot']
+            try: plot = common.parseDOM(item, "plot")[0]
             except: plot = '0'
             plot = common.replaceHTMLCodes(plot)
             plot = plot.encode('utf-8')
 
-            episodes = i['link']
+            episodes = common.parseDOM(item, "link")
         except:
             return
 
@@ -1525,17 +1521,19 @@ class archives:
         try:
             arc, imdb, idx = re.compile('archives_(.+?)_(\d*)_(\d*)').findall(url)[0]
 
-            dbcon = database.connect(addonArchives)
-            dbcur = dbcon.cursor()
-            dbcur.execute("SELECT * FROM arc_list WHERE arc = '%s'" % arc)
-            match = dbcur.fetchone()
+            if arc == 'cartoons_collection': u = addonCartoons
+            result = getUrl(u).result
 
-            link = eval(match[1].encode('utf-8'))
-            link = [i for i in link if i['imdb'] == imdb][0]
+            item = common.parseDOM(result, "item")
+            item = [i for i in item if common.parseDOM(i, "imdb_id")[0] == imdb][0]
 
-            size = link['link'][int(idx)]['size']
+            link = common.parseDOM(item, "link")[int(idx)]
 
-            url = link['link'][int(idx)]['url']
+            url = common.parseDOM(link, "url")[0]
+
+            try: size = common.parseDOM(link, "size")[0]
+            except: size = '0'
+
             url = resolver().sources_resolve(url)
 
             try: headers = dict(urlparse.parse_qsl(url.rsplit('|', 1)[1]))
@@ -1545,8 +1543,7 @@ class archives:
             response = urllib2.urlopen(request, timeout=20)
             s = str(response.headers['Content-Length'])
 
-            if not s == size: raise Exception()
-            return url
+            if size == '0' or size == s: return url
         except:
             return
 
@@ -3195,8 +3192,8 @@ class novasports:
 
         for episode in episodes:
             try:
-                name = common.parseDOM(episode, "a")[-1]
-                name += ' (%s)' % re.compile('>(\d{2}-\d{2}-\d{4})<').findall(episode)[0]
+                name = common.parseDOM(episode, "div", attrs = { "class": "miniHeading" })[0]
+                name += ' (%s)' % re.compile('(\d{2}/\d{2}/\d{4})').findall(episode)[0]
                 name = common.replaceHTMLCodes(name)
                 name = name.encode('utf-8')
 
@@ -3210,7 +3207,7 @@ class novasports:
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
-                date = re.compile('>(\d{2})-(\d{2})-(\d{4})<').findall(episode)[0]
+                date = re.compile('(\d{2})/(\d{2})/(\d{4})').findall(episode)[0]
                 date = '%s-%s-%s' % (date[2], date[1], date[0])
                 date = date.encode('utf-8')
 
@@ -3841,6 +3838,26 @@ class livestream:
                 url = url['primary']['gr']['hls']
 
             return url
+        except:
+            return
+
+    def lakatamia(self, url):
+        try:
+            import commonresolvers
+
+            regex = getUrl(addonChannels).result
+            regex = common.parseDOM(regex, "channel")
+            regex = [i for i in regex if common.parseDOM(i, "type") == ['lakatamia']][0]
+            regex = common.parseDOM(regex, "regex")[0]
+
+            result = getUrl(url).result
+
+            ids = re.compile(regex).findall(result)
+
+            for id in ids:
+                u = 'http://mybeststream.xyz/?id=%s&referer=%s' % (id, url)
+                u = commonresolvers.get(u).result
+                if not u == None: return u
         except:
             return
 

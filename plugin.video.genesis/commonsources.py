@@ -247,7 +247,7 @@ class icefilms:
     def __init__(self):
         self.base_link = 'http://ipv6.icefilms.info'
         self.link_1 = 'http://ipv6.icefilms.info'
-        self.link_2 = 'https://icefilms.unblocked.pw'
+        self.link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://www.icefilms.info'
         self.link_3 = 'https://icefilms.unblocked.pw'
         self.moviesearch_link = '/movies/a-z/%s'
         self.tvsearch_link = '/tv/a-z/%s'
@@ -261,7 +261,7 @@ class icefilms:
             query = self.moviesearch_link % query
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + query).result
                 except: result = ''
@@ -286,7 +286,7 @@ class icefilms:
             query = self.tvsearch_link % query
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + query).result
                 except: result = ''
@@ -307,7 +307,7 @@ class icefilms:
     def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         try:
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
@@ -332,7 +332,7 @@ class icefilms:
             url = self.video_link % t
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
@@ -404,14 +404,15 @@ class primewire:
         self.base_link = 'http://www.primewire.ag'
         self.key_link = '/index.php?search'
         self.link_1 = 'http://www.primewire.ag'
-        self.link_2 = 'https://primewire.unblocked.pw'
+        self.link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://www.primewire.ag'
+        self.link_3 = 'https://primewire.unblocked.pw'
         self.moviesearch_link = '/index.php?search_keywords=%s&key=%s&search_section=1'
         self.tvsearch_link = '/index.php?search_keywords=%s&key=%s&search_section=2'
 
     def get_movie(self, imdb, title, year):
         try:
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + self.key_link).result
                 except: result = ''
@@ -460,7 +461,7 @@ class primewire:
     def get_show(self, imdb, tvdb, show, show_alt, year):
         try:
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + self.key_link).result
                 except: result = ''
@@ -519,7 +520,7 @@ class primewire:
             sources = []
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
@@ -573,7 +574,8 @@ class movie25:
     def __init__(self):
         self.base_link = 'http://www.movie25.ag'
         self.link_1 = 'http://www.movie25.ag'
-        self.link_2 = 'https://movie25.unblocked.pw'
+        self.link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://www.movie25.ag'
+        self.link_3 = 'https://movie25.unblocked.pw'
         self.search_link = '/search.php?key=%s'
 
     def get_movie(self, imdb, title, year):
@@ -581,7 +583,7 @@ class movie25:
             query = self.search_link % urllib.quote_plus(title)
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + query).result
                 except: result = ''
@@ -628,7 +630,7 @@ class movie25:
             sources = []
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
@@ -676,7 +678,7 @@ class movie25:
             url = urlparse.urlparse(url).path
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
@@ -703,7 +705,8 @@ class watchseries:
     def __init__(self):
         self.base_link = 'http://watchseries.ag'
         self.link_1 = 'http://watchseries.ag'
-        self.link_2 = 'https://watchseries.unblocked.pw'
+        self.link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://watchseries.ag'
+        self.link_3 = 'https://watchseries.unblocked.pw'
         self.search_link = '/AdvancedSearch/%s-%s/by_popularity/%s'
         self.episode_link = '/episode/%s_s%s_e%s.html'
 
@@ -712,7 +715,7 @@ class watchseries:
             query = self.search_link % (str(int(year)-1), str(int(year)+1), urllib.quote_plus(show))
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + query).result
                 except: result = ''
@@ -771,7 +774,7 @@ class watchseries:
             url = url.replace('/json/', '/')
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
@@ -819,7 +822,7 @@ class watchseries:
                     return response
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try:
                     opener = urllib2.build_opener(NoRedirection)
@@ -849,7 +852,7 @@ class iwatchonline:
     def __init__(self):
         self.base_link = 'http://www.iwatchonline.to'
         self.link_1 = 'http://www.imovie.to'
-        self.link_2 = 'https://iwatchonline.unblocked.pw'
+        self.link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://www.iwatchonline.to'
         self.link_3 = 'https://iwatchonline.unblocked.pw'
         self.search_link = '/advance-search'
         self.show_link = '/tv-shows/%s'
@@ -928,7 +931,7 @@ class iwatchonline:
             sources = []
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
@@ -978,7 +981,7 @@ class iwatchonline:
             url = urlparse.urlparse(url).path
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''

@@ -1,4 +1,15 @@
 ------------------------
+Hellenic TV v3.5.0 (17-May-15)
+------------------------
+
+- Updated Live TV channels.
+- Re-work of Live TV section.
+- Re-work of Cartoons section.
+- Fixed novasports.gr listings. 
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.4.2 (15-May-15)
 ------------------------
 

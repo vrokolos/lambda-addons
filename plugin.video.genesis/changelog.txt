@@ -1,4 +1,21 @@
 ------------------------
+Genesis v4.5.0 (17-May-15)
+------------------------
+
+- Tweaked Icefilms source.
+- Tweaked Primewire source.
+- Tweaked Movie25 source.
+- Tweaked Watchseries source.
+- Tweaked Iwatchonline source.
+- Updated available resolvers.
+- NOTE: Clicknupload is now a host with captchas.
+- NOTE: You will have to enable them in settings.
+- Fixed issue with scene "Latest HD Movies".
+- Fixed issue with scene "Latest Movies".
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.4.7 (15-May-15)
 ------------------------
 

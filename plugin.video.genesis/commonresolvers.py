@@ -274,6 +274,60 @@ class regex:
         url = url.encode('utf-8')
         return url
 
+class unwise:
+    def worker(self, str_eval):
+        page_value=""
+        try:        
+            ss="w,i,s,e=("+str_eval+')' 
+            exec (ss)
+            page_value=self.__unwise(w,i,s,e)
+        except: return
+        return page_value
+
+    def __unwise(self,  w, i, s, e):
+        lIll = 0;
+        ll1I = 0;
+        Il1l = 0;
+        ll1l = [];
+        l1lI = [];
+        while True:
+            if (lIll < 5):
+                l1lI.append(w[lIll])
+            elif (lIll < len(w)):
+                ll1l.append(w[lIll]);
+            lIll+=1;
+            if (ll1I < 5):
+                l1lI.append(i[ll1I])
+            elif (ll1I < len(i)):
+                ll1l.append(i[ll1I])
+            ll1I+=1;
+            if (Il1l < 5):
+                l1lI.append(s[Il1l])
+            elif (Il1l < len(s)):
+                ll1l.append(s[Il1l]);
+            Il1l+=1;
+            if (len(w) + len(i) + len(s) + len(e) == len(ll1l) + len(l1lI) + len(e)):
+                break;
+            
+        lI1l = ''.join(ll1l)
+        I1lI = ''.join(l1lI)
+        ll1I = 0;
+        l1ll = [];
+        for lIll in range(0,len(ll1l),2):
+            ll11 = -1;
+            if ( ord(I1lI[ll1I]) % 2):
+                ll11 = 1;
+            l1ll.append(chr(    int(lI1l[lIll: lIll+2], 36) - ll11));
+            ll1I+=1;
+            if (ll1I >= len(l1lI)):
+                ll1I = 0;
+        ret=''.join(l1ll)
+        if 'eval(function(w,i,s,e)' in ret:
+            ret=re.compile('eval\(function\(w,i,s,e\).*}\((.*?)\)').findall(ret)[0] 
+            return self.worker(ret)
+        else:
+            return ret
+
 class js:
     def worker(self, script):
         aSplit = script.split(";',")
@@ -496,7 +550,7 @@ class clicknupload:
             'netloc': ['clicknupload.com'],
             'host': ['Clicknupload'],
             'quality': 'High',
-            'captcha': False,
+            'captcha': True,
             'a/c': False
         }
 
@@ -518,6 +572,7 @@ class clicknupload:
             k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
             for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
             post.update({'method_free': 'Free Download'})
+            post.update(captcha().worker(result))
             post = urllib.urlencode(post)
 
             result = getUrl(url, post=post).result
@@ -1187,6 +1242,28 @@ class mrfile:
         except:
             return
 
+class mybeststream:
+    def info(self):
+        return {
+            'netloc': ['mybeststream.xyz']
+        }
+
+    def resolve(self, url):
+        try:
+            referer = urlparse.parse_qs(urlparse.urlparse(url).query)['referer'][0]
+            page = url.replace(referer, '').replace('&referer=', '').replace('referer=', '')
+
+            result = getUrl(url, referer=referer).result
+            result = re.compile("}[(]('.+?' *, *'.+?' *, *'.+?' *, *'.+?')[)]").findall(result)[-1]
+            result = unwise().worker(result)
+
+            strm = re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
+            strm = [i for i in strm if i.startswith('rtmp')][0]
+            url = '%s pageUrl=%s live=1 timeout=10' % (strm, page)
+            return url
+        except:
+            return
+
 class nosvideo:
     def info(self):
         return {
@@ -1483,6 +1560,7 @@ class uploadrocket:
     def resolve(self, url):
         try:
             result = getUrl(url).result
+            result = result.decode('iso-8859-1').encode('utf-8')
 
             post = {}
             f = common.parseDOM(result, "Form", attrs = { "name": "freeorpremium" })[0]
@@ -1492,6 +1570,7 @@ class uploadrocket:
             post = urllib.urlencode(post)
 
             result = getUrl(url, post=post).result
+            result = result.decode('iso-8859-1').encode('utf-8')
 
             post = {}
             f = common.parseDOM(result, "Form", attrs = { "name": "F1" })[0]
@@ -1501,6 +1580,7 @@ class uploadrocket:
             post = urllib.urlencode(post)
 
             result = getUrl(url, post=post).result
+            result = result.decode('iso-8859-1').encode('utf-8')
 
             url = common.parseDOM(result, "a", ret="href", attrs = { "onclick": "DL.+?" })[0]
             return url
