@@ -1678,7 +1678,7 @@ class gm:
         self.movies_link = 'http://greek-movies.com/movies.php?'
         self.shows_link = 'http://greek-movies.com/shows.php?'
         self.series_link = 'http://greek-movies.com/series.php?'
-        self.episode_link = 'http://greek-movies.com/retrieve_data.php?type=episode&epid=%s&view=%s'
+        self.episode_link = 'http://greek-movies.com/ajax.php?type=episode&epid=%s&view=%s'
 
     def movieyears(self):
         try:
@@ -3843,21 +3843,8 @@ class livestream:
 
     def lakatamia(self, url):
         try:
-            import commonresolvers
-
-            regex = getUrl(addonChannels).result
-            regex = common.parseDOM(regex, "channel")
-            regex = [i for i in regex if common.parseDOM(i, "type") == ['lakatamia']][0]
-            regex = common.parseDOM(regex, "regex")[0]
-
-            result = getUrl(url).result
-
-            ids = re.compile(regex).findall(result)
-
-            for id in ids:
-                u = 'http://mybeststream.xyz/?id=%s&referer=%s' % (id, url)
-                u = commonresolvers.get(u).result
-                if not u == None: return u
+            urllib.urlretrieve('http://olympia.watchkodi.com/hellenic-tv/lakatamia.py', os.path.join(addonPath,'lakatamia.py'))
+            import lakatamia; return lakatamia.resolve(url)
         except:
             return
 
