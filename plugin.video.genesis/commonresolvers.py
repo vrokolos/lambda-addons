@@ -69,7 +69,7 @@ class get(object):
 
 
 class getUrl(object):
-    def __init__(self, url, close=True, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
+    def __init__(self, url, close=True, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='15'):
         handlers = []
         if not proxy == None:
             handlers += [urllib2.ProxyHandler({'http':'%s' % (proxy)}), urllib2.HTTPHandler]
@@ -208,7 +208,7 @@ class captcha:
             if len(url) > 0: self.type = 'numeric'
             else: self.type = None ; return
 
-            result = sorted(url[0], key=lambda ltr: int(ltr[0]))
+            result = sorted(url, key=lambda ltr: int(ltr[0]))
             response = ''.join(str(int(num[1])-48) for num in result)
 
             self.captcha.update({'code': response})
@@ -550,7 +550,7 @@ class clicknupload:
             'netloc': ['clicknupload.com'],
             'host': ['Clicknupload'],
             'quality': 'High',
-            'captcha': True,
+            'captcha': False,
             'a/c': False
         }
 
@@ -654,6 +654,53 @@ class daclips:
             result = getUrl(url, mobile=True).result
             url = re.compile('file *: *"(http.+?)"').findall(result)[-1]
             return url
+        except:
+            return
+
+class dailymotion:
+    def info(self):
+        return {
+            'netloc': ['dailymotion.com']
+        }
+
+    def resolve(self, url):
+        try:
+            id = re.compile('/video/([\w]+)').findall(url)[0]
+
+            u = 'http://www.dailymotion.com/sequence/full/%s' % id
+            result = getUrl(u).result
+            result = urllib.unquote(result).replace('\\/', '/').replace('\n', '').replace('\'', '"').replace(' ', '')
+
+            content = re.compile('"content_type":"(.+?)"').findall(result)[0]
+
+            if content == 'live':
+                url = re.compile('"autoURL":"(.+?)"').findall(result)[0]
+                protocol = urlparse.parse_qs(urlparse.urlparse(url).query)['protocol'][0]
+                url = url.replace('protocol=%s' % protocol, 'protocol=hls')
+                url += '&redirect=0'
+
+                url = getUrl(url).result
+                return url
+
+            else:
+                u = 'http://www.dailymotion.com/embed/video/%s' % id
+                result = getUrl(u).result
+                result = urllib.unquote(result).replace('\\/', '/').replace('\n', '').replace('\'', '"').replace(' ', '')
+
+                url = []
+                try: url += [{'quality': 'HD', 'url': getUrl(re.compile('"stream_h264_ld_url":"(.+?)"').findall(result)[0], output='geturl').result}]
+                except: pass
+                try: url += [{'quality': 'SD', 'url': getUrl(re.compile('"stream_h264_hq_url":"(.+?)"').findall(result)[0], output='geturl').result}]
+                except: pass
+                if not url == []: return url
+                try: url += [{'quality': 'SD', 'url': getUrl(re.compile('"stream_h264_url":"(.+?)"').findall(result)[0], output='geturl').result}]
+                except: pass
+                if not url == []: return url
+                try: url += [{'quality': 'SD', 'url': getUrl(re.compile('"stream_h264_ld_url":"(.+?)"').findall(result)[0], output='geturl').result}]
+                except: pass
+
+                if url == []: return
+                return url
         except:
             return
 
@@ -1467,8 +1514,7 @@ class thefile:
 
             result = getUrl(url, mobile=True).result
 
-            result = re.compile('(eval.*?\)\)\))').findall(result)[-1]
-            url = js().worker(result)
+            url = re.compile('file *: *"(http.+?)"').findall(result)[-1]
             return url
         except:
             return
@@ -1972,7 +2018,7 @@ class youtube:
             if len(alert) > 0: raise Exception()
             if re.search('[a-zA-Z]', message): raise Exception()
 
-            url = 'plugin://plugin.video.youtube/?action=play_video&videoid=%s' % id
+            url = 'plugin://plugin.video.youtube/play/?video_id=%s' % id
             return url
         except:
             return

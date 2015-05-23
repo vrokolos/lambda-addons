@@ -1,4 +1,13 @@
 ------------------------
+Genesis v4.5.2 (23-May-15)
+------------------------
+
+- Updated resolvers.
+- Tweaked trailers.
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.5.1 (21-May-15)
 ------------------------
 

@@ -5322,7 +5322,7 @@ class trailer:
             if len(alert) > 0: raise Exception()
             if re.search('[a-zA-Z]', message): raise Exception()
 
-            url = 'plugin://plugin.video.youtube/?action=play_video&videoid=%s' % id
+            url = 'plugin://plugin.video.youtube/play/?video_id=%s' % id
             return url
         except:
             return

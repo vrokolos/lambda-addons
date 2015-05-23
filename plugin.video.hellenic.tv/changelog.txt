@@ -1,4 +1,13 @@
 ------------------------
+Hellenic TV v3.5.2 (23-May-15)
+------------------------
+
+- Updated resolvers.
+- Tweaked youtube playback.
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.5.1 (19-May-15)
 ------------------------
 

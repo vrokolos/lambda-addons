@@ -1659,11 +1659,12 @@ class resolver:
             elif url.startswith(megacy().base_link): url = megacy().resolve(url)
             elif url.startswith(realfm().base_link): url = realfm().resolve(url)
             elif url.startswith(novasports().base_link): url = novasports().resolve(url)
-            elif url.startswith(dailymotion().base_link): url = dailymotion().resolve(url)
             elif url.startswith(youtube().youtube_search): url = youtube().resolve_search(url)
             elif url.startswith(youtube().base_link): url = youtube().resolve(url)
 
             else: url = commonresolvers.get(url).result
+
+            if type(url) == list: url = sorted(url, key=lambda k: k['quality'])[0]['url']
 
             return url
         except:
@@ -2336,13 +2337,14 @@ class ant1:
         id = url.split("?")[-1].split("cid=")[-1].split("&")[0]
         dataUrl = self.info_link % id
         pageUrl = self.watch_link % id
-        proxyUrl = 'http://9proxy.in/b.php?b=20&u=%s' % dataUrl
+        proxyUrl = 'https://proxy-de.hide.me/go.php?b=20&u=%s' % dataUrl
         swfUrl = 'http://www.antenna.gr/webtv/images/fbplayer.swf'
 
         try:
             result = getUrl(dataUrl).result
             playpath = common.parseDOM(result, "appStream")[0]
-            if playpath.endswith('GR.flv'): result = getUrl(proxyUrl).result
+            #if playpath.endswith('GR.flv'): result = getUrl(proxyUrl).result
+            if playpath.endswith('GR.flv'): return
 
             playpath = common.parseDOM(result, "appStream")[0]
             rtmp = common.parseDOM(result, "FMS")[0]
@@ -3552,27 +3554,6 @@ class dailymotion:
 
         return self.list
 
-    def resolve(self, url):
-        try:
-            id = url.split("/")[-1].split("?")[0]
-            result = getUrl(self.info_link % id).result
-
-            url = None
-            try: url = re.compile('"stream_h264_ld_url":"(.+?)"').findall(result)[0]
-            except: pass
-            try: url = re.compile('"stream_h264_url":"(.+?)"').findall(result)[0]
-            except: pass
-            try: url = re.compile('"stream_h264_hq_url":"(.+?)"').findall(result)[0]
-            except: pass
-            try: url = re.compile('"stream_h264_hd_url":"(.+?)"').findall(result)[0]
-            except: pass
-
-            url = urllib.unquote(url).decode('utf-8').replace('\\/', '/')
-            url = getUrl(url, output='geturl').result
-            return url
-        except:
-            return
-
     def thread(self, url, i):
         try:
             result = getUrl(url).result
@@ -3773,7 +3754,7 @@ class youtube:
             if len(alert) > 0: raise Exception()
             if re.search('[a-zA-Z]', message): raise Exception()
 
-            url = 'plugin://plugin.video.youtube/?action=play_video&videoid=%s' % id
+            url = 'plugin://plugin.video.youtube/play/?video_id=%s' % id
             return url
         except:
             return
@@ -3832,7 +3813,7 @@ class livestream:
             except: url = None
 
             if url == None:
-                url = 'http://www.unblockaccess.com/browse.php?b=20&u=%s' % urllib.quote_plus(u)
+                url = 'https://proxy-de.hide.me/go.php?b=20&u=%s' % urllib.quote_plus(u)
                 url = getUrl(url).result
                 url = json.loads(url)
                 url = url['primary']['gr']['hls']
@@ -3926,19 +3907,8 @@ class livestream:
 
     def dailymotion(self, url):
         try:
-            url = re.compile('/video/([\w]+)').findall(url)[0]
-            url = 'http://www.dailymotion.com/sequence/full/%s' % url
-
-            result = getUrl(url).result
-            url = re.compile('[\'|\"]autoURL[\'|\"] *: *[\'|\"](.+?)[\'|\"]').findall(result)[0]
-
-            import urlparse
-            url = urllib.unquote(url).decode('utf-8').replace('\\/', '/')
-            protocol = urlparse.parse_qs(urlparse.urlparse(url).query)['protocol'][0]
-            url = url.replace('protocol=%s' % protocol, 'protocol=hls')
-            url += '&redirect=0'
-
-            url = getUrl(url).result
+            import commonresolvers
+            url = commonresolvers.get(url).result
             return url
         except:
             return
