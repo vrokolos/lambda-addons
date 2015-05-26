@@ -1239,13 +1239,16 @@ class favourites:
             a = [i[0] for i in match if i[0].startswith('archives_')]
             a = [re.compile('archives_.+?_(\d*)_\d*').findall(i)[0] for i in a]
 
-            self.list = archives().arc_list('cartoons_collection')
+            self.list = index().cache(archives().item_list, 0.02, 'cartoons_collection')
             self.list = [i for i in self.list if i['imdb'] in a]
 
             b = [i for i in match if not i[0].startswith('archives_')]
             for url, name, title, year, image, genre, plot in b:
                 try:
                     name, title, year, image, genre, plot = eval(name.encode('utf-8')), eval(title.encode('utf-8')), eval(year.encode('utf-8')), eval(image.encode('utf-8')), eval(genre.encode('utf-8')), eval(plot.encode('utf-8'))
+
+                    if 'gdata.youtube.com' in url: 
+                        url = youtube().playlist_link % url.split('/playlists/')[-1]
 
                     if 'youtube' in url: type = 'tvshow'
                     else: type = 'movie'

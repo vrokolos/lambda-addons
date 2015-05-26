@@ -1,4 +1,15 @@
 ------------------------
+Genesis v4.5.3 (26-May-15)
+------------------------
+
+- Fixed issue with Trakt scrobbling.
+- Tweaked loading of resolvers.
+- Fixed Vodlocker resolver.
+- Tweaked Nowvideo resolver.
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.5.2 (23-May-15)
 ------------------------
 

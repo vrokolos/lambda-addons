@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import urllib,urllib2,urlparse,re,os,sys,xbmc,xbmcgui,xbmcaddon,xbmcvfs
+import urllib,urllib2,urlparse,re,os,sys,xbmcaddon
 
 try:
     import CommonFunctions as common
@@ -125,6 +125,7 @@ class getUrl(object):
             response.close()
         self.result = result
 
+
 class captcha:
     def worker(self, data):
         self.captcha = {}
@@ -217,6 +218,7 @@ class captcha:
 
     def keyboard(self, response):
         try:
+            import os,xbmc,xbmcgui,xbmcaddon,xbmcvfs
             dataPath = xbmc.translatePath(xbmcaddon.Addon().getAddonInfo("profile"))
             i = os.path.join(dataPath.decode("utf-8"),'img')
             f = xbmcvfs.File(i, 'w')
@@ -234,45 +236,6 @@ class captcha:
             return c
         except:
             return
-
-class regex:
-    def worker(self, data):
-        try:
-            data = str(data).replace('\r','').replace('\n','').replace('\t','')
-
-            url = re.compile('(.+?)<regex>').findall(data)[0]
-            regex = re.compile('<regex>(.+?)</regex>').findall(data)
-        except:
-            return
-
-        for x in regex:
-            try:
-                name = re.compile('<name>(.+?)</name>').findall(x)[0]
-
-                expres = re.compile('<expres>(.+?)</expres>').findall(x)[0]
-
-                referer = re.compile('<referer>(.+?)</referer>').findall(x)[0]
-                referer = urllib.unquote_plus(referer)
-                referer = common.replaceHTMLCodes(referer)
-                referer = referer.encode('utf-8')
-
-                page = re.compile('<page>(.+?)</page>').findall(x)[0]
-                page = urllib.unquote_plus(page)
-                page = common.replaceHTMLCodes(page)
-                page = page.encode('utf-8')
-
-                result = getUrl(page, referer=referer).result
-                result = str(result).replace('\r','').replace('\n','').replace('\t','')
-                result = str(result).replace('\/','/')
-
-                r = re.compile(expres).findall(result)[0]
-                url = url.replace('$doregex[%s]' % name, r)
-            except:
-                pass
-
-        url = common.replaceHTMLCodes(url)
-        url = url.encode('utf-8')
-        return url
 
 class unwise:
     def worker(self, str_eval):
@@ -606,7 +569,7 @@ class cloudzilla:
 class coolcdn:
     def info(self):
         return {
-            'netloc': ['movshare.net', 'novamov.com', 'nowvideo.sx', 'videoweed.es'],
+            'netloc': ['movshare.net', 'novamov.com', 'nowvideo.eu', 'nowvideo.sx', 'videoweed.es'],
             'host': ['Movshare', 'Novamov', 'Nowvideo', 'Videoweed'],
             'quality': 'Low',
             'captcha': False,
@@ -1928,8 +1891,10 @@ class vodlocker:
             url = re.compile('//.+?/([\w]+)').findall(url)[0]
             url = 'http://vodlocker.com/embed-%s.html' % url
 
-            result = getUrl(url, mobile=True).result
-            url = re.compile('file *: *"(http.+?)"').findall(result)[-1]
+            result = getUrl(url).result
+
+            url = re.compile('[\'|\"](http.+?[\w]+)[\'|\"]').findall(result)
+            url = [i for i in url if i.endswith(('.mp4', '.mkv', '.flv', '.avi'))][0]
             return url
         except:
             return

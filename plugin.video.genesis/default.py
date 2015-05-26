@@ -504,10 +504,10 @@ class player(xbmc.Player):
                 except: trakt_script_scrobble = ''
                 try: trakt_script_http = xbmcaddon.Addon('script.trakt').getSetting("ExcludeHTTP")
                 except: trakt_script_http = ''
-                try: trakt_script_user = xbmcaddon.Addon('script.trakt').getSetting("username")
-                except: trakt_script_user = ''
+                try: trakt_script_auth = xbmcaddon.Addon('script.trakt').getSetting("authorization")
+                except: trakt_script_auth = ''
 
-                if trakt_script_user == link().trakt_user and trakt_script_scrobble == 'true' and trakt_script_http == 'false': raise Exception()
+                if trakt_script_scrobble == 'true' and trakt_script_http == 'false' and not trakt_script_auth == '': raise Exception()
 
                 imdb = self.imdb
                 if not imdb.startswith('tt'): imdb = 'tt' + imdb
@@ -546,10 +546,10 @@ class player(xbmc.Player):
                 except: trakt_script_scrobble = ''
                 try: trakt_script_http = xbmcaddon.Addon('script.trakt').getSetting("ExcludeHTTP")
                 except: trakt_script_http = ''
-                try: trakt_script_user = xbmcaddon.Addon('script.trakt').getSetting("username")
-                except: trakt_script_user = ''
+                try: trakt_script_auth = xbmcaddon.Addon('script.trakt').getSetting("authorization")
+                except: trakt_script_auth = ''
 
-                if trakt_script_user == link().trakt_user and trakt_script_scrobble == 'true' and trakt_script_http == 'false': raise Exception()
+                if trakt_script_scrobble == 'true' and trakt_script_http == 'false' and not trakt_script_auth == '': raise Exception()
 
                 season, episode = int('%01d' % int(self.season)), int('%01d' % int(self.episode))
                 getTrakt().result(link().trakt_history, post={"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": self.tvdb}}]})

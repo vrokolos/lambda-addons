@@ -1,4 +1,13 @@
 ------------------------
+Hellenic TV v3.5.3 (26-May-15)
+------------------------
+
+- Updated resolvers.
+- Fixed cartoon favourites.
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.5.2 (23-May-15)
 ------------------------
 
