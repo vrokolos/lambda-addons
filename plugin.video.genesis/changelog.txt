@@ -1,4 +1,15 @@
 ------------------------
+Genesis v4.5.5 (28-May-15)
+------------------------
+
+- Added Movies8 source.
+- Fixed WSO source.
+- Removed G2G source.
+- Fixed Clicknupload resolver.
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.5.4 (26-May-15)
 ------------------------
 

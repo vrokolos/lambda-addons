@@ -1484,31 +1484,40 @@ class afdah:
         except:
             return
 
-class g2g:
+class movies8:
     def __init__(self):
-        self.base_link = 'http://4do.se'
-        self.search_link = '/forum/search.php?titleonly=1&securitytoken=guest&do=process&B1=&q=%s+Online+Streaming'
+        self.base_link = 'http://xmovies8.co'
+        self.search_link = '/?s=%s'
 
     def get_movie(self, imdb, title, year):
         try:
             query = self.base_link + self.search_link % (urllib.quote_plus(title))
 
             result = getUrl(query).result
-            result = common.parseDOM(result, "h3", attrs = { "class": "searchtitle" })
 
             title = cleantitle().movie(title)
             years = ['(%s)' % str(year), '(%s)' % str(int(year)+1), '(%s)' % str(int(year)-1)]
-            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "a", attrs = { "class": "title" })[0]) for i in result]
-            result = [i for i in result if any(x in i[1] for x in [' 720p ', ' 1080p '])]
-            result = [(i[0], re.compile('(.+? [(]\d{4}[)])').findall(i[1])[0]) for i in result]
-            result = [i for i in result if title == cleantitle().movie(i[1])]
-            result = [i[0] for i in result if any(x in i[1] for x in years)][0]
+
+            redirect = common.parseDOM(result, "div", attrs = { "class": "movie-download" })
+
+            if len(redirect) > 0:
+                t = common.parseDOM(result, "meta", ret="content", attrs = { "property": "og:title" })[0]
+                t = re.compile(': (.+?\(\d{4}\))').findall(t)[0]
+                if not title == cleantitle().movie(t): return
+                if not any(x in t for x in years): return
+                result = common.parseDOM(result, "link", ret="href", attrs = { "rel": "canonical" })[0]
+            else:
+                result = common.parseDOM(result, "div", attrs = { "class": "post-panel" })
+                result = common.parseDOM(result, "h2")
+                result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "a")[0]) for i in result]
+                result = [i for i in result if title == cleantitle().movie(i[1])]
+                result = [i[0] for i in result if any(x in i[1] for x in years)][0]
+
+
+            if not self.base_link in result: return
 
             try: url = re.compile('//.+?(/.+)').findall(result)[0]
             except: url = result
-            url = re.compile('(.+?[?]\d*)').findall(url)[0]
-            if not url.startswith('/'): url = '/%s' % url
-            if not url.startswith('/forum'): url = '/forum%s' % url
             url = common.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -1522,27 +1531,17 @@ class g2g:
             url = self.base_link + url
             result = getUrl(url).result
 
-            url = common.parseDOM(result, "iframe", ret="src", attrs = { "allowfullscreen": ".+?" })[0]
-            result = getUrl(url).result
+            result = common.parseDOM(result, "div", attrs = { "class": "movie-download" })
+            result = ''.join(result)
 
-            u = re.compile("'ggplayer'.+?='(http.+?)'").findall(result)[::-1]
-            result = getUrl(u[0]).result
-            if len(u) > 1: result += getUrl(u[1]).result
+            url = re.compile('(<a .+?</a>)').findall(result)
+            url = [(common.parseDOM(i, "a", ret="href"), common.parseDOM(i, "a")) for i in url]
+            url = [(i[0][0], i[1][0]) for i in url if len(i[0]) > 0 and len(i[1]) > 0]
 
-            url = common.parseDOM(result, "iframe", ret="src")
-
-            if len(url) == 1: 
-                from commonresolvers import googledocs
-                url = googledocs().resolve(url)
-
-                for i in url: sources.append({'source': 'GVideo', 'quality': i['quality'], 'provider': 'G2G', 'url': i['url']})
-
-            elif len(url) == 2: 
-                from commonresolvers import googledocs
-                u1 = googledocs().resolve(url[0])
-                u2 = googledocs().resolve(url[1])
-
-                for i in range(0, len(u1)): sources.append({'source': 'GVideo', 'quality': u1[i]['quality'], 'provider': 'G2G', 'url': 'stack://%s , %s' % (u1[i]['url'], u2[i]['url'])})
+            try: sources.append({'source': 'GVideo', 'quality': '1080p', 'provider': 'Movies8', 'url': [i[0] for i in url if i[1].startswith('1920') and 'google' in i[0]][0]})
+            except: pass
+            try: sources.append({'source': 'GVideo', 'quality': 'HD', 'provider': 'Movies8', 'url': [i[0] for i in url if i[1].startswith('1280') and 'google' in i[0]][0]})
+            except: pass
 
             return sources
         except:
@@ -2395,12 +2394,13 @@ class wso:
             query = self.tvbase_link + self.search_link % (urllib.quote_plus(query))
 
             result = getUrl(query).result
-            result = common.parseDOM(result, "h2", attrs = { "class": "PostHeaderIcon-wrapper" })
+            result = common.parseDOM(result, "header", attrs = { "class": "post-title" })
 
             title = cleantitle().tv(title)
-            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "a")[0]) for i in result]
-            result = [(i[0], re.compile('(.+?) (S\d*E\d*)').findall(i[1])[0]) for i in result]
-            result = [(i[0], i[1][0], i[1][1]) for i in result]
+            result = [(common.parseDOM(i, "a", ret="href"), common.parseDOM(i, "a")) for i in result]
+            result = [(i[0][0], i[1][0]) for i in result if len(i[0]) > 0 and len(i[1]) > 0]
+            result = [(i[0], re.compile('(.+?) (S\d*E\d*)').findall(i[1])) for i in result]
+            result = [(i[0], i[1][0][0], i[1][0][1]) for i in result if len(i[1]) > 0]
             result = [i for i in result if title == cleantitle().tv(i[1])]
             result = [i[0] for i in result if hdlr == i[2]][0]
 

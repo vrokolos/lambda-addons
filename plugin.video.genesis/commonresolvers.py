@@ -535,7 +535,8 @@ class clicknupload:
             k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
             for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
             post.update({'method_free': 'Free Download'})
-            post.update(captcha().worker(result))
+            try: post.update(captcha().worker(result))
+            except: pass
             post = urllib.urlencode(post)
 
             result = getUrl(url, post=post).result

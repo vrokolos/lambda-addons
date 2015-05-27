@@ -1,4 +1,13 @@
 ------------------------
+Hellenic TV v3.5.5 (28-May-15)
+------------------------
+
+- Updated Live TV channels.
+- Updated resolvers.
+- Code cosmetics.
+
+
+------------------------
 Hellenic TV v3.5.4 (26-May-15)
 ------------------------
 

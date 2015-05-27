@@ -44,7 +44,7 @@
 		<setting id="moviezone" type="bool" label="Moviezone" default="true"/>
 		<setting id="yify" type="bool" label="YIFY" default="true"/>
 		<setting id="afdah" type="bool" label="Afdah" default="true"/>
-		<setting id="g2g" type="bool" label="G2G" default="true"/>
+		<setting id="movies8" type="bool" label="Movies8" default="true"/>
 		<setting id="muchmovies" type="bool" label="Muchmovies" default="true"/>
 		<setting id="sweflix" type="bool" label="Sweflix" default="true"/>
 		<setting id="movieshd" type="bool" label="MoviesHD" default="true"/>
