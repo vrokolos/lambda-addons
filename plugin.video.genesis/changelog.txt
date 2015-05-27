@@ -1,5 +1,5 @@
 ------------------------
-Genesis v4.5.3 (26-May-15)
+Genesis v4.5.4 (26-May-15)
 ------------------------
 
 - Fixed issue with Trakt scrobbling.

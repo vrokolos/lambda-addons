@@ -5259,7 +5259,7 @@ class episodes:
 class trailer:
     def __init__(self):
         self.youtube_base = 'http://www.youtube.com'
-        self.key_link = 'QUl6YVN5QkN3QkxTaFVFelhpT2NlTnVsaUNsWTBpY0U2TTRBZGRV'
+        self.key_link = 'QUl6YVN5RDd2aFpDLTYta2habTVuYlVyLTZ0Q0JRQnZWcnFkeHNz'
         self.key_link = '&key=%s' % base64.urlsafe_b64decode(self.key_link)
         self.search_link = 'https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&q=%s'
         self.youtube_search = 'https://www.googleapis.com/youtube/v3/search?q='

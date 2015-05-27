@@ -1,5 +1,5 @@
 ------------------------
-Hellenic TV v3.5.3 (26-May-15)
+Hellenic TV v3.5.4 (26-May-15)
 ------------------------
 
 - Updated resolvers.

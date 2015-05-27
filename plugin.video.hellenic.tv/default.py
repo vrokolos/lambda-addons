@@ -3568,7 +3568,7 @@ class youtube:
     def __init__(self):
         self.base_link = 'http://www.youtube.com'
         self.api_link = 'https://www.googleapis.com/youtube'
-        self.key_link = 'QUl6YVN5QkN3QkxTaFVFelhpT2NlTnVsaUNsWTBpY0U2TTRBZGRV'
+        self.key_link = 'QUl6YVN5Qk9TNHVTeWQyN09VMFhWMktTZE4zdlQyVUdfdjBnOXNJ'
         self.key_link = '&key=%s' % base64.urlsafe_b64decode(self.key_link)
         self.search_link = 'https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&q=%s'
         self.youtube_search = 'https://www.googleapis.com/youtube/v3/search?q='
