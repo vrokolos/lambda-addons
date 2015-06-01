@@ -850,9 +850,9 @@ class watchseries:
 
 class iwatchonline:
     def __init__(self):
-        self.base_link = 'http://www.iwatchonline.to'
+        self.base_link = 'http://www.iwatchonline.ag'
         self.link_1 = 'http://www.imovie.to'
-        self.link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://www.iwatchonline.to'
+        self.link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://www.iwatchonline.ag'
         self.link_3 = 'https://iwatchonline.unblocked.pw'
         self.search_link = '/advance-search'
         self.show_link = '/tv-shows/%s'
@@ -1487,13 +1487,14 @@ class afdah:
 class movies8:
     def __init__(self):
         self.base_link = 'http://xmovies8.co'
+        self.cookie = 'location.href=1'
         self.search_link = '/?s=%s'
 
     def get_movie(self, imdb, title, year):
         try:
             query = self.base_link + self.search_link % (urllib.quote_plus(title))
 
-            result = getUrl(query).result
+            result = getUrl(query, cookie=self.cookie).result
 
             title = cleantitle().movie(title)
             years = ['(%s)' % str(year), '(%s)' % str(int(year)+1), '(%s)' % str(int(year)-1)]
@@ -1529,7 +1530,7 @@ class movies8:
             sources = []
 
             url = self.base_link + url
-            result = getUrl(url).result
+            result = getUrl(url, cookie=self.cookie).result
 
             result = common.parseDOM(result, "div", attrs = { "class": "movie-download" })
             result = ''.join(result)

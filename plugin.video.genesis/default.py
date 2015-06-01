@@ -416,6 +416,7 @@ class player(xbmc.Player):
             item.setInfo(type="Video", infoLabels = meta)
             xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 
+
         for i in range(0, 240):
             if self.isPlayingVideo(): break
             xbmc.sleep(1000)
@@ -425,6 +426,7 @@ class player(xbmc.Player):
             try: self.currentTime = self.getTime()
             except: pass
             xbmc.sleep(1000)
+        xbmcgui.Window(10000).clearProperty('script.trakt.ids')
         time.sleep(5)
 
     def video_info(self, content, name, imdb, tvdb):
@@ -441,10 +443,12 @@ class player(xbmc.Player):
 
             if self.content == 'movie':
                 self.title, self.year = re.compile('(.+?) [(](\d{4})[)]$').findall(self.name)[0]
+                xbmcgui.Window(10000).setProperty('script.trakt.ids', json.dumps({'imdb': 'tt' + self.imdb}))
 
             elif self.content == 'episode':
                 self.show, self.season, self.episode = re.compile('(.+?) S(\d*)E(\d*)$').findall(self.name)[0]
                 self.season, self.episode = '%01d' % int(self.season), '%01d' % int(self.episode)
+                xbmcgui.Window(10000).setProperty('script.trakt.ids', json.dumps({'tvdb': self.tvdb}))
         except:
             pass
 
@@ -498,8 +502,6 @@ class player(xbmc.Player):
                 pass
 
             try:
-                if (link().trakt_user == '' or link().trakt_password == ''): raise Exception()
-
                 try: trakt_script_scrobble = xbmcaddon.Addon('script.trakt').getSetting("scrobble_movie")
                 except: trakt_script_scrobble = ''
                 try: trakt_script_http = xbmcaddon.Addon('script.trakt').getSetting("ExcludeHTTP")
@@ -511,6 +513,7 @@ class player(xbmc.Player):
 
                 imdb = self.imdb
                 if not imdb.startswith('tt'): imdb = 'tt' + imdb
+                if (link().trakt_user == '' or link().trakt_password == ''): raise Exception()
                 getTrakt().result(link().trakt_history, post={"movies": [{"ids": {"imdb": imdb}}]})
             except:
                 pass
@@ -540,8 +543,6 @@ class player(xbmc.Player):
                 pass
 
             try:
-                if (link().trakt_user == '' or link().trakt_password == ''): raise Exception()
-
                 try: trakt_script_scrobble = xbmcaddon.Addon('script.trakt').getSetting("scrobble_episode")
                 except: trakt_script_scrobble = ''
                 try: trakt_script_http = xbmcaddon.Addon('script.trakt').getSetting("ExcludeHTTP")
@@ -552,6 +553,7 @@ class player(xbmc.Player):
                 if trakt_script_scrobble == 'true' and trakt_script_http == 'false' and not trakt_script_auth == '': raise Exception()
 
                 season, episode = int('%01d' % int(self.season)), int('%01d' % int(self.episode))
+                if (link().trakt_user == '' or link().trakt_password == ''): raise Exception()
                 getTrakt().result(link().trakt_history, post={"shows": [{"seasons": [{"episodes": [{"number": episode}], "number": season}], "ids": {"tvdb": self.tvdb}}]})
             except:
                 pass

@@ -1370,6 +1370,34 @@ class primeshare:
         except:
             return
 
+class promptfile:
+    def info(self):
+        return {
+            'netloc': ['promptfile.com'],
+            'host': ['Promptfile'],
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False
+        }
+
+    def resolve(self, url):
+        try:
+            result = getUrl(url).result
+
+            post = {}
+            f = common.parseDOM(result, "form", attrs = { "method": "post" })[0]
+            k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
+            for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
+            post = urllib.urlencode(post)
+
+            result = getUrl(url, post=post).result
+
+            url = common.parseDOM(result, "a", ret="href", attrs = { "class": "view_dl_link" })[0]
+            url = getUrl(url, output='geturl', post=post).result
+            return url
+        except:
+            return
+
 class sharerepo:
     def info(self):
         return {
@@ -1384,6 +1412,31 @@ class sharerepo:
         try:
             result = getUrl(url).result
             url = re.compile("file *: *'(http.+?)'").findall(result)[-1]
+            return url
+        except:
+            return
+
+class speedvideo:
+    def info(self):
+        return {
+            'netloc': ['speedvideo.net']
+        }
+
+    def resolve(self, url):
+        try:
+            url = url.replace('/embed-', '/')
+            url = re.compile('//.+?/([\w]+)').findall(url)[0]
+            url = 'http://speedvideo.net/embed-%s.html' % url
+
+            result = getUrl(url).result
+
+            a = re.compile('var\s+linkfile *= *"(.+?)"').findall(result)[0]
+            b = re.compile('var\s+linkfile *= *base64_decode\(.+?\s+(.+?)\)').findall(result)[0]
+            c = re.compile('var\s+%s *= *(\d*)' % b).findall(result)[0]
+
+            import base64
+            url = a[:int(c)] + a[(int(c) + 10):]
+            url = base64.urlsafe_b64decode(url)
             return url
         except:
             return
@@ -1510,6 +1563,34 @@ class thevideo:
         except:
             return
 
+class turbovideos:
+    def info(self):
+        return {
+            'netloc': ['turbovideos.net'],
+            'host': ['Turbovideos'],
+            'quality': 'High',
+            'captcha': False,
+            'a/c': False
+        }
+
+    def resolve(self, url):
+        try:
+            url = url.replace('/embed-', '/')
+            url = re.compile('//.+?/([\w]+)').findall(url)[0]
+            url = 'http://turbovideos.net/embed-%s.html' % url
+
+            result = getUrl(url).result
+
+            url = re.compile('file *: *"(.+?)"').findall(result)
+            if len(url) > 0: return url[0]
+
+            result = re.compile('(eval.*?\)\)\))').findall(result)[-1]
+            result = re.sub(r'(\',\d*,\d*,)', r';\1', result)
+            url = js().worker(result)
+            return url
+        except:
+            return
+
 class tusfiles:
     def info(self):
         return {
@@ -1617,13 +1698,18 @@ class uptobox:
             for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
             post = urllib.urlencode(post)
 
-            result = getUrl(url, post=post).result
+            import time
 
-            url = common.parseDOM(result, "div", attrs = { "align": ".+?" })
-            url = [i for i in url if 'button_upload' in i][0]
-            url = common.parseDOM(url, "a", ret="href")[0]
-            url = ['http' + i for i in url.split('http') if 'uptobox.com' in i][0]
-            return url
+            for i in range(0, 3):
+                try:
+                    result = getUrl(url, post=post).result
+                    url = common.parseDOM(result, "div", attrs = { "align": ".+?" })
+                    url = [i for i in url if 'button_upload' in i][0]
+                    url = common.parseDOM(url, "a", ret="href")[0]
+                    url = ['http' + i for i in url.split('http') if 'uptobox.com' in i][0]
+                    return url
+                except:
+                    time.sleep(1)
         except:
             return
 
@@ -1719,6 +1805,35 @@ class videomega:
 
             url = common.parseDOM(result, "source", ret="src", attrs = { "type": "video.+?" })[0]
             return url
+        except:
+            return
+
+class videopremium:
+    def info(self):
+        return {
+            'netloc': ['videopremium.tv', 'videopremium.me']
+        }
+
+    def resolve(self, url):
+        try:
+            result = getUrl(url).result
+
+            post = {}
+            f = common.parseDOM(result, "Form", attrs = { "action": "" })
+            k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
+            for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
+            post.update({'method_free': 'Watch Free!'})
+            post = urllib.urlencode(post)
+
+            result = getUrl(url, post=post).result
+
+            result = common.parseDOM(result, "script", attrs = { "type": ".+?" })
+            result = (''.join(result)).replace(' ','').replace('\'','"')
+            result = re.compile('file:"(http.+?m3u8)"').findall(result)
+
+            for url in result:
+                try: return getUrl(url, output='geturl').result
+                except: pass
         except:
             return
 
