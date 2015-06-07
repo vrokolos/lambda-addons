@@ -1,4 +1,18 @@
 ------------------------
+Genesis v4.5.7 (7-Jun-15)
+------------------------
+
+- Added YIFYstream source.
+- Added Mintmovies source.
+- Tweaked Clickplay source.
+- Fixed Afdah source.
+- Removed Movies8 source.
+- Removed TVrelease source.
+- Fixed Google resolvers.
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.5.6 (1-Jun-15)
 ------------------------
 

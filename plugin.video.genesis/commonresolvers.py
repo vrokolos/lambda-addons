@@ -811,20 +811,13 @@ class googleplus:
 
     def resolve(self, url):
         try:
-            if 'picasaweb' in url.lower():
-                result = getUrl(url).result
-                aid = re.compile('aid=(\d*)').findall(result)[0]
+            result = getUrl(url).result
 
-                pid = urlparse.urlparse(url).fragment
-                oid = re.compile('/(\d*)/').findall(urlparse.urlparse(url).path)[0]
-                key = urlparse.parse_qs(urlparse.urlparse(url).query)['authkey'][0]
+            u = re.compile('"url"\s*:\s*"([^"]+)"\s*,\s*"height"\s*:\s*\d+\s*,\s*"width"\s*:\s*\d+\s*,\s*"type"\s*:\s*"video/').findall(result)
+            u += re.compile('"(http[s]*://.+?videoplayback[?].+?)"').findall(result)
+            u += re.compile('\d*,\d*,\d*,"(.+?)"').findall(result)
 
-                url = 'http://plus.google.com/photos/%s/albums/%s/%s?authkey=%s' % (oid, aid, pid, key)
-
-            result = getUrl(url, mobile=True).result
-
-            u = re.compile('"(http[s]*://.+?videoplayback[?].+?)"').findall(result)[::-1]
-            u = [i.replace('\\u003d','=').replace('\\u0026','&') for i in u]
+            u = [i.replace('\\u003d','=').replace('\\u0026','&') for i in u][::-1]
             u = sum([self.tag(i) for i in u], [])
 
             url = []
@@ -1634,46 +1627,6 @@ class uploadc:
 
             result = re.compile('(eval.*?\)\)\))').findall(result)[-1]
             url = js().worker(result)
-            return url
-        except:
-            return
-
-class uploadrocket:
-    def info(self):
-        return {
-            'netloc': ['uploadrocket.net'],
-            'host': ['Uploadrocket'],
-            'quality': 'High',
-            'captcha': True,
-            'a/c': False
-        }
-
-    def resolve(self, url):
-        try:
-            result = getUrl(url).result
-            result = result.decode('iso-8859-1').encode('utf-8')
-
-            post = {}
-            f = common.parseDOM(result, "Form", attrs = { "name": "freeorpremium" })[0]
-            k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
-            for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-            post.update({'method_isfree': 'Click for Free Download'})
-            post = urllib.urlencode(post)
-
-            result = getUrl(url, post=post).result
-            result = result.decode('iso-8859-1').encode('utf-8')
-
-            post = {}
-            f = common.parseDOM(result, "Form", attrs = { "name": "F1" })[0]
-            k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
-            for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-            post.update(captcha().worker(result))
-            post = urllib.urlencode(post)
-
-            result = getUrl(url, post=post).result
-            result = result.decode('iso-8859-1').encode('utf-8')
-
-            url = common.parseDOM(result, "a", ret="href", attrs = { "onclick": "DL.+?" })[0]
             return url
         except:
             return
