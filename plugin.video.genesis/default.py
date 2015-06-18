@@ -1067,6 +1067,8 @@ class index:
 
                 cm = []
                 cm.append((playbackMenu, 'RunPlugin(%s?action=toggle_movie_playback&name=%s&title=%s&year=%s&imdb=%s)' % (sys.argv[0], sysname, systitle, sysyear, sysimdb)))
+                cm.append(("Torrents", "ActivateWindow(10025, \"plugin://plugin.video.kmediatorrent/kat/search?content_type=movies&query_suffix=category%3amovies&sort_field=seeders&query=imdb%3A" + sysimdb + "&sort_order=desc\", return)"))
+
                 if not (getSetting("trakt_user") == '' or getSetting("trakt_password") == ''):
                     cm.append((language(30419).encode("utf-8"), 'RunPlugin(%s?action=trakt_manager&name=%s&imdb=%s)' % (sys.argv[0], sysname, sysimdb)))
                 if action == 'movies_favourites':
@@ -1408,6 +1410,8 @@ class index:
 
                 cm = []
                 cm.append((playbackMenu, 'RunPlugin(%s?action=toggle_episode_playback&name=%s&title=%s&year=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&show=%s&show_alt=%s&date=%s&genre=%s)' % (sys.argv[0], sysname, systitle, sysyear, sysimdb, systvdb, sysseason, sysepisode, sysshow, sysshow_alt, sysdate, sysgenre)))
+                cm.append(("Torrents", "ActivateWindow(10025, \"plugin://plugin.video.kmediatorrent/kat/search?query_suffix=category%3atv&sort_field=seeders&query=" + sysshow + " season:" + sysseason + " episode:" + sysepisode + "&sort_order=desc\", return)"))
+
                 if video_type == 'true':
                     cm.append((language(30401).encode("utf-8"), 'RunPlugin(%s?action=item_queue)' % (sys.argv[0])))
                 if not (getSetting("trakt_user") == '' or getSetting("trakt_password") == ''):
