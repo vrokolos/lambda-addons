@@ -138,6 +138,7 @@
 	<string id="30425">Add to</string>
 	<string id="30426">Remove from</string>
 	<string id="30427">Refresh sources</string>
+	<string id="30428">Torrent Search</string>
 	<!-- Description -->
 	<string id="30450">The origins of streaming</string>
 	<!-- Labels -->
@@ -223,4 +224,6 @@
 	<string id="30647">[B]TRAKT[/B] : Import TV Watchlist...</string>
 	<string id="30648">[B]IMDB[/B] : Import Watchlist...</string>
 	<string id="30649">[B]IMDB[/B] : Import TV Watchlist...</string>
+	<string id="30650">[B]TRAKT[/B] : Ratings</string>
+	<string id="30651">[B]TRAKT[/B] : TV Ratings</string>
 </strings>
