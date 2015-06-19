@@ -178,6 +178,7 @@ class main:
         elif action == 'movies_featured':             movies().featured()
         elif action == 'movies_trakt_collection':     movies().trakt_collection()
         elif action == 'movies_trakt_watchlist':      movies().trakt_watchlist()
+        elif action == 'movies_trakt_ratings':        movies().trakt_ratings()
         elif action == 'movies_imdb_watchlist':       movies().imdb_watchlist()
         elif action == 'movies_search':               movies().search(query)
         elif action == 'movies_favourites':           movies().favourites()
@@ -192,6 +193,7 @@ class main:
         elif action == 'shows_premieres':             shows().premieres()
         elif action == 'shows_trakt_collection':      shows().trakt_collection()
         elif action == 'shows_trakt_watchlist':       shows().trakt_watchlist()
+        elif action == 'shows_trakt_ratings':         shows().trakt_ratings()
         elif action == 'shows_imdb_watchlist':        shows().imdb_watchlist()
         elif action == 'shows_search':                shows().search(query)
         elif action == 'shows_favourites':            shows().favourites()
@@ -284,7 +286,11 @@ class getTrakt:
             trakt_key = base64.urlsafe_b64decode(link().trakt_key)
             headers = {'Content-Type': 'application/json', 'trakt-api-key': trakt_key, 'trakt-api-version': '2'}
             if not post == None: post = json.dumps(post)
-            if (link().trakt_user == '' or link().trakt_password == ''): pass
+
+            if (link().trakt_user == '' and link().trakt_password == ''): 
+                pass
+            elif (link().trakt_user != '' and link().trakt_password == ''): 
+                headers.update({'trakt-user-login': link().trakt_user})
             else:
                 token = index().cache(self.auth, 24, link().trakt_user, link().trakt_password)
                 headers.update({'trakt-user-login': link().trakt_user, 'trakt-user-token': token})
@@ -1067,6 +1073,7 @@ class index:
 
                 cm = []
                 cm.append((playbackMenu, 'RunPlugin(%s?action=toggle_movie_playback&name=%s&title=%s&year=%s&imdb=%s)' % (sys.argv[0], sysname, systitle, sysyear, sysimdb)))
+                cm.append((language(30428).encode("utf-8"), "ActivateWindow(10025, \"plugin://plugin.video.kmediatorrent/kat/search?content_type=movies&query_suffix=category%3amovies&sort_field=seeders&query=imdb%3A" + sysimdb + "&sort_order=desc\", return)"))
                 if not (getSetting("trakt_user") == '' or getSetting("trakt_password") == ''):
                     cm.append((language(30419).encode("utf-8"), 'RunPlugin(%s?action=trakt_manager&name=%s&imdb=%s)' % (sys.argv[0], sysname, sysimdb)))
                 if action == 'movies_favourites':
@@ -1408,6 +1415,7 @@ class index:
 
                 cm = []
                 cm.append((playbackMenu, 'RunPlugin(%s?action=toggle_episode_playback&name=%s&title=%s&year=%s&imdb=%s&tvdb=%s&season=%s&episode=%s&show=%s&show_alt=%s&date=%s&genre=%s)' % (sys.argv[0], sysname, systitle, sysyear, sysimdb, systvdb, sysseason, sysepisode, sysshow, sysshow_alt, sysdate, sysgenre)))
+                cm.append((language(30428).encode("utf-8"), "ActivateWindow(10025, \"plugin://plugin.video.kmediatorrent/kat/search?query_suffix=category%3atv&sort_field=seeders&query=" + sysshow + " season:" + sysseason + " episode:" + sysepisode + "&sort_order=desc\", return)"))
                 if video_type == 'true':
                     cm.append((language(30401).encode("utf-8"), 'RunPlugin(%s?action=item_queue)' % (sys.argv[0])))
                 if not (getSetting("trakt_user") == '' or getSetting("trakt_password") == ''):
@@ -2328,17 +2336,19 @@ class root:
 
     def genesis(self):
         rootList = []
-        if not (link().trakt_user == '' or link().trakt_password == ''):
+        if not (link().trakt_user == ''):
             rootList.append({'name': 30581, 'image': 'movies_trakt_collection.jpg', 'action': 'movies_trakt_collection'})
             rootList.append({'name': 30582, 'image': 'shows_trakt_collection.jpg', 'action': 'shows_trakt_collection'})
             rootList.append({'name': 30583, 'image': 'movies_trakt_watchlist.jpg', 'action': 'movies_trakt_watchlist'})
             rootList.append({'name': 30584, 'image': 'shows_trakt_watchlist.jpg', 'action': 'shows_trakt_watchlist'})
+            rootList.append({'name': 30650, 'image': 'movies_trakt_ratings.jpg', 'action': 'movies_trakt_ratings'})
+            rootList.append({'name': 30651, 'image': 'shows_trakt_ratings.jpg', 'action': 'shows_trakt_ratings'})
             rootList.append({'name': 30585, 'image': 'episodes_trakt_progress.jpg', 'action': 'episodes_trakt_progress'})
             rootList.append({'name': 30586, 'image': 'episodes_trakt.jpg', 'action': 'episodes_trakt'})
         if not (link().imdb_user == ''):
             rootList.append({'name': 30587, 'image': 'movies_imdb_watchlist.jpg', 'action': 'movies_imdb_watchlist'})
             rootList.append({'name': 30588, 'image': 'shows_imdb_watchlist.jpg', 'action': 'shows_imdb_watchlist'})
-        if not (link().trakt_user == '' or link().trakt_password == '') or not (link().imdb_user == ''):
+        if not (link().trakt_user == '') or not (link().imdb_user == ''):
             rootList.append({'name': 30589, 'image': 'userlists_movies.jpg', 'action': 'userlists_movies'})
             rootList.append({'name': 30590, 'image': 'userlists_shows.jpg', 'action': 'userlists_shows'})
         rootList.append({'name': 30591, 'image': 'movies_favourites.jpg', 'action': 'movies_favourites'})
@@ -2446,10 +2456,12 @@ class link:
         self.trakt_trending = 'http://api-v2launch.trakt.tv/movies/trending'
         self.trakt_watchlist = 'http://api-v2launch.trakt.tv/users/%s/watchlist/movies'
         self.trakt_collection = 'http://api-v2launch.trakt.tv/users/%s/collection/movies'
+        self.trakt_ratings = 'https://api-v2launch.trakt.tv/users/%s/ratings/movies'
         self.trakt_tv_summary = 'http://api-v2launch.trakt.tv/shows/%s'
         self.trakt_tv_trending = 'http://api-v2launch.trakt.tv/shows/trending'
         self.trakt_tv_watchlist = 'http://api-v2launch.trakt.tv/users/%s/watchlist/shows'
         self.trakt_tv_collection = 'http://api-v2launch.trakt.tv/users/%s/collection/shows'
+        self.trakt_tv_ratings = 'https://api-v2launch.trakt.tv/users/%s/ratings/shows'
         self.trakt_tv_season_premieres = 'http://api-v2launch.trakt.tv/calendars/all/shows/premieres/%s/%s'
         self.trakt_tv_premieres = 'http://api-v2launch.trakt.tv/calendars/all/shows/new/%s/%s'
         self.trakt_tv_my_calendar = 'http://api-v2launch.trakt.tv/calendars/my/shows/%s/%s'
@@ -2999,6 +3011,28 @@ class movies:
         self.list = index().cache(self.trakt_list, 0, url)
         try: self.list = sorted(self.list, key=itemgetter('title'))
         except: return
+        index().movieList(self.list)
+        return self.list
+
+    def trakt_ratings(self):
+        self.list = []
+        self.list10 = sorted(index().cache(self.trakt_list, 0, (link().trakt_ratings + "/10") % link().trakt_user), key=itemgetter('title'))
+        for e in self.list10:
+            e['name'] = "[10] " + e['name']
+        self.list = []
+        self.list9 = sorted(index().cache(self.trakt_list, 0, (link().trakt_ratings + "/9") % link().trakt_user), key=itemgetter('title'))
+        for e in self.list9:
+            e['name'] = "[09] " + e['name']
+        self.list = []
+        self.list8 = sorted(index().cache(self.trakt_list, 0, (link().trakt_ratings + "/8") % link().trakt_user), key=itemgetter('title'))
+        for e in self.list8:
+            e['name'] = "[08] " + e['name']
+        self.list = []
+        self.list7 = sorted(index().cache(self.trakt_list, 0, (link().trakt_ratings + "/7") % link().trakt_user), key=itemgetter('title'))
+        for e in self.list7:
+            e['name'] = "[07] " + e['name']
+
+        self.list = self.list10 + self.list9 + self.list8 + self.list7
         index().movieList(self.list)
         return self.list
 
@@ -3891,6 +3925,31 @@ class shows:
         except: return
         index().showList(self.list)
         return self.list
+
+   def trakt_ratings(self):
+        self.list = []
+        list10 = sorted(self.trakt_list((link().trakt_tv_ratings + "/10") % link().trakt_user), key=itemgetter('title'))
+        for e in list10:
+            e['title'] = "[10] " + e['title']
+        self.list = []
+        list9 = sorted(self.trakt_list((link().trakt_tv_ratings + "/9") % link().trakt_user), key=itemgetter('title'))
+        for e in list9:
+            e['title'] = "[09] " + e['title']
+        self.list = []
+        list8 = sorted(self.trakt_list((link().trakt_tv_ratings + "/8") % link().trakt_user), key=itemgetter('title'))
+        for e in list8:
+            e['title'] = "[08] " + e['title']
+        self.list = []
+        list7 = sorted(self.trakt_list((link().trakt_tv_ratings + "/7") % link().trakt_user), key=itemgetter('title'))
+        for e in list7:
+            e['title'] = "[07] " + e['title']
+
+        self.list = list10 + list9 + list8 + list7
+        index().showList(self.list)
+        return self.list
+        
+    def fakecache(self, url):
+        return url
 
     def imdb_watchlist(self):
         url = link().imdb_watchlist % link().imdb_user
