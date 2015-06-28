@@ -545,7 +545,7 @@ class index:
                 cm.append((language(30406).encode("utf-8"), 'RunPlugin(%s?action=download&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
                 cm.append((language(30412).encode("utf-8"), 'Action(Info)'))
                 if action == 'movies_favourites':
-                    if not getSetting("fav_sort") == '2': cm.append((language(30416).encode("utf-8"), 'RunPlugin(%s?action=trailer&name=%s&url=%s)' % (sys.argv[0], sysname, trailer)))
+                    #if not getSetting("fav_sort") == '2': cm.append((language(30416).encode("utf-8"), 'RunPlugin(%s?action=trailer&name=%s&url=%s)' % (sys.argv[0], sysname, trailer)))
                     if getmeta == 'true': cm.append((language(30415).encode("utf-8"), 'RunPlugin(%s?action=metadata_movies&name=%s&url=%s&imdb=%s)' % (sys.argv[0], systitle, sysurl, metaimdb)))
                     if getmeta == 'true': cm.append((playcountMenu, 'RunPlugin(%s?action=playcount_movies&imdb=%s)' % (sys.argv[0], metaimdb)))
                     cm.append((language(30422).encode("utf-8"), 'RunPlugin(%s?action=library_add&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
@@ -554,7 +554,7 @@ class index:
                     if getSetting("fav_sort") == '2': cm.append((language(30420).encode("utf-8"), 'RunPlugin(%s?action=favourite_moveDown&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
                     cm.append((language(30421).encode("utf-8"), 'RunPlugin(%s?action=favourite_delete&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
                 elif action == 'movies_search':
-                    cm.append((language(30416).encode("utf-8"), 'RunPlugin(%s?action=trailer&name=%s&url=%s)' % (sys.argv[0], sysname, trailer)))
+                    #cm.append((language(30416).encode("utf-8"), 'RunPlugin(%s?action=trailer&name=%s&url=%s)' % (sys.argv[0], sysname, trailer)))
                     cm.append((language(30422).encode("utf-8"), 'RunPlugin(%s?action=library_add&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
                     cm.append((language(30417).encode("utf-8"), 'RunPlugin(%s?action=favourite_from_search&name=%s&imdb=%s&url=%s&image=%s)' % (sys.argv[0], sysname, sysimdb, sysurl, sysimage)))
                     cm.append((language(30428).encode("utf-8"), 'RunPlugin(%s?action=view_movies)' % (sys.argv[0])))
@@ -562,7 +562,7 @@ class index:
                     cm.append((language(30410).encode("utf-8"), 'RunPlugin(%s?action=playlist_open)' % (sys.argv[0])))
                     cm.append((language(30411).encode("utf-8"), 'RunPlugin(%s?action=addon_home)' % (sys.argv[0])))
                 else:
-                    cm.append((language(30416).encode("utf-8"), 'RunPlugin(%s?action=trailer&name=%s&url=%s)' % (sys.argv[0], sysname, trailer)))
+                    #cm.append((language(30416).encode("utf-8"), 'RunPlugin(%s?action=trailer&name=%s&url=%s)' % (sys.argv[0], sysname, trailer)))
                     if getmeta == 'true': cm.append((language(30415).encode("utf-8"), 'RunPlugin(%s?action=metadata_movies2&name=%s&url=%s&imdb=%s)' % (sys.argv[0], systitle, sysurl, metaimdb)))
                     cm.append((language(30422).encode("utf-8"), 'RunPlugin(%s?action=library_add&name=%s&url=%s)' % (sys.argv[0], sysname, sysurl)))
                     if not '"%s"' % url in favRead: cm.append((language(30417).encode("utf-8"), 'RunPlugin(%s?action=favourite_add&name=%s&imdb=%s&url=%s&image=%s)' % (sys.argv[0], sysname, sysimdb, sysurl, sysimage)))
@@ -837,6 +837,7 @@ class contextMenu:
         try:
             property = (addonName+name)+'download'
             download = xbmc.translatePath(getSetting("downloads"))
+            if getSetting("save2dir") == 'true': download = download + os.path.splitext(os.path.basename(name))[0]
             enc_name = name.translate(None, '\/:*?"<>|')
             xbmcvfs.mkdir(dataPath)
             xbmcvfs.mkdir(download)
@@ -973,7 +974,7 @@ class link:
         self.yify_genre = 'http://yify.tv/genres'
         self.yify_year = 'http://yify.tv/years'
         self.yify_language = 'http://yify.tv/languages'
-        self.yify_search = 'action=ajaxy_sf&sf_value='
+        self.yify_search = 'http://yify.tv/?s='
 
 class genres:
     def __init__(self):
@@ -1145,7 +1146,7 @@ class movies:
             self.query = query
         if not (self.query is None or self.query == ''):
             self.query = link().yify_search + urllib.quote_plus(self.query)
-            self.list = self.yify_list2(self.query)
+            self.list = self.yify_list(self.query)
             index().movieList(self.list)
 
     def yify_list(self, url):
@@ -1354,7 +1355,7 @@ class trailer:
                 return
             except:
                 pass
-            url = 'plugin://plugin.video.youtube/?action=play_video&videoid=%s' % id
+            url = 'plugin://plugin.video.youtube/play/?video_id=%s' % id
             return url
         except:
             return
@@ -1378,8 +1379,8 @@ class resolver:
 
         try:
             result = getUrl(url, referer=url, close=False).result
-            url = re.compile('showPkPlayer[(]"(.+?)"[)]').findall(result)[0]
-            url = 'http://yify.tv/reproductor2/pk/pk/plugins/player_p2.php?url=' + url
+            url = re.compile('pic=(.+?)&').findall(result)[0]
+            url = 'http://yify.tv/player/pk/pk/plugins/player_p2.php?url=' + url
 
             result = getUrl(url, referer=url, close=False).result
             result = json.loads(result)

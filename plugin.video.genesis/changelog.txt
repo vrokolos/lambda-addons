@@ -1,4 +1,13 @@
 ------------------------
+Genesis v4.8.0 (28-Jun-15)
+------------------------
+
+- Re-work of sources.
+- Re-work of resolvers.
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.5.7 (7-Jun-15)
 ------------------------
 

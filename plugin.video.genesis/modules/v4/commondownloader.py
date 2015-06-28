@@ -76,6 +76,26 @@ def download(url, dest, title=None, referer=None, agent=None, cookie=None):
     xbmc.executebuiltin(cmd)
 
 
+def done(title, dest, downloaded):
+    playing = xbmc.Player().isPlaying()
+
+    text = xbmcgui.Window(10000).getProperty('GEN-DOWNLOADED')
+
+    if len(text) > 0:
+        text += '[CR]'
+
+    if downloaded:
+        text += '%s : %s' % (dest.rsplit(os.sep)[-1], '[COLOR forestgreen]Download succeeded[/COLOR]')
+    else:
+        text += '%s : %s' % (dest.rsplit(os.sep)[-1], '[COLOR red]Download failed[/COLOR]')
+
+    xbmcgui.Window(10000).setProperty('GEN-DOWNLOADED', text)
+
+    if (not downloaded) or (not playing): 
+        xbmcgui.Dialog().ok(title, text)
+        xbmcgui.Window(10000).clearProperty('GEN-DOWNLOADED')
+
+
 def doDownload(url, dest, title, referer, agent, cookie):
     #unquote parameters
     url     = urllib.unquote_plus(url)
@@ -160,9 +180,8 @@ def doDownload(url, dest, title, referer, agent, cookie):
 
                     f.close()
                     print '%s download complete' % (dest)
-                    if not xbmc.Player().isPlaying():
-                        xbmcgui.Dialog().ok(title, dest, '' , 'Download finished')
-                    return
+                    return done(title, dest, True)
+
         except Exception, e:
             print str(e)
             error = True
@@ -199,11 +218,10 @@ def doDownload(url, dest, title, referer, agent, cookie):
             xbmc.sleep(sleep*1000)
 
         if (resumable and errors > 0) or errors >= 10:
-            if (not resumable and resume >= 10) or resume >= 100:
+            if (not resumable and resume >= 50) or resume >= 500:
                 #Give up!
                 print '%s download canceled - too many error whilst downloading' % (dest)
-                xbmcgui.Dialog().ok(title, dest, '' , 'Download failed')
-                return
+                return done(title, dest, False)
 
             resume += 1
             errors  = 0
