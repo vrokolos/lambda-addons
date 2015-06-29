@@ -30,35 +30,23 @@ from modules.libraries import client
 class source:
     def __init__(self):
         self.base_link = 'http://xmovies8.co'
-        self.cookie = 'location.href=1'
-        self.search_link = '/?s=%s'
+        self.search_link = 'https://www.google.com/search?q=%s&sitesearch=xmovies8.co'
 
 
     def get_movie(self, imdb, title, year):
         try:
             query = self.search_link % (urllib.quote_plus(title))
-            query = urlparse.urljoin(self.base_link, query)
 
-            result = cloudflare.source(query)
+            result = client.source(query)
 
             title = cleantitle.movie(title)
-            years = ['(%s)' % str(year), '(%s)' % str(int(year)+1), '(%s)' % str(int(year)-1)]
+            years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
 
-            match = client.parseDOM(result, "div", attrs = { "class": "post-panel" })
-            match = client.parseDOM(match, "h2")
-
-            if len(match) == 0:
-                t = client.parseDOM(result, "meta", ret="content", attrs = { "property": "og:title" })[0]
-                t = re.compile(': (.+?\(\d{4}\))').findall(t)[0]
-                if not title == cleantitle.movie(t): return
-                if not any(x in t for x in years): return
-                result = client.parseDOM(result, "link", ret="href", attrs = { "rel": "canonical" })[0]
-            else:
-                result = [(client.parseDOM(i, "a", ret="href")[0], client.parseDOM(i, "a")[0]) for i in match]
-                result = [i for i in result if title == cleantitle.movie(i[1])]
-                result = [i[0] for i in result if any(x in i[1] for x in years)][0]
-
-            if not self.base_link in result: return
+            result = client.parseDOM(result, "h3", attrs = { "class": ".+?" })
+            result = [(client.parseDOM(i, "a", ret="href"), client.parseDOM(i, "a")) for i in result]
+            result = [(i[0][0], i[1][-1]) for i in result if len(i[0]) > 0 and len(i[1]) > 0]
+            result = [i for i in result if any(x in i[0] for x in years) or  any(x in i[1] for x in years)]
+            result = [i[0] for i in result if title in cleantitle.movie(i[0]) or  title in cleantitle.movie(i[1])][0]
 
             try: url = re.compile('//.+?(/.+)').findall(result)[0]
             except: url = result

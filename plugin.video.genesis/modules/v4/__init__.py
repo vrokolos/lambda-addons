@@ -1879,12 +1879,12 @@ class link:
         self.tvrage_info = 'http://www.tvrage.com/shows/id-%s/episode_list/all'
         self.epguides_info = 'http://epguides.com/common/exportToCSV.asp?rage=%s'
 
-        self.scn_base = 'http://www.movie25.ag'
-        self.scn_link_1 = 'http://www.movie25.ag'
-        self.scn_link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://www.movie25.ag'
-        self.scn_link_3 = 'https://movie25.unblocked.pw'
-        self.scn_added = '/new-releases/1'
-        self.scn_added_hd = '/latest-hd-movies/1'
+        self.scn_base = 'http://www.watchfree.to'
+        self.scn_link_1 = 'http://www.watchfree.to'
+        self.scn_link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://www.watchfree.to'
+        self.scn_link_3 = 'https://watchfree.unblocked.pw'
+        self.scn_added = '/?page=1'
+        self.scn_added_hd = '/?page=1'
 
         self.scn_tv_base = 'http://m2v.ru'
         self.scn_tv_added = 'http://m2v.ru/?Part=11&func=part&page=1'
@@ -2956,20 +2956,19 @@ class movies:
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
-                if 'movie_table' in result: break
-
-            result = result.decode('iso-8859-1').encode('utf-8')
-            movies = common.parseDOM(result, "div", attrs = { "class": "movie_table" })
+                result = result.decode('iso-8859-1').encode('utf-8')
+                movies = common.parseDOM(result, "div", attrs = { "class": "item" })
+                if len(movies) > 0: break
         except:
             return
 
         try:
-            next = common.parseDOM(result, "div", attrs = { "class": "count_text" })[0]
+            next = common.parseDOM(result, "div", attrs = { "class": "pagination" })[0]
             next = re.compile('(<a.+?</a>)').findall(next)
-            next = [i for i in next if '>Next<' in i][-1]
+            next = [i for i in next if '>>' in i or '&gt;&gt;' in i][-1]
             next = re.compile('href=(.+?)>').findall(next)[-1]
-            next = re.sub('\'|\"','', next)
             next = common.replaceHTMLCodes(next)
+            next = next.replace('\'', '').replace('"', '')
             try: next = urlparse.parse_qs(urlparse.urlparse(next).query)['u'][0]
             except: pass
             next = urlparse.urljoin(link().scn_base, next)
@@ -2981,6 +2980,7 @@ class movies:
             try:
                 title = common.parseDOM(movie, "a", ret="title")[0]
                 title = re.compile('(.+?) [(]\d{4}[)]$').findall(title)[0]
+                title = title.lstrip('Watch').strip()
                 title = common.replaceHTMLCodes(title)
                 title = title.encode('utf-8')
 
@@ -2992,29 +2992,16 @@ class movies:
                 try: name = name.encode('utf-8')
                 except: pass
 
-                url = common.parseDOM(movie, "a", ret="href")[0]
-                url = common.replaceHTMLCodes(url)
-                try: url = urlparse.parse_qs(urlparse.urlparse(url).query)['u'][0]
-                except: pass
-                url = urlparse.urljoin(link().scn_base, url)
-                url = url.encode('utf-8')
-
                 poster = '0'
                 try: poster = common.parseDOM(movie, "img", ret="src")[0]
                 except: pass
                 poster = common.replaceHTMLCodes(poster)
                 try: poster = urlparse.parse_qs(urlparse.urlparse(poster).query)['u'][0]
                 except: pass
+                if poster.startswith('//'): poster = 'http:' + poster
                 poster = poster.encode('utf-8')
 
-                genre = common.parseDOM(movie, "div", attrs = { "class": "movie_about_genre" })
-                genre = common.parseDOM(genre, "a")
-                genre = " / ".join(genre)
-                if genre == '': genre = '0'
-                genre = common.replaceHTMLCodes(genre)
-                genre = genre.encode('utf-8')
-
-                self.list.append({'name': name, 'title': title, 'year': year, 'imdb': '0000000', 'tvdb': '0', 'season': '0', 'episode': '0', 'show': '0', 'show_alt': '0', 'date': '0', 'genre': genre, 'url': '0', 'poster': poster, 'fanart': '0', 'studio': '0', 'duration': '0', 'rating': '0', 'votes': '0', 'mpaa': '0', 'director': '0', 'plot': '0', 'plotoutline': '0', 'tagline': '0', 'next': next})
+                self.list.append({'name': name, 'title': title, 'year': year, 'imdb': '0000000', 'tvdb': '0', 'season': '0', 'episode': '0', 'show': '0', 'show_alt': '0', 'date': '0', 'genre': '0', 'url': '0', 'poster': poster, 'fanart': '0', 'studio': '0', 'duration': '0', 'rating': '0', 'votes': '0', 'mpaa': '0', 'director': '0', 'plot': '0', 'plotoutline': '0', 'tagline': '0', 'next': next})
             except:
                 pass
 

@@ -20,58 +20,56 @@
 
 
 import re
+import urllib
 import urlparse
+import json
 from modules.libraries import client
 
 
 def resolve(url):
     try:
-        base = url.replace('https://', 'http://')
-        result = str(client.request(base))
+        try: oid, id = urlparse.parse_qs(urlparse.urlparse(url).query)['oid'][0] , urlparse.parse_qs(urlparse.urlparse(url).query)['id'][0]
+        except: oid, id = re.compile('\/video(.*)_(.*)').findall(url)[0]
+        try: hash = urlparse.parse_qs(urlparse.urlparse(url).query)['hash'][0]
+        except: hash = _hash(oid, id)
 
-        u = re.compile('url(720|540|480|360|240)=(.+?)&').findall(result)
+        u = 'http://api.vk.com/method/video.getEmbed?oid=%s&video_id=%s&embed_hash=%s' % (oid, id, hash)
 
-        url = []
-        try: url += [[{'quality': 'HD', 'url': i[1]} for i in u if i[0] == '720'][0]]
-        except: pass
-        try: url += [[{'quality': 'SD', 'url': i[1]} for i in u if i[0] == '540'][0]]
-        except: pass
-        try: url += [[{'quality': 'SD', 'url': i[1]} for i in u if i[0] == '480'][0]]
-        except: pass
-        if not url == []: return url
-        try: url += [[{'quality': 'SD', 'url': i[1]} for i in u if i[0] == '360'][0]]
-        except: pass
-        if not url == []: return url
-        try: url += [[{'quality': 'SD', 'url': i[1]} for i in u if i[0] == '240'][0]]
-        except: pass
-
-        if not url == []: return url
-
-
-        try: s = 'http://www.vkvideosearch.com/video.php?v=%s' % re.compile('video(.+_.+)').findall(base)[0]
-        except: pass
-        try: s = 'http://www.vkvideosearch.com/video.php?v=%s_%s' % (urlparse.parse_qs(urlparse.urlparse(base).query)['oid'][0], urlparse.parse_qs(urlparse.urlparse(base).query)['id'][0])
-        except: pass
-        result = str(client.request(s))
-
-        u = re.compile('<a href="(.+?)">(720|540|480|360|240)p</a>').findall(result)
+        result = client.request(u)
+        result = json.loads(result)
+        result = result['response']
 
         url = []
-        try: url += [[{'quality': 'HD', 'url': i[0]} for i in u if i[1] == '720'][0]]
+        try: url += [{'quality': 'HD', 'url': result['url720']}]
         except: pass
-        try: url += [[{'quality': 'SD', 'url': i[0]} for i in u if i[1] == '540'][0]]
+        try: url += [{'quality': 'SD', 'url': result['url540']}]
         except: pass
-        try: url += [[{'quality': 'SD', 'url': i[0]} for i in u if i[1] == '480'][0]]
-        except: pass
-        if not url == []: return url
-        try: url += [[{'quality': 'SD', 'url': i[0]} for i in u if i[1] == '360'][0]]
+        try: url += [{'quality': 'SD', 'url': result['url480']}]
         except: pass
         if not url == []: return url
-        try: url += [[{'quality': 'SD', 'url': i[0]} for i in u if i[1] == '240'][0]]
+        try: url += [{'quality': 'SD', 'url': result['url360']}]
+        except: pass
+        if not url == []: return url
+        try: url += [{'quality': 'SD', 'url': result['url240']}]
         except: pass
 
         if not url == []: return url
 
+    except:
+        return
+
+
+def _hash(oid, id):
+    try:
+        url = 'http://vk.com/al_video.php?act=show_inline&al=1&video=%s_%s' % (oid, id)
+        result = client.request(url)
+        result = result.replace('\'', '"').replace(' ', '')
+
+        hash = re.compile('"hash2":"(.+?)"').findall(result)
+        hash += re.compile('"hash":"(.+?)"').findall(result)
+        hash = hash[0]
+
+        return hash
     except:
         return
 
