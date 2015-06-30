@@ -1224,7 +1224,7 @@ class contextMenu:
             try:
 				if not 'ftp://' in folder: raise Exception()
 				from ftplib import FTP		
-				ftparg = re.compile('ftp://(.+?):(.+?)@(.+?):(\d+)/(.+/?)').findall(folder)
+				ftparg = re.compile('ftp://(.+?):(.+?)@(.+?):?(\d+)?/(.+/?)').findall(folder)
 				ftp = FTP(ftparg[0][2],ftparg[0][0],ftparg[0][1])
 				try: ftp.cwd(ftparg[0][4])
 				except: ftp.mkd(ftparg[0][4])
@@ -1361,7 +1361,7 @@ class contextMenu:
             try:
 				if not 'ftp://' in folder: raise Exception()
 				from ftplib import FTP		
-				ftparg = re.compile('ftp://(.+?):(.+?)@(.+?):(\d+)/(.+/?)').findall(folder)
+				ftparg = re.compile('ftp://(.+?):(.+?)@(.+?):?(\d+)?/(.+/?)').findall(folder)
 				ftp = FTP(ftparg[0][2],ftparg[0][0],ftparg[0][1])
 				try: ftp.cwd(ftparg[0][4])
 				except: ftp.mkd(ftparg[0][4])
@@ -1377,7 +1377,7 @@ class contextMenu:
             try:
 				if not 'ftp://' in folder: raise Exception()
 				from ftplib import FTP		
-				ftparg = re.compile('ftp://(.+?):(.+?)@(.+?):(\d+)/(.+/?)').findall(folder)
+				ftparg = re.compile('ftp://(.+?):(.+?)@(.+?):?(\d+)?/(.+/?)').findall(folder)
 				ftp = FTP(ftparg[0][2],ftparg[0][0],ftparg[0][1])
 				try: ftp.cwd(ftparg[0][4])
 				except: ftp.mkd(ftparg[0][4])
@@ -2760,6 +2760,9 @@ class movies:
         [i.start() for i in threads]
         [i.join() for i in threads]
 
+        self.list = [i for i in self.list if not i['genre'] == '0']
+        self.list = [i for i in self.list if not any(x in i['genre'].lower() for x in ['adult', 'porn'])]
+
         filter = [i for i in self.list if not i['poster'] == '0']
         filter += [i for i in self.list if i['poster'] == '0']
         self.list = filter
@@ -3569,6 +3572,9 @@ class shows:
         [i.join() for i in threads]
 
         self.list = [i for i in self.list if not i['tvdb'] == '0']
+
+        self.list = [i for i in self.list if not i['genre'] == '0']
+        self.list = [i for i in self.list if not any(x in i['genre'].lower() for x in ['adult', 'porn'])]
 
         filter = [i for i in self.list if not i['poster'] == '0']
         filter += [i for i in self.list if i['poster'] == '0']

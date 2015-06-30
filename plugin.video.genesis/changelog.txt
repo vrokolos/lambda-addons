@@ -1,4 +1,14 @@
 ------------------------
+Genesis v4.8.2 (1-Jul-15)
+------------------------
+
+- Fixed various sources.
+- Tweaked library integration.
+- Tweaked search.
+- Code cosmetics.
+
+
+------------------------
 Genesis v4.8.1 (29-Jun-15)
 ------------------------
 

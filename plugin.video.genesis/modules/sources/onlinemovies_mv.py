@@ -31,27 +31,37 @@ from modules.resolvers import videomega
 class source:
     def __init__(self):
         self.base_link = 'http://onlinemovies.pro'
-        self.search_link = '/?s=%s'
+        self.search_link = 'https://www.google.com/search?q=%s&sitesearch=onlinemovies.pro'
         self.videomega_link = 'http://videomega.tv/cdn.php?ref=%s'
 
 
     def get_movie(self, imdb, title, year):
         try:
-            query = self.search_link % (urllib.quote_plus(re.sub(r'[\W_]+', ' ', title)))
-            query = urlparse.urljoin(self.base_link, query)
+            query = self.search_link % (urllib.quote_plus(title))
 
-            result = cloudflare.source(query)
-            result = result.replace('&#8211;','-').replace('&#8217;','\'')
-            result = client.parseDOM(result, "ul", attrs = { "class": "listing-videos.+?" })[0]
-            result = client.parseDOM(result, "li", attrs = { "class": ".+?" })
+            result = client.source(query)
 
             title = cleantitle.movie(title)
             years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
-            result = [(client.parseDOM(i, "a", ret="href")[0], client.parseDOM(i, "a", ret="title")[0]) for i in result]
-            result = [(i[0], re.sub('\s(\(|)(\d{4})(.+)', '', i[1]), re.compile('(\d{4})').findall(i[1])) for i in result]
-            result = [(i[0], i[1], i[2][0]) for i in result if len(i[2]) > 0]
-            result = [i for i in result if title == cleantitle.movie(i[1])]
-            result = [i[0] for i in result if any(x in i[2] for x in years)][0]
+
+            result = client.parseDOM(result, "h3", attrs = { "class": ".+?" })
+            result = [(client.parseDOM(i, "a", ret="href"), client.parseDOM(i, "a")) for i in result]
+            result = [(i[0][0], i[1][-1]) for i in result if len(i[0]) > 0 and len(i[1]) > 0]
+            result = [i for i in result if any(x in i[0] for x in years) or  any(x in i[1] for x in years)]
+            result = [i[0] for i in result if title in cleantitle.movie(i[0]) or  title in cleantitle.movie(i[1])][0]
+
+            result = result.replace('/tag/', '/')
+            result = cloudflare.source(result)
+
+            r = client.parseDOM(result, "title")[0]
+
+            t = re.sub('(\.|\_|\(|\[|\s)(\d{4}|3D)(\.|\_|\)|\]|\s)(.+)', '', r)
+            if not title == cleantitle.movie(t): raise Exception()
+
+            y = re.compile('[\.|\_|\(|\[|\s](\d{4})[\.|\_|\)|\]|\s]').findall(r)[0]
+            if not any(x == y for x in years): raise Exception()
+
+            result = client.parseDOM(result, "link", ret="href", attrs = { "rel": "canonical" })[0]
 
             try: url = re.compile('//.+?(/.+)').findall(result)[0]
             except: url = result
