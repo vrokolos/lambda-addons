@@ -23,6 +23,7 @@ import re
 import urllib
 import urlparse
 import base64
+import random
 import json
 import client
 import control
@@ -31,7 +32,7 @@ import control
 class trailer:
     def __init__(self):
         self.base_link = 'http://www.youtube.com'
-        self.key_link = 'QUl6YVN5RDd2aFpDLTYta2habTVuYlVyLTZ0Q0JRQnZWcnFkeHNz'
+        self.key_link = random.choice(['QUl6YVN5RDd2aFpDLTYta2habTVuYlVyLTZ0Q0JRQnZWcnFkeHNz', 'QUl6YVN5Q2RiNEFNenZpVG0yaHJhSFY3MXo2Nl9HNXBhM2ZvVXd3'])
         self.key_link = '&key=%s' % base64.urlsafe_b64decode(self.key_link)
         self.search_link = 'https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&q=%s'
         self.youtube_search = 'https://www.googleapis.com/youtube/v3/search?q='

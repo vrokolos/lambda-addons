@@ -198,24 +198,6 @@ class index:
         if not xbmcvfs.exists(dataPath):
             xbmcvfs.mkdir(dataPath)
 
-    def container_view(self, content, viewDict):
-        try:
-            skin = xbmc.getSkinDir()
-            record = (skin, content)
-            dbcon = database.connect(addonSettings)
-            dbcur = dbcon.cursor()
-            dbcur.execute("SELECT * FROM views WHERE skin = '%s' AND view_type = '%s'" % (record[0], record[1]))
-            view = dbcur.fetchone()
-            view = view[2]
-            if view == None: raise Exception()
-            xbmc.executebuiltin('Container.SetViewMode(%s)' % str(view))
-        except:
-            try:
-                id = str(viewDict[skin])
-                xbmc.executebuiltin('Container.SetViewMode(%s)' % id)
-            except:
-                pass
-
     def cache(self, function, timeout, *args):
         try:
             response = None
@@ -346,13 +328,8 @@ class index:
                 u = '%s?action=%s' % (sys.argv[0], root)
                 try: u += '&url=%s' % urllib.quote_plus(i['url'])
                 except: pass
-                if root == 'downloads_movies':
-                    u = xbmc.translatePath(getSetting("movie_downloads"))
-                    if len(xbmcvfs.listdir(u)[0]) == 0: raise Exception()
-                if root == 'downloads_shows':
-                    u = xbmc.translatePath(getSetting("tv_downloads"))
-                    if len(xbmcvfs.listdir(u)[0]) == 0: raise Exception()
-                elif root == 'library_movies':
+
+                if root == 'library_movies':
                     u = movieLibrary
                     if len(xbmcvfs.listdir(u)[0]) == 0: raise Exception()
                 elif root == 'library_shows':
@@ -380,7 +357,7 @@ class index:
                     cm.append((language(30407).encode("utf-8"), 'RunPlugin(%s?action=library_tv_list&url=%s)' % (sys.argv[0], urllib.quote_plus(link().imdb_watchlist % link().imdb_user))))
 
                 if root == 'movies_search' or root == 'shows_search' or root == 'people_movies' or root == 'people_shows':
-                    cm.append((language(30410).encode("utf-8"), 'RunPlugin(%s?action=settings_open)' % (sys.argv[0])))
+                    cm.append((language(30410).encode("utf-8"), 'RunPlugin(%s?action=openSettings)' % (sys.argv[0])))
                     cm.append((language(30411).encode("utf-8"), 'RunPlugin(%s?action=playlist_open)' % (sys.argv[0])))
                     replaceItems = True
 
@@ -537,7 +514,7 @@ class index:
                     cm.append((language(30403).encode("utf-8"), 'RunPlugin(%s?action=unwatched_movies&title=%s&year=%s&imdb=%s)' % (sys.argv[0], systitle, sysyear, sysimdb)))
                 if not imdb == '0000000' and not action == 'movies_search':
                     cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=watched_movies&title=%s&year=%s&imdb=%s)' % (sys.argv[0], systitle, sysyear, sysimdb)))
-                cm.append((language(30415).encode("utf-8"), 'RunPlugin(%s?action=view_movies)' % (sys.argv[0])))
+                cm.append((language(30415).encode("utf-8"), 'RunPlugin(%s?action=addView&content=movies)' % (sys.argv[0])))
 
                 item = xbmcgui.ListItem(label=name, iconImage="DefaultVideo.png", thumbnailImage=poster)
                 try: item.setArt({'poster': poster, 'banner': poster})
@@ -567,10 +544,8 @@ class index:
 
         xbmcplugin.setContent(int(sys.argv[1]), 'movies')
         xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=cacheToDisc)
-        for i in range(0, 200):
-            if xbmc.getCondVisibility('Container.Content(movies)'):
-                return index().container_view('movies', {'skin.confluence' : 500})
-            xbmc.sleep(100)
+        from modules.libraries.views import setView
+        setView('movies', {'skin.confluence' : 500})
 
     def showList(self, showList):
         if showList == None or len(showList) == 0: return
@@ -649,7 +624,7 @@ class index:
                 if not imdb == '0000000' and not action == 'shows_search':
                     cm.append((language(30403).encode("utf-8"), 'RunPlugin(%s?action=unwatched_shows&name=%s&year=%s&imdb=%s&tvdb=%s)' % (sys.argv[0], systitle, sysyear, sysimdb, systvdb)))
                     cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=watched_shows&name=%s&year=%s&imdb=%s&tvdb=%s)' % (sys.argv[0], systitle, sysyear, sysimdb, systvdb)))
-                cm.append((language(30416).encode("utf-8"), 'RunPlugin(%s?action=view_tvshows)' % (sys.argv[0])))
+                cm.append((language(30416).encode("utf-8"), 'RunPlugin(%s?action=addView&content=tvshows)' % (sys.argv[0])))
 
                 item = xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=poster)
                 try: item.setArt({'poster': poster, 'tvshow.poster': poster, 'season.poster': poster, 'banner': banner, 'tvshow.banner': banner, 'season.banner': banner})
@@ -677,10 +652,8 @@ class index:
 
         xbmcplugin.setContent(int(sys.argv[1]), 'tvshows')
         xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=True)
-        for i in range(0, 200):
-            if xbmc.getCondVisibility('Container.Content(tvshows)'):
-                return index().container_view('tvshows', {'skin.confluence' : 500})
-            xbmc.sleep(100)
+        from modules.libraries.views import setView
+        setView('tvshows', {'skin.confluence' : 500})
 
     def seasonList(self, seasonList):
         if seasonList == None or len(seasonList) == 0: return
@@ -736,7 +709,7 @@ class index:
                     cm.append((language(30403).encode("utf-8"), 'RunPlugin(%s?action=unwatched_seasons&name=%s&year=%s&imdb=%s&tvdb=%s&season=%s)' % (sys.argv[0], sysshow, sysyear, sysimdb, systvdb, sysseason)))
                 if not imdb == '0000000':
                     cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=watched_seasons&name=%s&year=%s&imdb=%s&tvdb=%s&season=%s)' % (sys.argv[0], sysshow, sysyear, sysimdb, systvdb, sysseason)))
-                cm.append((language(30417).encode("utf-8"), 'RunPlugin(%s?action=view_seasons)' % (sys.argv[0])))
+                cm.append((language(30417).encode("utf-8"), 'RunPlugin(%s?action=addView&content=seasons)' % (sys.argv[0])))
 
                 item = xbmcgui.ListItem(title, iconImage="DefaultVideo.png", thumbnailImage=thumb)
                 try: item.setArt({'poster': thumb, 'tvshow.poster': poster, 'season.poster': thumb, 'banner': banner, 'tvshow.banner': banner, 'season.banner': banner})
@@ -752,10 +725,8 @@ class index:
 
         xbmcplugin.setContent(int(sys.argv[1]), 'seasons')
         xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=True)
-        for i in range(0, 200):
-            if xbmc.getCondVisibility('Container.Content(seasons)'):
-                return index().container_view('seasons', {'skin.confluence' : 500})
-            xbmc.sleep(100)
+        from modules.libraries.views import setView
+        setView('seasons', {'skin.confluence' : 500})
 
     def episodeList(self, episodeList):
         if episodeList == None or len(episodeList) == 0: return
@@ -865,7 +836,7 @@ class index:
                     cm.append((language(30403).encode("utf-8"), 'RunPlugin(%s?action=unwatched_episodes&imdb=%s&tvdb=%s&season=%s&episode=%s)' % (sys.argv[0], sysimdb, systvdb, sysseason, sysepisode)))
                 if not imdb == '0000000':
                     cm.append((language(30404).encode("utf-8"), 'RunPlugin(%s?action=watched_episodes&imdb=%s&tvdb=%s&season=%s&episode=%s)' % (sys.argv[0], sysimdb, systvdb, sysseason, sysepisode)))
-                cm.append((language(30418).encode("utf-8"), 'RunPlugin(%s?action=view_episodes)' % (sys.argv[0])))
+                cm.append((language(30418).encode("utf-8"), 'RunPlugin(%s?action=addView&content=episodes)' % (sys.argv[0])))
 
                 item = xbmcgui.ListItem(label, iconImage="DefaultVideo.png", thumbnailImage=thumb)
                 try: item.setArt({'poster': poster, 'tvshow.poster': poster, 'season.poster': poster, 'banner': banner, 'tvshow.banner': banner, 'season.banner': banner})
@@ -883,10 +854,8 @@ class index:
 
         xbmcplugin.setContent(int(sys.argv[1]), 'episodes')
         xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=cacheToDisc)
-        for i in range(0, 200):
-            if xbmc.getCondVisibility('Container.Content(episodes)'):
-                return index().container_view('episodes', {'skin.confluence' : 504})
-            xbmc.sleep(100)
+        from modules.libraries.views import setView
+        setView('episodes', {'skin.confluence' : 504})
 
 class contextMenu:
     def item_queue(self):
@@ -894,48 +863,6 @@ class contextMenu:
 
     def playlist_open(self):
         xbmc.executebuiltin('ActivateWindow(VideoPlaylist)')
-
-    def settings_open(self, id=addonId, cat=None):
-        try:
-            xbmc.executebuiltin('Addon.OpenSettings(%s)' % id)
-            if cat == None: raise Exception()
-            f1, f2 = re.compile('(\d*)\.(\d*)').findall(str(cat))[0]
-            xbmc.executebuiltin('SetFocus(%i)' % (int(f1) + 100))
-            xbmc.executebuiltin('SetFocus(%i)' % (int(f2) + 200))
-        except:
-            return
-
-    def view(self, content):
-        try:
-            skin = xbmc.getSkinDir()
-            skinPath = xbmc.translatePath('special://skin/')
-            xml = os.path.join(skinPath,'addon.xml')
-            file = xbmcvfs.File(xml)
-            read = file.read().replace('\n','')
-            file.close()
-            try: src = re.compile('defaultresolution="(.+?)"').findall(read)[0]
-            except: src = re.compile('<res.+?folder="(.+?)"').findall(read)[0]
-            src = os.path.join(skinPath, src)
-            src = os.path.join(src, 'MyVideoNav.xml')
-            file = xbmcvfs.File(src)
-            read = file.read().replace('\n','')
-            file.close()
-            views = re.compile('<views>(.+?)</views>').findall(read)[0]
-            views = [int(x) for x in views.split(',')]
-            for view in views:
-                label = xbmc.getInfoLabel('Control.GetLabel(%s)' % (view))
-                if not (label == '' or label == None): break
-            record = (skin, content, str(view))
-            dbcon = database.connect(addonSettings)
-            dbcur = dbcon.cursor()
-            dbcur.execute("CREATE TABLE IF NOT EXISTS views (""skin TEXT, ""view_type TEXT, ""view_id TEXT, ""UNIQUE(skin, view_type)"");")
-            dbcur.execute("DELETE FROM views WHERE skin = '%s' AND view_type = '%s'" % (record[0], record[1]))
-            dbcur.execute("INSERT INTO views Values (?, ?, ?)", record)
-            dbcon.commit()
-            viewName = xbmc.getInfoLabel('Container.Viewmode')
-            index().infoDialog('%s%s%s' % (language(30301).encode("utf-8"), viewName, language(30302).encode("utf-8")))
-        except:
-            return
 
     def favourite_add(self, type, imdb, name, year, image, refresh=False):
         try:
@@ -1582,48 +1509,6 @@ class contextMenu:
 
             xbmc.sleep(10000)
 
-    def download(self, name, url, provider):
-        try:
-            from modules.sources import sources
-            url = sources().sourcesResolve(url, provider)
-            if url == None: raise Exception()
-
-            try: agent = urlparse.parse_qs(url.split('|')[1])['User-Agent'][0]
-            except: agent = None
-            try: referer = urlparse.parse_qs(url.split('|')[1])['Referer'][0]
-            except: referer = None
-            try: cookie = urlparse.parse_qs(url.split('|')[1])['Cookie'][0]
-            except: cookie = None
-
-            url = url.split('|')[0]
-
-            name = name.translate(None, '\/:*?"<>|').strip('.')
-
-            content = re.compile('(.+?)\sS(\d*)E\d*$').findall(name)
-
-            if len(content) == 0:
-            	dest = xbmc.translatePath(getSetting("movie_downloads"))
-            	xbmcvfs.mkdir(dest)
-            	dest = os.path.join(dest, name)
-            	xbmcvfs.mkdir(dest)
-            else:
-            	dest = xbmc.translatePath(getSetting("tv_downloads"))
-            	xbmcvfs.mkdir(dest)
-            	dest = os.path.join(dest, content[0][0])
-            	xbmcvfs.mkdir(dest)
-            	dest = os.path.join(dest, 'Season %01d' % int(content[0][1]))
-            	xbmcvfs.mkdir(dest)
-
-            ext = os.path.splitext(urlparse.urlparse(url).path)[1][1:]
-            if not ext in ['mp4', 'mkv', 'flv', 'avi', 'mpg']: ext = 'mp4'
-            dest = os.path.join(dest, name + '.' + ext)
-
-            import commondownloader
-            commondownloader.download(url, dest, 'Genesis', referer=referer, agent=agent, cookie=cookie)
-        except:
-            index().infoDialog(language(30308).encode("utf-8"))
-            return
-
     def toggle_playback(self, content, name, title, year, imdb, tvdb, season, episode, show, show_alt, date, genre):
         if content == 'movie':
             meta = {'title': xbmc.getInfoLabel('ListItem.title'), 'originaltitle': xbmc.getInfoLabel('ListItem.originaltitle'), 'year': xbmc.getInfoLabel('ListItem.year'), 'genre': xbmc.getInfoLabel('ListItem.genre'), 'studio' : xbmc.getInfoLabel('ListItem.studio'), 'country' : xbmc.getInfoLabel('ListItem.country'), 'duration' : xbmc.getInfoLabel('ListItem.duration'), 'rating': xbmc.getInfoLabel('ListItem.rating'), 'votes': xbmc.getInfoLabel('ListItem.votes'), 'mpaa': xbmc.getInfoLabel('ListItem.mpaa'), 'director': xbmc.getInfoLabel('ListItem.director'), 'writer': xbmc.getInfoLabel('ListItem.writer'), 'plot': xbmc.getInfoLabel('ListItem.plot'), 'plotoutline': xbmc.getInfoLabel('ListItem.plotoutline'), 'tagline': xbmc.getInfoLabel('ListItem.tagline')}
@@ -1685,6 +1570,10 @@ class root:
             rootList.append({'name': 30507, 'image': 'root_calendar.jpg', 'action': 'root_calendar'})
 
         rootList.append({'name': 30508, 'image': 'root_tools.jpg', 'action': 'root_tools'})
+
+        if not getSetting("downloadPath") == '':
+            rootList.append({'name': 30140, 'image': 'downloader.jpg', 'action': 'downloader'})
+
         rootList.append({'name': 30509, 'image': 'root_search.jpg', 'action': 'root_search'})
         index().rootList(rootList)
 
@@ -1750,8 +1639,6 @@ class root:
             rootList.append({'name': 30590, 'image': 'userlists_shows.jpg', 'action': 'userlists_shows'})
         rootList.append({'name': 30591, 'image': 'movies_favourites.jpg', 'action': 'movies_favourites'})
         rootList.append({'name': 30592, 'image': 'shows_favourites.jpg', 'action': 'shows_favourites'})
-        rootList.append({'name': 30593, 'image': 'downloads_movies.jpg', 'action': 'downloads_movies'})
-        rootList.append({'name': 30594, 'image': 'downloads_shows.jpg', 'action': 'downloads_shows'})
         index().rootList(rootList)
 
     def search(self):
@@ -1764,23 +1651,23 @@ class root:
 
     def tools(self):
         rootList = []
-        rootList.append({'name': 30621, 'image': 'settings_open.jpg', 'action': 'settings_general'})
-        rootList.append({'name': 30622, 'image': 'settings_open.jpg', 'action': 'settings_accounts'})
-        rootList.append({'name': 30623, 'image': 'settings_open.jpg', 'action': 'settings_playback'})
-        rootList.append({'name': 30624, 'image': 'settings_open.jpg', 'action': 'settings_subtitles'})
-        rootList.append({'name': 30625, 'image': 'settings_open.jpg', 'action': 'settings_movies'})
-        rootList.append({'name': 30626, 'image': 'settings_open.jpg', 'action': 'settings_tv'})
-        rootList.append({'name': 30627, 'image': 'settings_open.jpg', 'action': 'settings_hostshd'})
-        rootList.append({'name': 30628, 'image': 'settings_open.jpg', 'action': 'settings_hostssd'})
+        rootList.append({'name': 30621, 'image': 'settings.jpg', 'action': 'generalSettings'})
+        rootList.append({'name': 30622, 'image': 'settings.jpg', 'action': 'accountSettings'})
+        rootList.append({'name': 30623, 'image': 'settings.jpg', 'action': 'playbackSettings'})
+        rootList.append({'name': 30624, 'image': 'settings.jpg', 'action': 'subtitleSettings'})
+        rootList.append({'name': 30625, 'image': 'settings.jpg', 'action': 'movieSettings'})
+        rootList.append({'name': 30626, 'image': 'settings.jpg', 'action': 'tvSettings'})
+        rootList.append({'name': 30627, 'image': 'settings.jpg', 'action': 'hdhostSettings'})
+        rootList.append({'name': 30628, 'image': 'settings.jpg', 'action': 'sdhostSettings'})
         rootList.append({'name': 30629, 'image': 'cache_clear.jpg', 'action': 'cache_clear_src'})
         rootList.append({'name': 30630, 'image': 'cache_clear.jpg', 'action': 'cache_clear_list'})
-        rootList.append({'name': 30631, 'image': 'settings_open.jpg', 'action': 'settings_downloads'})
+        rootList.append({'name': 30631, 'image': 'settings.jpg', 'action': 'downloadSettings'})
         rootList.append({'name': 30632, 'image': 'root_library.jpg', 'action': 'root_library'})
         index().rootList(rootList)
 
     def library(self):
         rootList = []
-        rootList.append({'name': 30640, 'image': 'settings_open.jpg', 'action': 'settings_library'})
+        rootList.append({'name': 30640, 'image': 'settings.jpg', 'action': 'librarySettings'})
         rootList.append({'name': 30641, 'image': 'library_update.jpg', 'action': 'library_update_tool'})
         rootList.append({'name': 30642, 'image': 'library_movies.jpg', 'action': 'library_movies'})
         rootList.append({'name': 30643, 'image': 'library_shows.jpg', 'action': 'library_shows'})

@@ -151,69 +151,9 @@ elif action == 'item_queue':
     from modules.v4 import contextMenu
     contextMenu().item_queue()
 
-elif action == 'view_movies':
-    from modules.v4 import contextMenu
-    contextMenu().view('movies')
-
-elif action == 'view_tvshows':
-    from modules.v4 import contextMenu
-    contextMenu().view('tvshows')
-
-elif action == 'view_seasons':
-    from modules.v4 import contextMenu
-    contextMenu().view('seasons')
-
-elif action == 'view_episodes':
-    from modules.v4 import contextMenu
-    contextMenu().view('episodes')
-
 elif action == 'playlist_open':
     from modules.v4 import contextMenu
     contextMenu().playlist_open()
-
-elif action == 'settings_open':
-    from modules.v4 import contextMenu
-    contextMenu().settings_open()
-
-elif action == 'settings_general':
-    from modules.v4 import contextMenu
-    contextMenu().settings_open(cat=0.0)
-
-elif action == 'settings_playback':
-    from modules.v4 import contextMenu
-    contextMenu().settings_open(cat=1.0)
-
-elif action == 'settings_movies':
-    from modules.v4 import contextMenu
-    contextMenu().settings_open(cat=2.0)
-
-elif action == 'settings_tv':
-    from modules.v4 import contextMenu
-    contextMenu().settings_open(cat=3.0)
-
-elif action == 'settings_hostshd':
-    from modules.v4 import contextMenu
-    contextMenu().settings_open(cat=4.0)
-
-elif action == 'settings_hostssd':
-    from modules.v4 import contextMenu
-    contextMenu().settings_open(cat=5.0)
-
-elif action == 'settings_accounts':
-    from modules.v4 import contextMenu
-    contextMenu().settings_open(cat=6.1)
-
-elif action == 'settings_library':
-    from modules.v4 import contextMenu
-    contextMenu().settings_open(cat=7.0)
-
-elif action == 'settings_downloads':
-    from modules.v4 import contextMenu
-    contextMenu().settings_open(cat=8.0)
-
-elif action == 'settings_subtitles':
-    from modules.v4 import contextMenu
-    contextMenu().settings_open(cat=9.0)
 
 elif action == 'favourite_movie_add':
     from modules.v4 import contextMenu
@@ -330,10 +270,6 @@ elif action == 'toggle_movie_playback':
 elif action == 'toggle_episode_playback':
     from modules.v4 import contextMenu
     contextMenu().toggle_playback('episode', name, title, year, imdb, tvdb, season, episode, show, show_alt, date, genre)
-
-elif action == 'download':
-    from modules.v4 import contextMenu
-    contextMenu().download(name, url, provider)
 
 elif action == 'service':
     from modules.v4 import contextMenu
@@ -542,6 +478,83 @@ elif action == 'userlists_movies':
 elif action == 'userlists_shows':
     from modules.v4 import userlists
     userlists().shows()
+
+
+
+
+
+
+elif action == 'openSettings':
+    from modules.libraries.control import openSettings
+    openSettings()
+
+elif action == 'generalSettings':
+    from modules.libraries.control import openSettings
+    openSettings(c=0, f=0)
+
+elif action == 'playbackSettings':
+    from modules.libraries.control import openSettings
+    openSettings(c=1, f=0)
+
+elif action == 'movieSettings':
+    from modules.libraries.control import openSettings
+    openSettings(c=2, f=0)
+
+elif action == 'tvSettings':
+    from modules.libraries.control import openSettings
+    openSettings(c=3, f=0)
+
+elif action == 'hdhostSettings':
+    from modules.libraries.control import openSettings
+    openSettings(c=4, f=0)
+
+elif action == 'sdhostSettings':
+    from modules.libraries.control import openSettings
+    openSettings(c=5, f=0)
+
+elif action == 'accountSettings':
+    from modules.libraries.control import openSettings
+    openSettings(c=6, f=1)
+
+elif action == 'librarySettings':
+    from modules.libraries.control import openSettings
+    openSettings(c=7, f=0)
+
+elif action == 'downloadSettings':
+    from modules.libraries.control import openSettings
+    openSettings(c=8, f=0)
+
+elif action == 'subtitleSettings':
+    from modules.libraries.control import openSettings
+    openSettings(c=9, f=0)
+
+elif action == 'addView':
+    from modules.libraries.views import addView
+    addView(content)
+
+elif action == 'downloader':
+    from modules.libraries.downloader import downloader
+    downloader()
+
+elif action == 'addDownload':
+    from modules.libraries.downloader import addDownload
+    addDownload(name,url,image,provider)
+
+elif action == 'removeDownload':
+    from modules.libraries.downloader import removeDownload
+    removeDownload(url)
+
+elif action == 'startDownload':
+    from modules.libraries.downloader import startDownload
+    startDownload()
+
+elif action == 'stopDownload':
+    from modules.libraries.downloader import stopDownload
+    stopDownload()
+
+elif action == 'statusDownload':
+    from modules.libraries.downloader import statusDownload
+    statusDownload()
 
 elif action == 'trailer':
     from modules.libraries.trailer import trailer

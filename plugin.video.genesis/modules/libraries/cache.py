@@ -25,7 +25,6 @@ except:
     from pysqlite2 import dbapi2 as database
 
 import re
-import os
 import hashlib
 import datetime
 import control
@@ -50,6 +49,7 @@ def get(function, timeout, *args, **table):
         table = 'rel_list'
 
     try:
+        control.makeFile(control.dataPath)
         dbcon = database.connect(control.cacheFile)
         dbcur = dbcon.cursor()
         dbcur.execute("SELECT * FROM %s WHERE func = '%s' AND args = '%s'" % (table, f, a))
@@ -86,6 +86,18 @@ def get(function, timeout, *args, **table):
 
     try:
         return eval(r.encode('utf-8'))
+    except:
+        pass
+
+
+def clear(table):
+    try:
+        control.makeFile(control.dataPath)
+        dbcon = database.connect(control.cacheFile)
+        dbcur = dbcon.cursor()
+        dbcur.execute("DROP TABLE IF EXISTS %s" % table)
+        dbcur.execute("VACUUM")
+        dbcon.commit()
     except:
         pass
 

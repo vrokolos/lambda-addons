@@ -26,8 +26,10 @@ def resolve(url):
     try:
         result = client.request(url)
 
-        url = client.parseDOM(result, "span", attrs = { "id": "realdownload" })[0]
-        url = client.parseDOM(url, "a", ret="href")[0]
+        url = client.parseDOM(result, "span", attrs = { "id": "realdownload" })
+        url += client.parseDOM(result, "span", attrs = { "id": "realGkSuckersdownload" })
+
+        url = client.parseDOM(url[0], "a", ret="href")[0]
         return url
     except:
         return

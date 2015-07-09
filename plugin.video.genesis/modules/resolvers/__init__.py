@@ -28,6 +28,9 @@ import premiumize
 
 def request(url):
     try:
+        if '</regex>' in url:
+            import regex ; url = regex.resolve(url)
+
         rd = realdebrid.resolve(url)
         if not rd == None: return rd
         pz = premiumize.resolve(url)

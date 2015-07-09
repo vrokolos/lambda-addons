@@ -33,13 +33,15 @@ def resolve(url):
         f = client.parseDOM(result, "Form", attrs = { "method": "POST" })[0]
         k = client.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
         for i in k: post.update({i: client.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-        post.update({'method_free': 'Free Download'})
+        post.update({'method_free': 'Continue to Video'})
         post = urllib.urlencode(post)
 
         result = client.request(url, post=post)
 
         result = re.compile('(eval.*?\)\)\))').findall(result)[0]
+
         url = jsunpack.unpack(result)
+        url = url.replace('/0/', '/xml/').replace('.0', '.xml')
 
         result = client.request(url)
         url = client.parseDOM(result, "file")[0]

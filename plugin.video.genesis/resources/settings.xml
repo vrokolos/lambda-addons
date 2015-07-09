@@ -43,11 +43,11 @@
 		<setting id="yify" type="bool" label="YIFY" default="true" />
 		<setting id="yifystream" type="bool" label="YIFYstream" default="true" />
 		<setting id="afdah" type="bool" label="Afdah" default="true" />
+		<setting id="pubfilm" type="bool" label="Pubfilm" default="true" />
 		<setting id="xmovies8" type="bool" label="Xmovies8" default="true" />
 		<setting id="muchmovies" type="bool" label="Muchmovies" default="true" />
 		<setting id="sweflix" type="bool" label="Sweflix" default="true" />
 		<setting id="movieshd" type="bool" label="MoviesHD" default="true" />
-		<setting id="onlinemovies" type="bool" label="Onlinemovies" default="true" />
 		<setting id="vkbox" type="bool" label="VKBox" default="true" />
 		<setting id="moviestorm" type="bool" label="Moviestorm" default="true" />
 		<setting id="watchfree" type="bool" label="Watchfree" default="true" />
@@ -155,8 +155,7 @@
 		<setting id="check_library" type="bool" label="30129" default="true" />
 	</category>
 	<category label="30140">
-		<setting id="movie_downloads" type="folder" label="30141" default="special://userdata/addon_data/plugin.video.genesis/Downloads/Movies" />
-		<setting id="tv_downloads" type="folder" label="30142" default="special://userdata/addon_data/plugin.video.genesis/Downloads/TVShows" />
+		<setting id="downloadPath" type="folder" label="30141" default="" />
 	</category>
 	<category label="30160">
 		<setting id="subtitles" type="bool" label="30163" default="false" />

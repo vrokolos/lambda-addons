@@ -28,9 +28,10 @@ from modules.libraries import client
 
 class source:
     def __init__(self):
-        self.base_link = 'https://sweflix.net'
-        self.search_link = '/index.php?act=query&query=%s'
-        self.footer_link = '/film_api.php?target=footer&fid=%s'
+        self.base_link = 'https://m.sweflix.to'
+        self.agent_link = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u='
+        self.search_link = '/index.php?show=query&q=%s'
+        self.player_link = '/view.php?vicloid=%s'
 
 
     def get_movie(self, imdb, title, year):
@@ -39,11 +40,18 @@ class source:
             query = urlparse.urljoin(self.base_link, query)
 
             result = client.source(query)
-            result = client.parseDOM(result, "div", attrs = { "class": "hover-group.+?" })
+            if result == None: result = client.source(self.agent_link + urllib.quote_plus(query))
+
+            result = result.replace('\r','').replace('\n','').replace('\t','')
+
+            result = re.compile('(<div id="*\d*.+?</div>)').findall(result)
 
             title = cleantitle.movie(title)
-            years = ['>%s<' % str(year), '>%s<' % str(int(year)+1), '>%s<' % str(int(year)-1)]
-            result = [(client.parseDOM(i, "a", ret="data-movieid")[0], client.parseDOM(i, "h5")[-1], client.parseDOM(i, "p")[-1]) for i in result]
+            years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
+
+            result = [(re.compile('id="*(\d*)"*').findall(i), re.compile('<h4>(.+?)</h4>').findall(i), re.compile('Releasedatum *: *(\d{4})').findall(i)) for i in result]
+            result = [(i[0][0], i[1][0], i[2][0]) for i in result if len(i[0]) > 0 and len(i[1]) > 0 and len(i[2]) > 0]
+            result = [(i[0], i[1].rsplit('</span>')[0].split('>')[-1].strip(), i[2]) for i in result]
             result = [i for i in result if title == cleantitle.movie(i[1])]
             result = [i[0] for i in result if any(x in i[2] for x in years)][0]
 
@@ -62,16 +70,16 @@ class source:
 
             if url == None: return sources
 
-            url = urlparse.urljoin(self.base_link, self.footer_link % url)
-            result = client.source(url)
-
-            url = client.parseDOM(result, "a", ret="href")
-            url = [i for i in url if 'play/' in i][0]
-            url = urlparse.urljoin(self.base_link, url)
+            url = urlparse.urljoin(self.base_link, self.player_link % url)
 
             result = client.source(url)
+            if result == None: result = client.source(self.agent_link + urllib.quote_plus(url))
 
-            url = client.parseDOM(result, "source", ret="src", attrs = { "type": "video/.+?" })[0]
+            result = result.replace('\r','').replace('\n','').replace('\t','')
+
+            result = re.compile('<source src="*(.+?)"* type="*video').findall(result)[0]
+            url = result.replace('sweflix.net', 'sweflix.%s' % (urlparse.urlparse(url).netloc).split('.')[-1])
+
             if '1080p' in url: quality = '1080p'
             else: quality = 'HD'
 

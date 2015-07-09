@@ -124,13 +124,13 @@ class sources:
                 try:
                     url, source, provider = i['url'], i['label'], i['provider']
 
-                    sysname, sysimdb, systvdb, sysurl, syssource, sysprovider = urllib.quote_plus(name), urllib.quote_plus(imdb), urllib.quote_plus(tvdb), urllib.quote_plus(url), urllib.quote_plus(source), urllib.quote_plus(provider)
+                    sysname, sysimdb, systvdb, sysurl, sysimage, syssource, sysprovider = urllib.quote_plus(name), urllib.quote_plus(imdb), urllib.quote_plus(tvdb), urllib.quote_plus(url), urllib.quote_plus(poster), urllib.quote_plus(source), urllib.quote_plus(provider)
 
                     query = 'action=playItem&content=%s&name=%s&imdb=%s&tvdb=%s&url=%s&source=%s&provider=%s' % (content, sysname, sysimdb, systvdb, sysurl, syssource, sysprovider)
 
                     cm = []
                     cm.append((control.lang(30401).encode('utf-8'), 'RunPlugin(%s?action=item_queue)' % (sysaddon)))
-                    cm.append((control.lang(30402).encode('utf-8'), 'RunPlugin(%s?action=download&name=%s&url=%s&provider=%s)' % (sysaddon, sysname, sysurl, sysprovider)))
+                    cm.append((control.lang(30402).encode('utf-8'), 'RunPlugin(%s?action=addDownload&name=%s&url=%s&image=%s&provider=%s)' % (sysaddon, sysname, sysurl, sysimage, sysprovider)))
                     cm.append((control.lang(30412).encode('utf-8'), 'Action(Info)'))
                     cm.append((control.lang(30427).encode('utf-8'), 'RunPlugin(%s?action=container_refresh)' % (sysaddon)))
                     cm.append((control.lang(30410).encode('utf-8'), 'RunPlugin(%s?action=settings_open)' % (sysaddon)))
@@ -195,6 +195,7 @@ class sources:
 
         threads = []
 
+        control.makeFile(control.dataPath)
         self.sourceFile = control.cachesourcesFile
 
         sourceDict = [i[0] for i in sourceDict if i[1] == 'true']
