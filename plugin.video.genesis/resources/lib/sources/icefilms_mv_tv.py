@@ -21,6 +21,7 @@
 
 import re,urllib,urlparse,random
 
+from resources.lib.libraries import control
 from resources.lib.libraries import client
 from resources.lib import resolvers
 
@@ -29,12 +30,11 @@ class source:
     def __init__(self):
         self.base_link = 'http://ipv6.icefilms.info'
         self.link_1 = 'http://ipv6.icefilms.info'
-        self.link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://www.icefilms.info'
-        self.link_3 = 'https://icefilms.unblocked.pw'
+        self.link_2 = 'https://icefilms.unblocked.pw'
         self.moviesearch_link = '/movies/a-z/%s'
         self.tvsearch_link = '/tv/a-z/%s'
-        self.video_link = '/membersonly/components/com_iceplayer/video.php?h=331&w=719&vid=%s&img='
-        self.resp_link = '/membersonly/components/com_iceplayer/video.phpAjaxResp.php?s=%s&t=%s'
+        self.video_link = '/membersonly/components/com_iceplayer/video.php?h=374&w=631&vid=%s&img='
+        self.resp_link = '/membersonly/components/com_iceplayer/video.phpAjaxResp.php?id=%s&s=%s&iqs=&url=&m=%s&cap= &sec=%s&t=%s&image=%s'
         self.headers = {}
 
 
@@ -45,7 +45,7 @@ class source:
             query = self.moviesearch_link % query
 
             result = ''
-            links = [self.link_1, self.link_2, self.link_3]
+            links = [self.link_1, self.link_2]
             for base_link in links:
                 result = client.source(urlparse.urljoin(base_link, query), headers=self.headers)
                 if 'Donate' in str(result): break
@@ -72,7 +72,7 @@ class source:
             query = self.tvsearch_link % query
 
             result = ''
-            links = [self.link_1, self.link_2, self.link_3]
+            links = [self.link_1, self.link_2]
             for base_link in links:
                 result = client.source(urlparse.urljoin(base_link, query), headers=self.headers)
                 if 'Donate' in str(result): break
@@ -97,7 +97,7 @@ class source:
             if url == None: return
 
             result = ''
-            links = [self.link_1, self.link_2, self.link_3]
+            links = [self.link_1, self.link_2]
             for base_link in links:
                 result = client.source(urlparse.urljoin(base_link, url), headers=self.headers)
                 if 'Donate' in str(result): break
@@ -120,17 +120,29 @@ class source:
 
             if url == None: return sources
 
-            t = url.split('v=', 1)[-1].rsplit('&', 1)[0] 
+            t = urlparse.parse_qs(urlparse.urlparse(url).query)['v'][0]
             url = self.video_link % t
 
             result = ''
-            links = [self.link_1, self.link_2, self.link_3]
+            links = [self.link_1, self.link_2]
             for base_link in links:
                 result = client.source(urlparse.urljoin(base_link, url), headers=self.headers)
                 if 'ripdiv' in str(result): break
 
             result = result.decode('iso-8859-1').encode('utf-8')
-            sec = re.compile('lastChild[.]value="(.+?)"').findall(result)[0]
+
+            secret = re.compile('lastChild[.]value="(.+?)"').findall(result)[0]
+
+            s_start = re.search('(?:\s+|,)s\s*=(\d+)', result)
+            s_start = int(s_start.group(1))
+                
+            m_start = re.search('(?:\s+|,)m\s*=(\d+)', result)
+            m_start = int(m_start.group(1))
+
+            image = re.compile('<iframe[^>]*src="([^"]+)').findall(result)
+            image = image[0] if len(image) > 0 else ''
+            image = urllib.quote(image)
+
             links = client.parseDOM(result, 'div', attrs = {'class': 'ripdiv'})
 
             hd = [i for i in links if '>HD 720p<' in i]
@@ -141,6 +153,7 @@ class source:
             if len(hd) > 0: hd = hd[0].split('<p>')
             if len(sd) > 0: sd = sd[0].split('<p>')
             links = [(i, 'HD') for i in hd] + [(i, 'SD') for i in sd]
+
 
             for i in links:
                 try:
@@ -154,10 +167,14 @@ class source:
                     host = client.replaceHTMLCodes(host)
                     host = host.encode('utf-8')
 
+                    s = s_start + random.randint(3, 1000)
+                    m = m_start + random.randint(21, 1000)
+
                     url = client.parseDOM(i[0], 'a', ret='onclick')[-1]
                     url = re.compile('[(](.+?)[)]').findall(url)[0]
-                    url = 'id=%s&t=%s&sec=%s&s=%s&m=%s&cap= &iqs=&url=' % (url, t, sec, random.randrange(2000, 9999), random.randrange(2000, 9999))
+                    url = self.resp_link % (url, s, m, secret, t, image)
                     url = url.encode('utf-8')
+
                     sources.append({'source': host, 'quality': quality, 'provider': 'Icefilms', 'url': url})
                 except:
                     pass
@@ -169,17 +186,68 @@ class source:
 
     def resolve(self, url):
         try:
-            links = [self.link_1, self.link_3]
+            post = urlparse.parse_qsl(urlparse.urlparse(url).query, True)
+            post = [i for i in post if not i[0] == 'image']
+            post = urllib.urlencode(post)
+
+            query = urlparse.parse_qs(urlparse.urlparse(url).query)
+
+            image = urllib.unquote(query['image'][0])
+
+            ref = self.video_link % query['t'][0]
+
+            url = urlparse.urlparse(url).path
+            url += '?s=%s&t=%s&app_id=Genesis' % (query['id'][0], query['t'][0])
+
+            links = [self.link_1, self.link_2]
             for base_link in links:
-                r = urlparse.urljoin(base_link, self.video_link % urlparse.parse_qs(url)['t'][0])
-                u = urlparse.urljoin(base_link, self.resp_link % (urlparse.parse_qs(url)['id'][0], urlparse.parse_qs(url)['t'][0]))
-                result = client.request(u, post=url, referer=r, cookie=client.request(r, output='cookie'))
+                referer = urlparse.urljoin(base_link, ref)
+                cookie = client.request(referer, output='cookie')
+                result = client.request(urlparse.urljoin(base_link, url), post=post, referer=referer, cookie=cookie)
                 if 'com_iceplayer' in str(result): break
 
             url = urlparse.parse_qs(urlparse.urlparse(result).query)['url'][0]
             url = resolvers.request(url)
+
+            if not url == None: self.img_parser(image, referer)
+
             return url
         except:
             return
+
+
+    def img_parser(self, image, referer):
+        try:
+            if not image.startswith('http:'): image = 'http:' + image
+            result = client.request(image, referer=referer)
+
+            image, width, height = re.compile("<img\s+src='([^']+)'\s+width='(\d+)'\s+height='(\d+)'").findall(result)[0]
+            click = re.compile("href='([^']+)").findall(result)[0]
+
+            image = client.replaceHTMLCodes(image)
+            image = image.encode('utf-8')
+
+            width, height = int(width), int(height)
+            left = (1280 - width) / 2
+
+            if width <= 0 or height <= 0: raise Exception()
+
+            f = control.image(left,0,width,height, image)
+            d = control.windowDialog
+            d.addControl(f)
+            d.show()
+
+            client.request(image, referer=referer)
+
+            control.dialog.ok(control.addonInfo('name'), str('Continue to Video'), '')
+
+            if random.randint(0, 100) < 5:
+                client.request(click, referer=referer)
+
+            try: d.removeControl(f) ; d.close()
+            except: return
+        except:
+            try: d.removeControl(f) ; d.close()
+            except: return
 
 
