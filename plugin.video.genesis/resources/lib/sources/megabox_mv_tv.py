@@ -39,8 +39,6 @@ class source:
         self.film_key = base64.b64decode('OTBlOTdkYzUyMWNmMDIwZQ==')
         self.data_key = base64.b64decode('MzkzNmI5MGU5N2RjNTIxYw==')
 
-        self.__request(self.base_link + self.config_link)
-
 
     def __request(self, url, post=None):
         try:
@@ -52,6 +50,17 @@ class source:
 
             result = self.__decrypt(self.data_key, base64.b64decode(result))
             return result
+        except:
+            self.__config()
+
+
+    def __config(self):
+        try:
+            headers = {'User-Agent': 'Apache-HttpClient/UNAVAILABLE (java 1.4)'}
+
+            url = self.base_link + self.config_link + self.__extra()
+
+            client.source(url, headers=headers)
         except:
             return
 
