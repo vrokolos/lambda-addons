@@ -19,41 +19,33 @@
 '''
 
 
-import re,urllib,urlparse,random
+import re,urllib,urlparse
 
 from resources.lib.libraries import cleantitle
 from resources.lib.libraries import client
-from resources.lib.resolvers import googleplus
+from resources.lib import resolvers
 
 
 class source:
     def __init__(self):
-        self.base_link_1 = 'https://afdah.org'
-        self.base_link_2 = 'https://xmovies8.org'
-        self.search_link = '/results?q=%s'
-        self.info_link = '/video_info'
+        self.base_link = 'http://watchmovies-online.ch'
+        self.search_link = '/?s=%s'
 
 
     def get_movie(self, imdb, title, year):
         try:
-            self.base_link = random.choice([self.base_link_1, self.base_link_2])
-
             query = self.search_link % (urllib.quote_plus(title))
             query = urlparse.urljoin(self.base_link, query)
 
             result = client.source(query)
-
-            result = client.parseDOM(result, 'div', attrs = {'class': 'cell_container'})
+            result = client.parseDOM(result, 'div', attrs = {'class': 'Post-body'})
 
             title = cleantitle.movie(title)
-            years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
-
-            result = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a', ret='title')) for i in result]
+            years = ['(%s)' % str(year), '(%s)' % str(int(year)+1), '(%s)' % str(int(year)-1)]
+            result = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a')) for i in result]
             result = [(i[0][0], i[1][0]) for i in result if len(i[0]) > 0 and len(i[1]) > 0]
-            result = [(i[0], re.compile('(.+?) [(](\d{4})[)]').findall(i[1])) for i in result]
-            result = [(i[0], i[1][0][0], i[1][0][1]) for i in result if len(i[1]) > 0]
             result = [i for i in result if title == cleantitle.movie(i[1])]
-            result = [i[0] for i in result if any(x in i[2] for x in years)][0]
+            result = [i[0] for i in result if any(x in i[1] for x in years)][0]
 
             try: url = re.compile('//.+?(/.+)').findall(result)[0]
             except: url = result
@@ -70,24 +62,36 @@ class source:
 
             if url == None: return sources
 
-            self.base_link = random.choice([self.base_link_1, self.base_link_2])
-
             url = urlparse.urljoin(self.base_link, url)
 
             result = client.source(url)
+            links = client.parseDOM(result, 'td', attrs = {'class': 'even tdhost'})
+            links += client.parseDOM(result, 'td', attrs = {'class': 'odd tdhost'})
 
-            video_id = re.compile('video_id *= *[\'|\"](.+?)[\'|\"]').findall(result)[0]
-            post = urllib.urlencode({'video_id': video_id})
+            q = re.compile('<label>Quality</label>(.+?)<').findall(result)
+            if len(q) > 0: q = q[0]
+            else: q = ''
 
-            result = client.source(urlparse.urljoin(self.base_link, self.info_link), post=post)
+            if q.endswith(('CAM', 'TS')): quality = 'CAM'
+            else: quality = 'SD'
 
-            u = [i for i in result.split('&') if 'google' in i][0]
-            u = urllib.unquote_plus(u)
-            u = [urllib.unquote_plus(i.split('|')[-1]) for i in u.split(',')]
-            u = [googleplus.tag(i)[0] for i in u]
-            u = [i for i in u if i['quality'] in ['1080p', 'HD']]
+            for i in links:
+                try:
+                    host = client.parseDOM(i, 'a')[0]
+                    host = host.split('<', 1)[0]
+                    host = host.rsplit('.', 1)[0].split('.', 1)[-1]
+                    host = host.strip().lower()
+                    if not host in hostDict: raise Exception()
+                    host = client.replaceHTMLCodes(host)
+                    host = host.encode('utf-8')
 
-            for i in u: sources.append({'source': 'GVideo', 'quality': i['quality'], 'provider': 'Afdah', 'url': i['url']})
+                    url = client.parseDOM(i, 'a', ret='href')[0]
+                    url = client.replaceHTMLCodes(url)
+                    url = url.encode('utf-8')
+
+                    sources.append({'source': host, 'quality': quality, 'provider': 'WMOnline', 'url': url})
+                except:
+                    pass
 
             return sources
         except:
@@ -96,11 +100,12 @@ class source:
 
     def resolve(self, url):
         try:
-            if url.startswith('stack://'): return url
+            result = client.request(url)
 
-            url = client.request(url, output='geturl')
-            if 'requiressl=yes' in url: url = url.replace('http://', 'https://')
-            else: url = url.replace('https://', 'http://')
+            try: url = client.parseDOM(result, 'a', ret='href', attrs = {'class': 'wsoButton'})[0]
+            except: pass
+
+            url = resolvers.request(url)
             return url
         except:
             return

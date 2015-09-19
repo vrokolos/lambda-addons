@@ -29,39 +29,8 @@ from resources.lib import resolvers
 class source:
     def __init__(self):
         self.base_link = 'http://moviestorm.eu'
-        self.moviesearch_link = 'https://www.google.com/search?q=allintitle:%s&sitesearch=moviestorm.eu/view/'
         self.tvsearch_link = '/series/all/'
         self.episode_link = '%s?season=%01d&episode=%01d'
-
-
-    def get_movie(self, imdb, title, year):
-        try:
-            query = self.moviesearch_link % (urllib.quote_plus(title))
-
-            result = client.source(query)
-
-            title = cleantitle.movie(title)
-            years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
-
-            result = client.parseDOM(result, 'h3', attrs = {'class': '.+?'})
-            result = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a')) for i in result]
-            result = [(i[0][0], i[1][-1]) for i in result if len(i[0]) > 0 and len(i[1]) > 0]
-            result = [(i[0], re.compile('(^Watch Full "|^Watch |)(.+? [(]\d{4}[)])').findall(i[1])) for i in result]
-            result = [(i[0], i[1][0][-1]) for i in result if len(i[1]) > 0]
-            result = [i for i in result if title == cleantitle.movie(i[1])]
-            result = [i[0] for i in result if any(x in i[1] for x in years)][0]
-
-            check = urlparse.urljoin(self.base_link, result)
-            check = client.source(check)
-            if not str(imdb) in check: raise Exception()
-
-            try: url = re.compile('//.+?(/.+)').findall(result)[0]
-            except: url = result
-            url = client.replaceHTMLCodes(url)
-            url = url.encode('utf-8')
-            return url
-        except:
-            return
 
 
     def get_show(self, imdb, tvdb, tvshowtitle, year):
@@ -147,4 +116,5 @@ class source:
             return url
         except:
             return
+
 

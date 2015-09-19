@@ -28,39 +28,26 @@ from resources.lib import resolvers
 
 class source:
     def __init__(self):
-        self.base_link = 'http://watchmovies-online.ch'
-        self.tvbase_link = 'http://watchseries-online.ch'
-        self.tvsearch_link = 'https://www.google.com/search?q=allintitle:%s&sitesearch=watchseries-online.ch'
-        self.moviesearch_link = '/?s=%s'
-
-
-    def get_movie(self, imdb, title, year):
-        try:
-            query = self.moviesearch_link % (urllib.quote_plus(title))
-            query = urlparse.urljoin(self.base_link, query)
-
-            result = client.source(query)
-            result = client.parseDOM(result, 'div', attrs = {'class': 'Post-body'})
-
-            title = cleantitle.movie(title)
-            years = ['(%s)' % str(year), '(%s)' % str(int(year)+1), '(%s)' % str(int(year)-1)]
-            result = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a')) for i in result]
-            result = [(i[0][0], i[1][0]) for i in result if len(i[0]) > 0 and len(i[1]) > 0]
-            result = [i for i in result if title == cleantitle.movie(i[1])]
-            result = [i[0] for i in result if any(x in i[1] for x in years)][0]
-
-            try: url = re.compile('//.+?(/.+)').findall(result)[0]
-            except: url = result
-            url = client.replaceHTMLCodes(url)
-            url = url.encode('utf-8')
-            return url
-        except:
-            return
+        self.base_link = 'http://watchseries-online.ch'
+        self.search_link = 'index'
 
 
     def get_show(self, imdb, tvdb, tvshowtitle, year):
         try:
-            url = tvshowtitle
+            tvshowtitle = cleantitle.tv(tvshowtitle)
+
+            query = urlparse.urljoin(self.base_link, self.search_link)
+
+            result = client.source(query)
+
+            result = re.compile('(<li>.+?</li>)').findall(result)
+            result = [re.compile('href="(.+?)">(.+?)<').findall(i) for i in result]
+            result = [i[0] for i in result if len(i[0]) > 0]
+            result = [i for i in result if tvshowtitle == cleantitle.tv(i[1])]
+            result = [i[0] for i in result][0]
+
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
             url = client.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -72,25 +59,27 @@ class source:
         try:
             if url == None: return
 
-            title = url
-            hdlr = 'S%02dE%02d' % (int(season), int(episode))
+            year, month = re.compile('(\d{4})-(\d{2})').findall(date)[-1]
+            if int(year) <= 2008: raise Exception()
 
-            query = self.tvsearch_link % (urllib.quote_plus('"%s %s"' % (title, hdlr)))
+            cat = urlparse.urljoin(self.base_link, url)
+            cat = cat.split('category/', 1)[-1].rsplit('/')[0]
 
-            result = client.source(query)
 
-            tvshowtitle = cleantitle.tv(title)
+            url = urlparse.urljoin(self.base_link, '/episode/%s-s%02de%02d' % (cat, int(season), int(episode)))
+            result = client.source(url, output='response', error=True)
 
-            result = client.parseDOM(result, 'h3', attrs = {'class': '.+?'})
-            result = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a')) for i in result]
-            result = [(i[0][0], i[1][-1]) for i in result if len(i[0]) > 0 and len(i[1]) > 0]
+            if '404' in result[0]:
+                url = urlparse.urljoin(self.base_link, '/%s/%s/%s-s%02de%02d' % (year, month, cat, int(season), int(episode)))
+                result = client.source(url, output='response', error=True)
 
-            result = [(i[0], re.compile('(^Watch Full "|^Watch |)(.+?) %s' % hdlr).findall(i[1])) for i in result]
-            result = [(i[0], i[1][0][-1]) for i in result if len(i[1]) > 0]
-            result = [i for i in result if tvshowtitle == cleantitle.tv(i[1])]
-            result = [i[0] for i in result][-1]
+            if '404' in result[0]:
+                url = urlparse.urljoin(self.base_link, '/%s/%s/%s-%01dx%01d' % (year, month, cat, int(season), int(episode)))
+                result = client.source(url, output='response', error=True)
 
-            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            if '404' in result[0]: raise Exception()
+
+            try: url = re.compile('//.+?(/.+)').findall(url)[0]
             except: url = result
             url = client.replaceHTMLCodes(url)
             url = url.encode('utf-8')
@@ -105,21 +94,11 @@ class source:
 
             if url == None: return sources
 
-            content = re.compile('/\d{4}/\d{2}/').findall(url)
-
-            if len(content) > 0: url = urlparse.urljoin(self.tvbase_link, url)
-            else: url = urlparse.urljoin(self.base_link, url)
+            url = urlparse.urljoin(self.base_link, url)
 
             result = client.source(url)
             links = client.parseDOM(result, 'td', attrs = {'class': 'even tdhost'})
             links += client.parseDOM(result, 'td', attrs = {'class': 'odd tdhost'})
-
-            q = re.compile('<label>Quality</label>(.+?)<').findall(result)
-            if len(q) > 0: q = q[0]
-            else: q = ''
-
-            if q.endswith(('CAM', 'TS')): quality = 'CAM'
-            else: quality = 'SD'
 
             for i in links:
                 try:
@@ -135,7 +114,7 @@ class source:
                     url = client.replaceHTMLCodes(url)
                     url = url.encode('utf-8')
 
-                    sources.append({'source': host, 'quality': quality, 'provider': 'WSO', 'url': url})
+                    sources.append({'source': host, 'quality': 'SD', 'provider': 'WSOnline', 'url': url})
                 except:
                     pass
 
@@ -155,4 +134,5 @@ class source:
             return url
         except:
             return
+
 
