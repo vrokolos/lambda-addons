@@ -1,4 +1,31 @@
 ------------------------
+Genesis v5.0.7 (25-Sep-15)
+------------------------
+
+- [COLOR orange]NOTE: Genesis is a free addon and it will always be a free addon.[/COLOR]
+- [COLOR orange]NOTE: Anyone that tells you otherwise is trying to steal your money.[/COLOR]
+
+- [COLOR orange]NOTE: I have no plans to stop Genesis development any time soon.[/COLOR]
+- [COLOR orange]NOTE: If that ever changes it would be announced by me on the TVA forum and not via other anonymous people on the internet.[/COLOR]
+
+- Added smart play feature.
+- NOTE: Smart play detects deleted streams from filehosts.
+- NOTE: It bypasses them and finds a working stream of the same filehost.
+
+- Re-added simple downloading support (thx 2 spoyser).
+- NOTE: Downloading will change again in future.
+- NOTE: A seperate addon will be used for downloading from Genesis.
+- NOTE: You can access your downloaded content from My Genesis section.
+
+- Updated available sources.
+- Updated available resolvers.
+- Tweaked default timeout of sources.
+- Tweaked requests timeout.
+- Updated translations.
+- Code cosmetics.
+
+
+------------------------
 Genesis v5.0.6 (19-Sep-15)
 ------------------------
 

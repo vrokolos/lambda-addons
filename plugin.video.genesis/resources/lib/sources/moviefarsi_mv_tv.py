@@ -22,12 +22,16 @@
 import re,urllib,urlparse
 
 from resources.lib.libraries import cleantitle
+from resources.lib.libraries import cloudflare
 from resources.lib.libraries import client
+from resources.lib.libraries import cache
 
 
 class source:
     def __init__(self):
         self.base_link = 'http://moviefarsi2.com'
+        self.tvsearch_link = '/list-series/'
+        self.cookie_link = 'Human=true'
         self.search_link = '?s=%s'
 
 
@@ -36,7 +40,9 @@ class source:
             query = self.search_link % urllib.quote_plus(title)
             query = urlparse.urljoin(self.base_link, query)
 
-            result = client.source(query)
+            result = client.source(query, cookie=self.cookie_link)
+            if result == None: result = cloudflare.source(query)
+
             result = client.parseDOM(result, 'article', attrs = {'id': 'post-\d*'})
             result = [i for i in result if imdb in i][0]
             result = client.parseDOM(result, 'a', ret='href', attrs = {'class': 'more-link'})[0]
@@ -50,31 +56,46 @@ class source:
 
     def get_show(self, imdb, tvdb, tvshowtitle, year):
         try:
-            query = self.search_link % urllib.quote_plus(tvshowtitle)
-            query = urlparse.urljoin(self.base_link, query)
+            result = cache.get(self.moviefarsi_shows, 168, table='chronic')
+            if result == None: return
 
-            result = client.source(query)
-            result = client.parseDOM(result, 'article', attrs = {'id': 'post-\d*'})
+            tvshowtitle = cleantitle.tv(tvshowtitle)
+            years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
 
-            match = [i for i in result if imdb in i]
+            result = [i[0] for i in result if tvshowtitle == cleantitle.tv(i[1])][0]
 
-            if len(match) == 0:
-                tvshowtitle = cleantitle.tv(tvshowtitle)
-                years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
+            url = urlparse.urljoin(self.base_link, result)
 
-                result = [i for i in result if any(x in i for x in years)]
-                result = [(client.parseDOM(i, 'a', ret='title'), i) for i in result]
-                result = [(i[0][0], i[1]) for i in result if len(i[0]) > 0]
-                result = [(re.sub(r'[^\x00-\x7F]+',' ', i[0]).strip(), i[1]) for i in result]
+            result = client.source(url, cookie=self.cookie_link)
+            if result == None: result = cloudflare.source(url)
 
-                match = [i[1] for i in result if tvshowtitle == cleantitle.tv(i[0])]
+            result = client.parseDOM(result, 'article', attrs = {'id': 'post-\d*'})[0]
 
-            result = match[0]
-            result = client.parseDOM(result, 'a', ret='href', attrs = {'class': 'more-link'})[0]
+            y = client.parseDOM(result, 'strong')[0]
+            y = re.compile('(\d{4})').findall(y)[0]
+            if not y in years: return
+
+            result = client.parseDOM(result, 'a', ret='href')[0]
 
             url = re.compile('//.+?/(\d*)').findall(result)[0]
             url = url.encode('utf-8')
             return url
+        except:
+            return
+
+
+    def moviefarsi_shows(self):
+        try:
+            query = urlparse.urljoin(self.base_link, self.tvsearch_link)
+
+            result = client.source(query, cookie=self.cookie_link)
+            if result == None: result = cloudflare.source(query)
+
+            result = client.parseDOM(result, 'li', attrs = {'class': 'categories'})[0]
+
+            result = re.compile('href="(.+?)" *>(.+?)<').findall(result)
+
+            return result
         except:
             return
 
@@ -103,7 +124,8 @@ class source:
             if len(content) == 0:
                 url = urlparse.urljoin(self.base_link, url) + '/'
 
-                result = client.source(url)
+                result = client.source(url, cookie=self.cookie_link)
+                if result == None: result = cloudflare.source(url)
 
                 links = re.compile('src=".+?/downloadicon.png".+?href="(.+?)"').findall(result)
 
@@ -135,7 +157,8 @@ class source:
 
                 url = urlparse.urljoin(self.base_link, url) + '/'
 
-                result = client.source(url)
+                result = client.source(url, cookie=self.cookie_link)
+                if result == None: result = cloudflare.source(url)
 
                 match = re.compile('<span style *= *"color: *#ff0000;">.+?<span style *= *"color: *#333333;" *> *(\d*) *</span>.+?<span style *= *"color: *#333333;" *> *(\d*) *</span>').findall(result)[0]
 
@@ -175,7 +198,9 @@ class source:
 
             match = ['S%sE%s' % (season, episode), 'S%s E%s' % (season, episode)]
 
-            result = client.source(url)
+            result = client.source(url, cookie=self.cookie_link)
+            if result == None: result = cloudflare.source(url)
+
             result = client.parseDOM(result, 'a', ret='href')
             result = [i for i in result if any(x in i for x in match)][0]
 

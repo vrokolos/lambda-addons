@@ -22,6 +22,7 @@
 import re,urllib,urlparse,json
 
 from resources.lib.libraries import cleantitle
+from resources.lib.libraries import cloudflare
 from resources.lib.libraries import client
 
 
@@ -40,7 +41,7 @@ class source:
             query = urlparse.urljoin(self.base_link, self.ajax_link)
             post = self.search_link % (urllib.quote_plus(tvshowtitle))
 
-            result = client.source(query, post=post, headers=self.headers)
+            result = cloudflare.source(query, post=post, headers=self.headers)
             result = json.loads(result)
 
             tvshowtitle = cleantitle.tv(tvshowtitle)
@@ -53,7 +54,7 @@ class source:
 
             url = urlparse.urljoin(self.base_link, result)
 
-            result = client.source(url)
+            result = cloudflare.source(url)
 
             url = client.parseDOM(result, 'div', ret='value', attrs = {'id': 'icerikid'})[0]
             url = url.encode('utf-8')
@@ -69,7 +70,7 @@ class source:
             query = urlparse.urljoin(self.base_link, self.ajax_link)
             post = self.episode_link % ('%01d' % int(season), url)
 
-            result = client.source(query, post=post, headers=self.headers)
+            result = cloudflare.source(query, post=post, headers=self.headers)
             result = json.loads(result)
             result = result['data']
             result = re.compile('href="(.+?)"').findall(result)
@@ -92,13 +93,13 @@ class source:
 
             url = urlparse.urljoin(self.base_link, url)
 
-            result = client.source(url)
+            result = cloudflare.source(url)
 
             query = urlparse.urljoin(self.base_link, self.ajax_link)
             post = re.compile('var\s*view_id\s*=\s*"(\d*)"').findall(result)[0]
             post = self.player_link % post
 
-            result = client.source(query, post=post, headers=self.headers)
+            result = cloudflare.source(query, post=post, headers=self.headers)
             result = json.loads(result)
             result = result['data']
 

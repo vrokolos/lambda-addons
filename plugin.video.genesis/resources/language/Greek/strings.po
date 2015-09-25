@@ -2,12 +2,13 @@
 # Addon id: plugin.video.genesis
 # Addon Provider: Genesis
 # Translators:
+# Translators:
 # lambda81 <lambda.xbmc.addons@gmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: Genesis\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: 2015-09-02 12:49+0000\n"
+"PO-Revision-Date: 2015-09-23 23:11+0000\n"
 "Last-Translator: lambda81 <lambda.xbmc.addons@gmail.com>\n"
 "Language-Team: Greek (http://www.transifex.com/tv-addons/genesis/language/el/)\n"
 "MIME-Version: 1.0\n"
@@ -244,6 +245,18 @@ msgctxt "#30097"
 msgid "Favourite TV"
 msgstr "Αγαπημένες Σειρές"
 
+msgctxt "#30098"
+msgid "Downloads"
+msgstr "Λήψεις"
+
+msgctxt "#30099"
+msgid "Movies"
+msgstr "Ταινίες"
+
+msgctxt "#30100"
+msgid "TV"
+msgstr "TV"
+
 msgctxt "#30111"
 msgid "[B]SETTINGS[/B] : General"
 msgstr "[B]ΡΥΘΜΙΣΕΙΣ[/B] : Γενικά"
@@ -287,6 +300,10 @@ msgstr "[B]GENESIS[/B] : Καθαρισμός μνήμης..."
 msgctxt "#30121"
 msgid "[B]GENESIS[/B] : Library"
 msgstr "[B]GENESIS[/B] : Συλλογή"
+
+msgctxt "#30122"
+msgid "[B]GENESIS[/B] : Downloads"
+msgstr "[B]GENESIS[/B] : Λήψεις"
 
 msgctxt "#30131"
 msgid "[B]LIBRARY[/B] : Settings"
@@ -1057,3 +1074,15 @@ msgstr "Κύρια γλώσσα"
 msgctxt "#30946"
 msgid "Secondary Language"
 msgstr "Δευτερεύουσα γλώσσα"
+
+msgctxt "#30950"
+msgid "Downloads"
+msgstr "Λήψεις"
+
+msgctxt "#30951"
+msgid "Movies"
+msgstr "Ταινίες"
+
+msgctxt "#30952"
+msgid "TV"
+msgstr "TV"

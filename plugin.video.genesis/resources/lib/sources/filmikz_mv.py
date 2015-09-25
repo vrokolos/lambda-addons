@@ -29,22 +29,22 @@ from resources.lib import resolvers
 class source:
     def __init__(self):
         self.base_link = 'http://filmikz.ch'
-        self.search_link = '/index.php?search=%s&image.x=0&image.y=0'
+        self.search_link = '/movies.php'
 
 
     def get_movie(self, imdb, title, year):
         try:
-            query = self.search_link % (urllib.quote_plus(title))
-            query = urlparse.urljoin(self.base_link, query)
+            query = urlparse.urljoin(self.base_link, self.search_link)
 
             result = client.source(query)
-            result = client.parseDOM(result, 'td', attrs = {'class': 'movieText'})
 
             title = cleantitle.movie(title)
             years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
 
-            result = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'strong')) for i in result]
-            result = [(i[0][0], i[1][0]) for i in result if len(i[0]) > 0 and len(i[1]) > 0]
+            result = re.compile('(<li>.+?</li>)').findall(result)
+            result = [i for i in result if "'main2'" in i]
+            result = [re.compile('href=(.+?)>(.+?)<').findall(i) for i in result]
+            result = [i[0] for i in result if len(i) > 0]
             result = [(i[0], re.compile('(.+?) [(](\d{4})[)]').findall(i[1])) for i in result]
             result = [(i[0], i[1][0][0], i[1][0][1]) for i in result if len(i[1]) > 0]
             result = [i for i in result if title == cleantitle.movie(i[1])]
