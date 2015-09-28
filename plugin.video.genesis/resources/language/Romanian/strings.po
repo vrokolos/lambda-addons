@@ -3,1087 +3,1086 @@
 # Addon Provider: Genesis
 # Translators:
 # Translators:
-# Mafarricos, 2015
-# lambda81, 2015
+# Cojocaru Nicolae - Gheorhe, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: Genesis\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: 2015-09-23 23:36+0000\n"
+"PO-Revision-Date: 2015-09-28 03:36+0000\n"
 "Last-Translator: lambda81\n"
-"Language-Team: Portuguese (http://www.transifex.com/tv-addons/genesis/language/pt/)\n"
+"Language-Team: Romanian (http://www.transifex.com/tv-addons/genesis/language/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: pt\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: ro\n"
+"Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));\n"
 
 msgctxt "#30001"
 msgid "Movies"
-msgstr "Filmes"
+msgstr "Filme"
 
 msgctxt "#30002"
 msgid "TV Shows"
-msgstr "Séries"
+msgstr "Seriale"
 
 msgctxt "#30003"
 msgid "Channels"
-msgstr "Canais"
+msgstr "Canale"
 
 msgctxt "#30004"
 msgid "My Genesis"
-msgstr "Meu Genesis"
+msgstr "Genesis-ul Meu"
 
 msgctxt "#30005"
 msgid "Latest Movies"
-msgstr "Últimos Filmes"
+msgstr "Filme Recente"
 
 msgctxt "#30006"
 msgid "Latest Episodes"
-msgstr "Últimos Episódios"
+msgstr "Episoade Recente"
 
 msgctxt "#30007"
 msgid "TV Calendar"
-msgstr "Calendário de Séries"
+msgstr "Calendar TV"
 
 msgctxt "#30008"
 msgid "Tools"
-msgstr "Ferramentas"
+msgstr "Unelte"
 
 msgctxt "#30009"
 msgid "Search"
-msgstr "Pesquisar"
+msgstr "Cautare"
 
 msgctxt "#30021"
 msgid "Genres"
-msgstr "Géneros"
+msgstr "Tipuri"
 
 msgctxt "#30022"
 msgid "Year"
-msgstr "Ano"
+msgstr "Ani"
 
 msgctxt "#30023"
 msgid "People"
-msgstr "Atores"
+msgstr "Persoane"
 
 msgctxt "#30024"
 msgid "Certificates"
-msgstr "Classificações Parentais"
+msgstr "Certificari"
 
 msgctxt "#30025"
 msgid "Featured"
-msgstr "Em Destaque"
+msgstr "Recomandate"
 
 msgctxt "#30026"
 msgid "People Watching"
-msgstr "A ser Visto"
+msgstr "La ce se uita lumea"
 
 msgctxt "#30027"
 msgid "Most Popular"
-msgstr "Mais Populares"
+msgstr "Cele mai indragite"
 
 msgctxt "#30028"
 msgid "Most Voted"
-msgstr "Mais Votados"
+msgstr "Cele mai votate"
 
 msgctxt "#30029"
 msgid "Box Office"
-msgstr "Sucessos de Bilheteira"
+msgstr "Box Office"
 
 msgctxt "#30030"
 msgid "Oscar Winners"
-msgstr "Vendedores de Óscares"
+msgstr "Castigatori Oscar"
 
 msgctxt "#30031"
 msgid "In Theaters"
-msgstr "Nos Cinemas"
+msgstr "In Cinema"
 
 msgctxt "#30032"
 msgid "Latest Movies"
-msgstr "Últimos Filmes"
+msgstr "Filme Recente"
 
 msgctxt "#30033"
 msgid "Favourites"
-msgstr "Favoritos"
+msgstr "Favorite"
 
 msgctxt "#30034"
 msgid "People Search"
-msgstr "Pesquisar Atores"
+msgstr "Cautare persoane"
 
 msgctxt "#30035"
 msgid "Search"
-msgstr "Pesquisar"
+msgstr "Cautare"
 
 msgctxt "#30051"
 msgid "Genres"
-msgstr "Géneros"
+msgstr "Tipuri"
 
 msgctxt "#30052"
 msgid "Year"
-msgstr "Ano"
+msgstr "Ani"
 
 msgctxt "#30053"
 msgid "Networks"
-msgstr "Redes Televisivas"
+msgstr "Retele"
 
 msgctxt "#30054"
 msgid "People Watching"
-msgstr "A ser Visto"
+msgstr "Persoane care "
 
 msgctxt "#30055"
 msgid "Most Popular"
-msgstr "Mais Populares"
+msgstr "Cele mai indragite"
 
 msgctxt "#30056"
 msgid "Airing today"
-msgstr "A dar hoje"
+msgstr "Difuzate Astazi"
 
 msgctxt "#30057"
 msgid "Returning TV Shows"
-msgstr "Séries a Retornar"
+msgstr "Seriale care reincep acum"
 
 msgctxt "#30058"
 msgid "New TV Shows"
-msgstr "Novas Séries"
+msgstr "Seriale Noi"
 
 msgctxt "#30059"
 msgid "Highly Rated"
-msgstr "Bem Classificados"
+msgstr "Foarte apreciate"
 
 msgctxt "#30060"
 msgid "Most Voted"
-msgstr "Mais Votados"
+msgstr "Cele mai votate"
 
 msgctxt "#30061"
 msgid "TV Calendar"
-msgstr "Calendário de Séries"
+msgstr "Calendar TV"
 
 msgctxt "#30062"
 msgid "Latest Episodes"
-msgstr "Últimos Episódios"
+msgstr "Episoade Recente"
 
 msgctxt "#30063"
 msgid "Favourite Episodes"
-msgstr "Episódios Favoritos"
+msgstr "Episoade Preferate"
 
 msgctxt "#30064"
 msgid "Favourites"
-msgstr "Favoritos"
+msgstr "Favorite"
 
 msgctxt "#30065"
 msgid "People Search"
-msgstr "Pesquisar Atores"
+msgstr "Cautare persoane"
 
 msgctxt "#30066"
 msgid "Search"
-msgstr "Pesquisar"
+msgstr "Cautare"
 
 msgctxt "#30081"
 msgid "[B]TRAKT[/B] : Collection"
-msgstr "[B]TRAKT[/B] : Coleção"
+msgstr "[B]TRAKT[/B] : Colectie"
 
 msgctxt "#30082"
 msgid "[B]TRAKT[/B] : Watchlist"
-msgstr "[B]TRAKT[/B] : Watchlist"
+msgstr "[B]TRAKT[/B] : De vazut"
 
 msgctxt "#30083"
 msgid "[B]TRAKT[/B] : Featured"
-msgstr "[B]TRAKT[/B] : Em Destaque"
+msgstr "[B]TRAKT[/B] : Recomandat"
 
 msgctxt "#30084"
 msgid "[B]TRAKT[/B] : Ratings"
-msgstr "[B]TRAKT[/B] : Classificações"
+msgstr "[B]TRAKT[/B] : Scoruri"
 
 msgctxt "#30085"
 msgid "[B]TRAKT[/B] : TV Collection"
-msgstr "[B]TRAKT[/B] : Coleção Séries"
+msgstr "[B]TRAKT[/B] : Colectie Seriale"
 
 msgctxt "#30086"
 msgid "[B]TRAKT[/B] : TV Watchlist"
-msgstr "[B]TRAKT[/B] : Watchlist Séries"
+msgstr "[B]TRAKT[/B] : Seriale de vazut"
 
 msgctxt "#30087"
 msgid "[B]TRAKT[/B] : TV Featured"
-msgstr "[B]TRAKT[/B] : Séries em Destaque"
+msgstr "[B]TRAKT[/B] : Seriale Recomandate"
 
 msgctxt "#30088"
 msgid "[B]TRAKT[/B] : TV Ratings"
-msgstr "[B]TRAKT[/B] : Classificação de Séries"
+msgstr "[B]TRAKT[/B] : Seriale dupa scor"
 
 msgctxt "#30089"
 msgid "[B]TRAKT[/B] : Progress"
-msgstr "[B]TRAKT[/B] : Progresso"
+msgstr "[B]TRAKT[/B] : Unde am ramas"
 
 msgctxt "#30090"
 msgid "[B]TRAKT[/B] : Episodes"
-msgstr "[B]TRAKT[/B] : Episódios"
+msgstr "[B]TRAKT[/B] : Episoade"
 
 msgctxt "#30091"
 msgid "[B]IMDB[/B] : Watchlist"
-msgstr "[B]IMDB[/B] : Watchlist"
+msgstr "[B]IMDB[/B] : De vazut"
 
 msgctxt "#30092"
 msgid "[B]IMDB[/B] : TV Watchlist"
-msgstr "[B]IMDB[/B] : Watchlist Séries"
+msgstr "[B]IMDB[/B] : Seriale de vazut"
 
 msgctxt "#30093"
 msgid "Movie Lists"
-msgstr "Listas de Filmes"
+msgstr "Lista Filme"
 
 msgctxt "#30094"
 msgid "TV Show Lists"
-msgstr "Listas de Séries"
+msgstr "Lista Seriale"
 
 msgctxt "#30095"
 msgid "Favourite Movies"
-msgstr "Filmes Favoritos"
+msgstr "Filme Preferate"
 
 msgctxt "#30096"
 msgid "Favourite Episodes"
-msgstr "Episódios Favoritos"
+msgstr "Episoade preferate"
 
 msgctxt "#30097"
 msgid "Favourite TV"
-msgstr "Séries Favoritas"
+msgstr "Seriale preferate"
 
 msgctxt "#30098"
 msgid "Downloads"
-msgstr "Transferências"
+msgstr "Descarcari"
 
 msgctxt "#30099"
 msgid "Movies"
-msgstr "Filmes"
+msgstr "Filme"
 
 msgctxt "#30100"
 msgid "TV"
-msgstr "Séries"
+msgstr "Seriale"
 
 msgctxt "#30111"
 msgid "[B]SETTINGS[/B] : General"
-msgstr "[B]CONFIGURAÇÕES[/B] : Geral"
+msgstr "[B]SETARI[/B] : General"
 
 msgctxt "#30112"
 msgid "[B]SETTINGS[/B] : Accounts"
-msgstr "[B]CONFIGURAÇÕES[/B] : Contas"
+msgstr "[B]SETARI[/B] : Cont"
 
 msgctxt "#30113"
 msgid "[B]SETTINGS[/B] : Playback"
-msgstr "[B]CONFIGURAÇÕES[/B] : Reprodução"
+msgstr "[B]SETARI[/B] : Playback"
 
 msgctxt "#30114"
 msgid "[B]SETTINGS[/B] : Subtitles"
-msgstr "[B]CONFIGURAÇÕES[/B] : Legendas"
+msgstr "[B]SETARI[/B] : Subtitrari"
 
 msgctxt "#30115"
 msgid "[B]SOURCES[/B] : Movies"
-msgstr "[B]FONTES[/B] : Filmes"
+msgstr "[B]SURSE[/B] : Filme"
 
 msgctxt "#30116"
 msgid "[B]SOURCES[/B] : TV"
-msgstr "[B]FONTES[/B] : Séries"
+msgstr "[B]SURSE[/B] : Seriale"
 
 msgctxt "#30117"
 msgid "[B]HOSTS[/B] : HD Priority"
-msgstr "[B]FONTES[/B] : Prioridade HD"
+msgstr "[B]HOSTS[/B] : Prioritate HD"
 
 msgctxt "#30118"
 msgid "[B]HOSTS[/B] : SD Priority"
-msgstr "[B]FONTES[/B] : Prioridade SD"
+msgstr "[B]HOSTS[/B] : Prioritate SD"
 
 msgctxt "#30119"
 msgid "[B]GENESIS[/B] : Clear sources..."
-msgstr "[B]GENESIS[/B] : Limpar fontes..."
+msgstr "[B]GENESIS[/B] : Sterge sursele..."
 
 msgctxt "#30120"
 msgid "[B]GENESIS[/B] : Clear cache..."
-msgstr "[B]GENESIS[/B] : Limpar cache..."
+msgstr "[B]GENESIS[/B] : Sterge cache-ul..."
 
 msgctxt "#30121"
 msgid "[B]GENESIS[/B] : Library"
-msgstr "[B]GENESIS[/B] : Biblioteca"
+msgstr "[B]GENESIS[/B] : Librarie"
 
 msgctxt "#30122"
 msgid "[B]GENESIS[/B] : Downloads"
-msgstr "[B]GENESIS[/B] : Transferências"
+msgstr "[B]GENESIS[/B] : Descarcari"
 
 msgctxt "#30131"
 msgid "[B]LIBRARY[/B] : Settings"
-msgstr "[B]BIBLIOTECA[/B] : Configurações"
+msgstr "[B]LIBRARIE[/B] : Setari"
 
 msgctxt "#30132"
 msgid "[B]GENESIS[/B] : Update folders..."
-msgstr "[B]GENESIS[/B] : Atualizar pastas..."
+msgstr "[B]LIBRARIE[/B] : Actualizeaza directoarele"
 
 msgctxt "#30133"
 msgid "[B]GENESIS[/B] : Movie folder..."
-msgstr "[B]GENESIS[/B] : Pasta Filmes..."
+msgstr "[B]GENESIS[/B] : Director Filme"
 
 msgctxt "#30134"
 msgid "[B]GENESIS[/B] : TV folder..."
-msgstr "[B]GENESIS[/B] : Pasta Séries..."
+msgstr "[B]GENESIS[/B] : Director Seriale"
 
 msgctxt "#30135"
 msgid "[B]TRAKT[/B] : Import Collection..."
-msgstr "[B]TRAKT[/B] : Importar Coleção..."
+msgstr "[B]GENESIS[/B] : Importa Colectia"
 
 msgctxt "#30136"
 msgid "[B]TRAKT[/B] : Import Watchlist..."
-msgstr "[B]TRAKT[/B] : Importar Watchlist..."
+msgstr "[B]GENESIS[/B] : Importa lista de vazut"
 
 msgctxt "#30137"
 msgid "[B]TRAKT[/B] : Import TV Collection..."
-msgstr "[B]TRAKT[/B] : Importar Coleção Séries..."
+msgstr "[B]GENESIS[/B] : Importa seriale"
 
 msgctxt "#30138"
 msgid "[B]TRAKT[/B] : Import TV Watchlist..."
-msgstr "[B]TRAKT[/B] : Importar Watchlist Séries..."
+msgstr "[B]GENESIS[/B] : Importa lista serialelor de vazut"
 
 msgctxt "#30139"
 msgid "[B]IMDB[/B] : Import Watchlist..."
-msgstr "[B]IMDB[/B] : Importar Watchlist..."
+msgstr "[B]IMDB[/B] : Importa lista de vazut"
 
 msgctxt "#30140"
 msgid "[B]IMDB[/B] : Import TV Watchlist..."
-msgstr "[B]IMDB[/B] : Import Watchlist Séries..."
+msgstr "[B]IMDB[/B] : Importa lista serialelor de vazut"
 
 msgctxt "#30151"
 msgid "Movies"
-msgstr "Filmes"
+msgstr "Filme"
 
 msgctxt "#30152"
 msgid "TV Shows"
-msgstr "Séries"
+msgstr "Seriale"
 
 msgctxt "#30153"
 msgid "People (Movies)"
-msgstr "Atores (Filmes)"
+msgstr "Persoane (Filme)"
 
 msgctxt "#30154"
 msgid "People (TV)"
-msgstr "Atores (Séries)"
+msgstr "Persoane (Seriale)"
 
 msgctxt "#30191"
 msgid "Add to Library"
-msgstr "Adicionar à Biblioteca"
+msgstr "Adauga in librarie"
 
 msgctxt "#30201"
 msgid "Search"
-msgstr "Pesquisar"
+msgstr "Cautare"
 
 msgctxt "#30202"
 msgid "Queue item"
-msgstr "Colocar em fila"
+msgstr "Pune in lista de asteptare"
 
 msgctxt "#30203"
 msgid "Auto-play"
-msgstr "Reprodução Automática"
+msgstr "Rulare automata"
 
 msgctxt "#30204"
 msgid "Play using..."
-msgstr "Utilizar Reprodução com..."
+msgstr "Rulare folosind..."
 
 msgctxt "#30205"
 msgid "Movie information"
-msgstr "Informação do Filme"
+msgstr "Detalii Film"
 
 msgctxt "#30206"
 msgid "Mark as watched"
-msgstr "Marcar como visto"
+msgstr "\"Vazut\""
 
 msgctxt "#30207"
 msgid "Mark as unwatched"
-msgstr "Marcar como não visto"
+msgstr "Nevazut"
 
 msgctxt "#30208"
 msgid "Trakt Manager"
-msgstr "Gestor Trakt"
+msgstr "Trakt Manager"
 
 msgctxt "#30209"
 msgid "Add to favourites"
-msgstr "Adicionar aos favoritos"
+msgstr "Adauga la favorite"
 
 msgctxt "#30210"
 msgid "Remove from favourites"
-msgstr "Remover dos favoritos"
+msgstr "Sterge din favorite"
 
 msgctxt "#30211"
 msgid "Add to Library"
-msgstr "Adicionar à Biblioteca"
+msgstr "Adauga in librarie"
 
 msgctxt "#30212"
 msgid "Set Movies view"
-msgstr "Configurar vista de Filmes"
+msgstr "Cum afisez filmele"
 
 msgctxt "#30213"
 msgid "[I]Next Page[/I]"
-msgstr "[I]Próxima Página[/I]"
+msgstr "[I]Pagina urmatoare[/I]"
 
 msgctxt "#30231"
 msgid "Search"
-msgstr "Pesquisar"
+msgstr "Cautare"
 
 msgctxt "#30232"
 msgid "Queue item"
-msgstr "Colocar em fila"
+msgstr "Pune in lista de asteptare"
 
 msgctxt "#30233"
 msgid "TV show information"
-msgstr "Informação da Série"
+msgstr "Informatii Serial"
 
 msgctxt "#30234"
 msgid "Mark as watched"
-msgstr "Marcar como visto"
+msgstr "\"Vazut\""
 
 msgctxt "#30235"
 msgid "Mark as unwatched"
-msgstr "Marcar como não visto"
+msgstr "Nevazut"
 
 msgctxt "#30236"
 msgid "Trakt Manager"
-msgstr "Gestor Trakt"
+msgstr "Trakt Manager"
 
 msgctxt "#30237"
 msgid "Add to favourites"
-msgstr "Adicionar aos favoritos"
+msgstr "Adauga la favorite"
 
 msgctxt "#30238"
 msgid "Remove from favourites"
-msgstr "Remover dos favoritos"
+msgstr "Sterge din favorite"
 
 msgctxt "#30239"
 msgid "Add to Library"
-msgstr "Adicionar à Biblioteca"
+msgstr "Adauga in librarie"
 
 msgctxt "#30240"
 msgid "Set TV Shows view"
-msgstr "Configurar vista de Séries"
+msgstr "Cum afisez serialele"
 
 msgctxt "#30241"
 msgid "[I]Next Page[/I]"
-msgstr "[I]Próxima Página[/I]"
+msgstr "[I]Pagina Urmatoare[/I]"
 
 msgctxt "#30261"
 msgid "Queue item"
-msgstr "Colocar em fila"
+msgstr "Pune in lista de asteptare"
 
 msgctxt "#30262"
 msgid "TV show information"
-msgstr "Informação da Série"
+msgstr "Despre acest Serial"
 
 msgctxt "#30263"
 msgid "Mark as watched"
-msgstr "Marcar como visto"
+msgstr "\"Vazut\""
 
 msgctxt "#30264"
 msgid "Mark as unwatched"
-msgstr "Marcar como não visto"
+msgstr "Nevazut"
 
 msgctxt "#30265"
 msgid "Trakt Manager"
-msgstr "Gestor Trakt"
+msgstr "Trakt Manager"
 
 msgctxt "#30266"
 msgid "Add to favourites"
-msgstr "Adicionar aos favoritos"
+msgstr "Adauga la favorite"
 
 msgctxt "#30267"
 msgid "Remove from favourites"
-msgstr "Remover dos favoritos"
+msgstr "Sterge din favorite"
 
 msgctxt "#30268"
 msgid "Add to Library"
-msgstr "Adicionar à Biblioteca"
+msgstr "Adauga la librarie"
 
 msgctxt "#30269"
 msgid "Set Seasons view"
-msgstr "Configurar vista de Temporadas"
+msgstr "Cum afisez sezoanele"
 
 msgctxt "#30270"
 msgid "Auto-play"
-msgstr "Reprodução Automática"
+msgstr "Rulare automata"
 
 msgctxt "#30271"
 msgid "Play using..."
-msgstr "Utilizar Reprodução com..."
+msgstr "Rulare folosind..."
 
 msgctxt "#30272"
 msgid "Episode information"
-msgstr "Informação do Episódio"
+msgstr "Despre acest episod"
 
 msgctxt "#30273"
 msgid "Set Episodes view"
-msgstr "Configurar vista de Episódios"
+msgstr "Cum afisez episoadele"
 
 msgctxt "#30291"
 msgid "Auto-play"
-msgstr "Reprodução Automática"
+msgstr "Rulare automata"
 
 msgctxt "#30292"
 msgid "Play using..."
-msgstr "Utilizar Reprodução com..."
+msgstr "Rulare folosind..."
 
 msgctxt "#30293"
 msgid "Information"
-msgstr "Informação"
+msgstr "Informatii"
 
 msgctxt "#30294"
 msgid "Refresh"
-msgstr "Refrescar"
+msgstr "Actua"
 
 msgctxt "#30295"
 msgid "Add-on settings"
-msgstr "Configurações do add-on"
+msgstr "Informatii add-on"
 
 msgctxt "#30296"
 msgid "Now playing..."
-msgstr "A Reproduzir..."
+msgstr "Ruleaza..."
 
 msgctxt "#30401"
 msgid "Are you sure?"
-msgstr "Tem certeza?"
+msgstr "Sunteti sigur(a) ?"
 
 msgctxt "#30402"
 msgid "Process Complete"
-msgstr "Processo Terminado"
+msgstr "Operatiune finalizata"
 
 msgctxt "#30411"
 msgid "Added to Favourites"
-msgstr "Adicionado aos Favoritos"
+msgstr "Adaugat la favorite"
 
 msgctxt "#30412"
 msgid "Removed from Favourites"
-msgstr "Removido dos Favoritos"
+msgstr "Sters din favorite"
 
 msgctxt "#30421"
 msgid "Adding to library..."
-msgstr "Adicionar à biblioteca..."
+msgstr "Se adauga in librarie..."
 
 msgctxt "#30422"
 msgid "Updating TV shows..."
-msgstr "Atualizando Séries..."
+msgstr "Actualizare Seriale..."
 
 msgctxt "#30423"
 msgid "Process Complete"
-msgstr "Processo Terminado"
+msgstr "Operatiune finalizata"
 
 msgctxt "#30425"
 msgid "Are you sure?"
-msgstr "Tem certeza?"
+msgstr "Confirmati ?"
 
 msgctxt "#30451"
 msgid "Getting information"
-msgstr "A Obter Informação"
+msgstr "Primire informatii..."
 
 msgctxt "#30461"
 msgid "Resume from"
-msgstr "Resumir de"
+msgstr "Reia de la..."
 
 msgctxt "#30462"
 msgid "Start from beginning"
-msgstr "Começar do início"
+msgstr "De la inceput"
 
 msgctxt "#30463"
 msgid "Resume"
-msgstr "Resumir"
+msgstr "De unde am ramas"
 
 msgctxt "#30464"
 msgid "Loaded in"
-msgstr "Carregado em"
+msgstr "Incarcat in"
 
 msgctxt "#30465"
 msgid "seconds"
-msgstr "segundos"
+msgstr "secunde"
 
 msgctxt "#30471"
 msgid "Trakt Manager"
-msgstr "Gestor Trakt"
+msgstr "Trakt Manager"
 
 msgctxt "#30472"
 msgid "Add to Collection"
-msgstr "Adicionar à Coleção"
+msgstr "Adauga la colectie"
 
 msgctxt "#30473"
 msgid "Remove from Collection"
-msgstr "Remover da Coleção"
+msgstr "Sterge din colectie"
 
 msgctxt "#30474"
 msgid "Add to Watchlist"
-msgstr "Adicionar à Watchlist"
+msgstr "Adauga la lista de vazut"
 
 msgctxt "#30475"
 msgid "Remove from Watchlist"
-msgstr "Remover da Watchlist"
+msgstr "Sterge din lista de vazut"
 
 msgctxt "#30476"
 msgid "Add to new List"
-msgstr "Adicionar a nova Lista"
+msgstr "Adauga la o lista noua"
 
 msgctxt "#30477"
 msgid "Add to"
-msgstr "Adicionar a"
+msgstr "Adauga la"
 
 msgctxt "#30478"
 msgid "Remove from"
-msgstr "Remover de"
+msgstr "Sterge din"
 
 msgctxt "#30491"
 msgid "This View is now Default"
-msgstr "Esta Vista está definida agora por defeito"
+msgstr "Acest mod de vizualizare este de acum implicit"
 
 msgctxt "#30501"
 msgid "No stream available"
-msgstr "Sem fonte disponível"
+msgstr "Nu exista surse momentan"
 
 msgctxt "#30502"
 msgid "Movie information"
-msgstr "Informação do Filme"
+msgstr "Detalii Film"
 
 msgctxt "#30503"
 msgid "Episode information"
-msgstr "Informação do Episódio"
+msgstr "Informatii episod"
 
 msgctxt "#30504"
 msgid "Queue item"
-msgstr "Colocar em fila"
+msgstr "Pune in lista de asteptare"
 
 msgctxt "#30505"
 msgid "Download item"
-msgstr "Download do item"
+msgstr "Descarcare"
 
 msgctxt "#30506"
 msgid "Refresh sources"
-msgstr "Refrescar fontes"
+msgstr "Actualizare surse"
 
 msgctxt "#30507"
 msgid "Add-on settings"
-msgstr "Configurações do add-on"
+msgstr "Informatii add-on"
 
 msgctxt "#30508"
 msgid "Now playing..."
-msgstr "A Reproduzir..."
+msgstr "Ruleaza..."
 
 msgctxt "#30509"
 msgid "Auto-play"
-msgstr "Reprodução Automática"
+msgstr "Rulare automata"
 
 msgctxt "#30510"
 msgid "Are you sure?"
-msgstr "Tem certeza?"
+msgstr "Confirmati ?"
 
 msgctxt "#30511"
 msgid "Process Complete"
-msgstr "Processo Terminado"
+msgstr "Operatiune finalizata"
 
 msgctxt "#30521"
 msgid "Monday"
-msgstr "Segunda-feira"
+msgstr "Luni"
 
 msgctxt "#30522"
 msgid "Tuesday"
-msgstr "Terça-feira"
+msgstr "Marti"
 
 msgctxt "#30523"
 msgid "Wednesday"
-msgstr "Quarta-feira"
+msgstr "Miercuri"
 
 msgctxt "#30524"
 msgid "Thursday"
-msgstr "Quinta-feira"
+msgstr "Joi"
 
 msgctxt "#30525"
 msgid "Friday"
-msgstr "Sexta-feira"
+msgstr "Vineri"
 
 msgctxt "#30526"
 msgid "Saturday"
-msgstr "Sábado"
+msgstr "Sambata"
 
 msgctxt "#30527"
 msgid "Sunday"
-msgstr "Domingo"
+msgstr "Duminica"
 
 msgctxt "#30528"
 msgid "January"
-msgstr "Janeiro"
+msgstr "Ianuarie"
 
 msgctxt "#30529"
 msgid "February"
-msgstr "Fevereiro"
+msgstr "Februarie"
 
 msgctxt "#30530"
 msgid "March"
-msgstr "Março"
+msgstr "Martie"
 
 msgctxt "#30531"
 msgid "April"
-msgstr "Abril"
+msgstr "Aprilie"
 
 msgctxt "#30532"
 msgid "May"
-msgstr "Maio"
+msgstr "Mai"
 
 msgctxt "#30533"
 msgid "June"
-msgstr "Junho"
+msgstr "Iunie"
 
 msgctxt "#30534"
 msgid "July"
-msgstr "Julho"
+msgstr "Iulie"
 
 msgctxt "#30535"
 msgid "August"
-msgstr "Agosto"
+msgstr "August"
 
 msgctxt "#30536"
 msgid "September"
-msgstr "Setembro"
+msgstr "Septembrie"
 
 msgctxt "#30537"
 msgid "October"
-msgstr "Outubro"
+msgstr "Octombrie"
 
 msgctxt "#30538"
 msgid "November"
-msgstr "Novembro"
+msgstr "Noiembrie"
 
 msgctxt "#30539"
 msgid "December"
-msgstr "Dezembro"
+msgstr "Decembrie"
 
 msgctxt "#30800"
 msgid "General"
-msgstr "Geral"
+msgstr "General"
 
 msgctxt "#30801"
 msgid "Appearance"
-msgstr "Apresentação"
+msgstr "Aspect"
 
 msgctxt "#30802"
 msgid "Enable Fanart"
-msgstr "Ativar Fanart"
+msgstr "Activare fanart"
 
 msgctxt "#30803"
 msgid "Info Language"
-msgstr "Informação da Língua"
+msgstr "Informatii despre limba"
 
 msgctxt "#30804"
 msgid "Sources Timeout"
-msgstr "Timeout das Fontes"
+msgstr "Time-out surse"
 
 msgctxt "#30805"
 msgid "Main menu"
-msgstr "Menu principal"
+msgstr "Meniul Principal"
 
 msgctxt "#30806"
 msgid "Latest Movies"
-msgstr "Últimos Filmes"
+msgstr "Filme Recente"
 
 msgctxt "#30807"
 msgid "Disabled"
-msgstr "Desativado"
+msgstr "Dezactivat"
 
 msgctxt "#30808"
 msgid "Default"
-msgstr "Por Defeito"
+msgstr "Implicit"
 
 msgctxt "#30809"
 msgid "Featured"
-msgstr "Em Destaque"
+msgstr "Recomandate"
 
 msgctxt "#30810"
 msgid "People Watching"
-msgstr "A ser Visto"
+msgstr "Persoane care "
 
 msgctxt "#30811"
 msgid "Latest Episodes"
-msgstr "Últimos Episódios"
+msgstr "Ultimele episoade"
 
 msgctxt "#30812"
 msgid "Disabled"
-msgstr "Desativado"
+msgstr "Dezactivat"
 
 msgctxt "#30813"
 msgid "Default"
-msgstr "Por Defeito"
+msgstr "Implicit"
 
 msgctxt "#30814"
 msgid "Favourites"
-msgstr "Favoritos"
+msgstr "Favorite"
 
 msgctxt "#30815"
 msgid "Trakt Progress"
-msgstr "Progresso Trakt"
+msgstr "Unde am ramas in Trakt"
 
 msgctxt "#30816"
 msgid "Trakt Episodes"
-msgstr "Episódios Trakt"
+msgstr "Episoade din Trakt"
 
 msgctxt "#30817"
 msgid "TV Calendar"
-msgstr "Calendário de Séries"
+msgstr "Calendar TV"
 
 msgctxt "#30818"
 msgid "Disabled"
-msgstr "Desativado"
+msgstr "Inactiv"
 
 msgctxt "#30819"
 msgid "Enabled"
-msgstr "Ativado"
+msgstr "Activ"
 
 msgctxt "#30830"
 msgid "Playback"
-msgstr "Reprodução"
+msgstr "Rulare"
 
 msgctxt "#30831"
 msgid "Max Quality"
-msgstr "Qualidade Máxima"
+msgstr "Calitatea Maxima"
 
 msgctxt "#30832"
 msgid "Host selection"
-msgstr "Seleção de Fontes"
+msgstr "Selectare Gazde"
 
 msgctxt "#30833"
 msgid "Dialog"
-msgstr "Diálogo"
+msgstr "Dialog"
 
 msgctxt "#30834"
 msgid "Directory"
-msgstr "Pasta"
+msgstr "Director"
 
 msgctxt "#30835"
 msgid "File Hosting Filters"
-msgstr "Filtros de Fontes de Ficheiros"
+msgstr "Filtre Gazde"
 
 msgctxt "#30836"
 msgid "Hosters with captchas"
-msgstr "Fontes com captchas"
+msgstr "Gazde cu capthas"
 
 msgctxt "#30837"
 msgid "Hosters with 1080p files"
-msgstr "Fontes com 1080p"
+msgstr "Gazde cu fisiere 1080p"
 
 msgctxt "#30838"
 msgid "Hosters with 720p files"
-msgstr "Fontes com 720p"
+msgstr "Gazde cu fisiere 720p"
 
 msgctxt "#30839"
 msgid "Auto-play"
-msgstr "Reprodução Automática"
+msgstr "Rulare automata"
 
 msgctxt "#30840"
 msgid "Auto-play"
-msgstr "Reprodução Automática"
+msgstr "Rulare automata"
 
 msgctxt "#30841"
 msgid "Auto-play (Library)"
-msgstr "Reprodução Automática (Biblioteca)"
+msgstr "Rulare automata (Librarie)"
 
 msgctxt "#30842"
 msgid "Force SD playback in Auto-play"
-msgstr "Forçar fontes SD em Reprodução Automática"
+msgstr "Forteaza calitate SD la rularea automata"
 
 msgctxt "#30843"
 msgid "When playback starts..."
-msgstr "Quando a reprodução começar..."
+msgstr "Cand incepe rularea..."
 
 msgctxt "#30844"
 msgid "Resume Playback"
-msgstr "Resumir Reprodução"
+msgstr "Rulare de unde am ramas"
 
 msgctxt "#30845"
 msgid "Playback Info"
-msgstr "Informação de Reprodução"
+msgstr "Informatii rulare"
 
 msgctxt "#30860"
 msgid "Movies"
-msgstr "Filmes"
+msgstr "Filme"
 
 msgctxt "#30861"
 msgid "TV"
-msgstr "Séries"
+msgstr "Seriale"
 
 msgctxt "#30870"
 msgid "HD Hosts"
-msgstr "Fontes HD"
+msgstr "Gazde HD"
 
 msgctxt "#30871"
 msgid "SD Hosts"
-msgstr "Fontes SD"
+msgstr "Gazde SD"
 
 msgctxt "#30881"
 msgid "Priority 1"
-msgstr "Prioridade 1"
+msgstr "Prioritate 1"
 
 msgctxt "#30882"
 msgid "Priority 2"
-msgstr "Prioridade 2"
+msgstr "Prioritate 2"
 
 msgctxt "#30883"
 msgid "Priority 3"
-msgstr "Prioridade 3"
+msgstr "Prioritate 3"
 
 msgctxt "#30884"
 msgid "Priority 4"
-msgstr "Prioridade 4"
+msgstr "Prioritate 4"
 
 msgctxt "#30885"
 msgid "Priority 5"
-msgstr "Prioridade 5"
+msgstr "Prioritate 5"
 
 msgctxt "#30886"
 msgid "Priority 6"
-msgstr "Prioridade 6"
+msgstr "Prioritate 6"
 
 msgctxt "#30887"
 msgid "Priority 7"
-msgstr "Prioridade 7"
+msgstr "Prioritate 7"
 
 msgctxt "#30888"
 msgid "Priority 8"
-msgstr "Prioridade 8"
+msgstr "Prioritate 8"
 
 msgctxt "#30889"
 msgid "Priority 9"
-msgstr "Prioridade 9"
+msgstr "Prioritate 9"
 
 msgctxt "#30890"
 msgid "Priority 10"
-msgstr "Prioridade 10"
+msgstr "Prioritate 10"
 
 msgctxt "#30891"
 msgid "Priority 11"
-msgstr "Prioridade 11"
+msgstr "Prioritate 11"
 
 msgctxt "#30892"
 msgid "Priority 12"
-msgstr "Prioridade 12"
+msgstr "Prioritate 12"
 
 msgctxt "#30893"
 msgid "Priority 13"
-msgstr "Prioridade 13"
+msgstr "Prioritate 13"
 
 msgctxt "#30894"
 msgid "Priority 14"
-msgstr "Prioridade 14"
+msgstr "Prioritate 14"
 
 msgctxt "#30895"
 msgid "Priority 15"
-msgstr "Prioridade 15"
+msgstr "Prioritate 15"
 
 msgctxt "#30896"
 msgid "Priority 16"
-msgstr "Prioridade 16"
+msgstr "Prioritate 16"
 
 msgctxt "#30897"
 msgid "Priority 17"
-msgstr "Prioridade 17"
+msgstr "Prioritate 17"
 
 msgctxt "#30898"
 msgid "Priority 18"
-msgstr "Prioridade 18"
+msgstr "Prioritate 18"
 
 msgctxt "#30899"
 msgid "Priority 19"
-msgstr "Prioridade 19"
+msgstr "Prioritate 19"
 
 msgctxt "#30900"
 msgid "Priority 20"
-msgstr "Prioridade 20"
+msgstr "Prioritate 20"
 
 msgctxt "#30910"
 msgid "Accounts"
-msgstr "Contas"
+msgstr "Conturi"
 
 msgctxt "#30911"
 msgid "User"
-msgstr "Utilizador"
+msgstr "Utilizator"
 
 msgctxt "#30912"
 msgid "Email"
-msgstr "Email"
+msgstr "E-mail"
 
 msgctxt "#30913"
 msgid "Password"
-msgstr "Password"
+msgstr "Parola"
 
 msgctxt "#30920"
 msgid "Library"
-msgstr "Biblioteca"
+msgstr "Librarie"
 
 msgctxt "#30921"
 msgid ""
 "Genesis folders will be imported to library if they are added to media "
 "sources."
-msgstr "Pastas do Genesis irão ser importadas para a biblioteca se adicionadas às fontes de vídeos."
+msgstr "Directoarele Genesis vor fi importate in librarie, daca sunt adaugate ca surse media."
 
 msgctxt "#30922"
 msgid "Movies"
-msgstr "Filmes"
+msgstr "Filme"
 
 msgctxt "#30923"
 msgid "TV"
-msgstr "Séries"
+msgstr "Seriale"
 
 msgctxt "#30924"
 msgid "Auto update TV Shows"
-msgstr "Atualizar automaticamente Séries"
+msgstr "Actualizeaza automat serialele"
 
 msgctxt "#30925"
 msgid "Show notifications during update"
-msgstr "Mostrar notificações durante a atualização"
+msgstr "Notificari in timpul actualizarii"
 
 msgctxt "#30926"
 msgid "Update library after adding content"
-msgstr "Atualizar biblioteca depois de adicionar conteúdo"
+msgstr "Actualizeaza libraria dupa adaugare de continut nou"
 
 msgctxt "#30927"
 msgid "Avoid creating duplicate content"
-msgstr "Evitar criar conteúdo duplicado"
+msgstr "Evita crearea continutului duplicat"
 
 msgctxt "#30928"
 msgid "Check movie before adding it"
-msgstr "Verificar filme antes de adiciona-lo"
+msgstr "Verifica filmul inainte de adaugare"
 
 msgctxt "#30929"
 msgid "Check first episode of season before adding it"
-msgstr "Verificar primeiro episódio da temporada antes de adiciona-lo"
+msgstr "Verifica primul episod al sezonului inainte de adaugare"
 
 msgctxt "#30940"
 msgid "Subtitles"
-msgstr "Legendas"
+msgstr "Subtitrari"
 
 msgctxt "#30941"
 msgid "Subtitles could be unavailable or out of sync."
-msgstr "As Legendas poderão estar indisponíveis ou fora de sincronismo."
+msgstr "Subtitrarile pot fi inaccesibile sau nesincronizate"
 
 msgctxt "#30942"
 msgid "In that case use your own subtitles."
-msgstr "Nessa situação utilize as suas próprias legendas."
+msgstr "In acest caz foloseste subtitrarile proprii"
 
 msgctxt "#30943"
 msgid "Enable subtitles"
-msgstr "Ativar Legendas"
+msgstr "Activeaza subtitrarile"
 
 msgctxt "#30944"
 msgid "Convert subtitles to UTF-8"
-msgstr "Converter legendas para UTF-8"
+msgstr "Converteste subtitrarile la UTF-8"
 
 msgctxt "#30945"
 msgid "Primary Language"
-msgstr "Língua Principal"
+msgstr "Limba principala"
 
 msgctxt "#30946"
 msgid "Secondary Language"
-msgstr "Língua Secundária"
+msgstr "Limba secundara"
 
 msgctxt "#30950"
 msgid "Downloads"
-msgstr "Transferências"
+msgstr "Descarcari"
 
 msgctxt "#30951"
 msgid "Movies"
-msgstr "Filmes"
+msgstr "Filme"
 
 msgctxt "#30952"
 msgid "TV"
-msgstr "Séries"
+msgstr "Seriale"

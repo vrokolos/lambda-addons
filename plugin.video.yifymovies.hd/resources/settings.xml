@@ -10,6 +10,7 @@
 		<setting type="sep"/>
 		<setting id="downloads" type="folder" label="30007" default=""/>
 		<setting id="save2dir" type="bool" label="30512" default="true"/>
+        <setting id="autoplay" type="bool" label="30513" default="false"/>
 	</category>
 
 	<category label="30040">

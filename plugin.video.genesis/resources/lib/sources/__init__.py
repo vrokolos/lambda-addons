@@ -175,23 +175,29 @@ class sources:
             items = json.loads(source)
 
             source, quality = items[0]['source'], items[0]['quality']
-            items = [i for i in items+next+prev if i['quality'] == quality and i['source'] == source]
-            items += [i for i in next+prev if i['quality'] == quality and not i['source'] == source]
-            items = items[:30]
+            items = [i for i in items+next+prev if i['quality'] == quality and i['source'] == source][:15]
+            items += [i for i in next+prev if i['quality'] == quality and not i['source'] == source][:35]
 
+            block = None
 
             for i in items:
                 try:
-                    url = self.sourcesResolve(i['url'], i['provider'])
-                    if url == None: raise Exception()
+                    if i['source'] == block: raise Exception()
+
+                    w = workers.Thread(self.sourcesResolve, i['url'], i['provider'])
+                    w.start() ; time.sleep(20)
+
+                    if w.is_alive() == True: block = i['source']
+
+                    if self.url == None: raise Exception()
 
                     if control.setting('playback_info') == 'true':
                         control.infoDialog(i['label'], heading=name)
 
                     from resources.lib.libraries.player import player
-                    player().run(content, name, url, imdb, tvdb)
+                    player().run(content, name, self.url, imdb, tvdb)
 
-                    return url
+                    return self.url
                 except:
                     pass
 
@@ -561,8 +567,9 @@ class sources:
             try: headers = dict(urlparse.parse_qsl(url.rsplit('|', 1)[1]))
             except: headers = dict('')
 
-            result = client.request(url.split('|')[0], headers=headers, output='chunk', timeout='30')
+            result = client.request(url.split('|')[0], headers=headers, output='chunk', timeout='20')
             if result == None: raise Exception()
+            self.url = url
             return url
         except:
             return
@@ -580,20 +587,29 @@ class sources:
 
             items = [self.sources[select-1]]
 
-            source, quality = items[0]['source'], items[0]['quality']
             next = [y for x,y in enumerate(self.sources) if x >= select]
             prev = [y for x,y in enumerate(self.sources) if x < select][::-1]
-            items = [i for i in items+next+prev if i['quality'] == quality and i['source'] == source]
-            items += [i for i in next+prev if i['quality'] == quality and not i['source'] == source]
-            items = items[:30]
+
+            source, quality = items[0]['source'], items[0]['quality']
+            items = [i for i in items+next+prev if i['quality'] == quality and i['source'] == source][:15]
+            items += [i for i in next+prev if i['quality'] == quality and not i['source'] == source][:35]
+
+            block = None
 
             for i in items:
                 try:
-                    url = self.sourcesResolve(i['url'], i['provider'])
-                    if url == None: raise Exception()
+                    if i['source'] == block: raise Exception()
+
+                    w = workers.Thread(self.sourcesResolve, i['url'], i['provider'])
+                    w.start() ; time.sleep(20)
+
+                    if w.is_alive() == True: block = i['source']
+
+                    if self.url == None: raise Exception()
 
                     self.selectedSource = i['label']
-                    return url
+
+                    return self.url
                 except:
                     pass
 

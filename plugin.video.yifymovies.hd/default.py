@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import urllib,urllib2,re,os,threading,datetime,time,base64,xbmc,xbmcplugin,xbmcgui,xbmcaddon,xbmcvfs
+import urllib,urllib2,re,os,threading,datetime,time,base64,xbmc,xbmcplugin,xbmcgui,xbmcaddon,xbmcvfs,array,random
 from operator import itemgetter
 try:    import json
 except: import simplejson as json
@@ -28,6 +28,7 @@ try:    import StorageServer
 except: import storageserverdummy as StorageServer
 from metahandler import metahandlers
 from metahandler import metacontainers
+#from random import randint
 
 
 action              = None
@@ -857,6 +858,7 @@ class contextMenu:
             	yes = index().yesnoDialog(language(30343).encode("utf-8"), language(30344).encode("utf-8"), name)
             	if yes:
             	    xbmcvfs.delete(file)
+                    if getSetting("save2dir") == 'true': xbmcvfs.rmdir(download)
             	else:
             	    return
             elif file.endswith('.tmp'):
@@ -866,13 +868,14 @@ class contextMenu:
             	    return
             	else:
             	    xbmcvfs.delete(file)
+                    if getSetting("save2dir") == 'true': xbmcvfs.rmdir(download)
 
             url = resolver().run(url, name, download=True)
             if url is None: return
             url = url.rsplit('|', 1)[0]
             ext = url.rsplit('/', 1)[-1].rsplit('?', 1)[0].rsplit('|', 1)[0].strip().lower()
             ext = os.path.splitext(ext)[1][1:]
-            if ext == '': ext = 'mp4'
+            if ext == '' or ext == 'pdf': ext = 'mp4'
             stream = os.path.join(download, enc_name + '.' + ext)
             temp = stream + '.tmp'
 
@@ -909,6 +912,7 @@ class contextMenu:
             file.close()
             index().clearProperty(property)
             xbmcvfs.delete(temp)
+            if getSetting("save2dir") == 'true': xbmcvfs.rmdir(download)
             sys.exit()
             return
 
@@ -1028,7 +1032,7 @@ class years:
 
     def yify_list(self):
         try:
-            result = getUrl(link().yify_year, timeout='30').result
+            result = getUrl(link().yify_year, referer=link().yify_base, timeout='30').result
             result = common.parseDOM(result, "div", attrs = { "class": "datagrid" })[0]
             years = re.compile('(<a.+?</a>)').findall(result)
         except:
@@ -1365,10 +1369,29 @@ class resolver:
         try:
             url = self.yify(url, name)
             if url is None: raise Exception()
-
-            if download == True: return url
-            player().run(name, url)
-            return url
+            
+            if getSetting("autoplay") == 'true' and len(url) > 1:
+                mirrors = list()
+                count = 1
+                for i in url:
+                    mirrors.extend(['Mirror #%s' % count])
+                    count += 1
+            
+                dialog = xbmcgui.Dialog()
+                src = dialog.select('Choose a mirror', mirrors)
+                       
+                #if url[src] is None: raise Exception()
+            
+                if download == True: return url[src]
+            
+                player().run(name, url[src])
+                return url[src]
+            else:
+                url = random.choice(url)
+                #if url is None: raise Exception()
+                if download == True: return url
+                player().run(name, url)
+                return url
         except:
             if not index().getProperty('PseudoTVRunning') == 'True':
                 index().infoDialog(language(30318).encode("utf-8"))
@@ -1379,20 +1402,31 @@ class resolver:
 
         try:
             result = getUrl(url, referer=url, close=False).result
-            url = re.compile('pic=(.+?)&').findall(result)[0]
-            url = 'http://yify.tv/player/pk/pk/plugins/player_p2.php?url=' + url
+            yifySrcs = re.compile('pic=(.+?)dpenc').findall(result)
+            
+            urlArr = list()
+            for url in yifySrcs:
+                try:
+                    url = 'http://yify.tv/player/pk/pk/plugins/player_p2.php?url=' + url + 'dpenc'
 
-            result = getUrl(url, referer=url, close=False).result
-            result = json.loads(result)
+                    result = getUrl(url, referer=url, close=False).result
+                    result = json.loads(result)
 
-            url = [i['url'] for i in result if 'x-shockwave-flash' in i['type']]
-            url += [i['url'] for i in result if 'video/mpeg4' in i['type']]
-            url = url[-1]
+                    url = [i['url'] for i in result if 'x-shockwave-flash' in i['type']]
+                    url += [i['url'] for i in result if 'video/mpeg4' in i['type']]
+                    url = url[-1]
 
-            url = getUrl(url, output='geturl').result
-            if 'requiressl=yes' in url: url = url.replace('http://', 'https://')
-            else: url = url.replace('https://', 'http://')
-            return url
+                    url = getUrl(url, output='geturl').result
+                    if 'requiressl=yes' in url: url = url.replace('http://', 'https://')
+                    if 'https://' in url: url = url.replace(':443/', '/')
+                    #else: url = url.replace('https://', 'http://')
+                    if 'uptostream.com' not in url: urlArr.extend([url])
+                except:
+                    pass
+            
+            urlArr = list(filter(None, urlArr))
+            #print urlArr
+            return urlArr
         except:
             pass
 

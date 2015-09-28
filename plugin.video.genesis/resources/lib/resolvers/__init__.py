@@ -299,7 +299,7 @@ def info():
         'netloc': ['openload.io', 'openload.co'],
         'host': ['Openload'],
         'quality': 'High',
-        'captcha': False,
+        'captcha': True,
         'a/c': False
     }, {
         'class': 'primeshare',
