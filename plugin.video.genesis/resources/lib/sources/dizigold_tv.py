@@ -32,7 +32,7 @@ class source:
         self.headers = {'X-Requested-With': 'XMLHttpRequest'}
         self.ajax_link = '/sistem/ajax.php'
         self.search_link = 'aranan=%s&tip=aranans'
-        self.episode_link = 'sezon_id=%s&dizi_id=%s&tip=sezon'
+        self.episode_link = 'sezon_id=%s&dizi_id=%s&tip=sezons'
         self.player_link = 'id=%s&tip=view'
 
 
@@ -71,6 +71,7 @@ class source:
             post = self.episode_link % ('%01d' % int(season), url)
 
             result = cloudflare.source(query, post=post, headers=self.headers)
+
             result = json.loads(result)
             result = result['data']
             result = re.compile('href="(.+?)"').findall(result)

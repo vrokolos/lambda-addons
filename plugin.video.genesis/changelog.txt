@@ -1,4 +1,28 @@
 ------------------------
+Genesis v5.0.9 (30-Sep-15)
+------------------------
+
+- [COLOR orange]NOTE: Genesis is a free addon and it will always be a free addon.[/COLOR]
+- [COLOR orange]NOTE: Anyone that tells you otherwise is trying to steal your money.[/COLOR]
+
+- [COLOR orange]NOTE: I have no plans to stop Genesis development any time soon.[/COLOR]
+- [COLOR orange]NOTE: If that ever changes it would be announced by me on the TVADDONS forum.[/COLOR]
+- [COLOR orange]NOTE: Not via other anonymous people on the internet.[/COLOR]
+
+- [COLOR orange]NOTE: Recently there have been fake updates coming from Superrepo.[/COLOR]
+- [COLOR orange]NOTE: There was never a 5.0.8i version.[/COLOR]
+- [COLOR orange]NOTE: I will protect this addon against possible malicious code at any cost.[/COLOR]
+- [COLOR orange]NOTE: @Bart Otten: This is my first and final warning.[/COLOR]
+- [COLOR orange]NOTE: If this happens again, I will add code to remove Superrepo automatically.[/COLOR]
+
+- Fixed more issues with smart play.
+- Added progress dialog in smart play.
+- Fixed issue with Dizigold source.
+- Fixed issue with Filmikz source.
+- Code cosmetics.
+
+
+------------------------
 Genesis v5.0.8 (28-Sep-15)
 ------------------------
 

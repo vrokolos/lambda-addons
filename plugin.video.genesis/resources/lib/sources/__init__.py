@@ -154,45 +154,67 @@ class sources:
 
     def playItem(self, content, name, imdb, tvdb, source):
         try:
-            next = []
-            prev = []
+            next = [] ; prev = [] ; total = []
 
-            for i in range(1,1000000):
+            for i in range(1,10000):
                 try:
                     u = control.infoLabel('ListItem(%s).FolderPath' % str(i))
+                    if u in total: raise Exception()
+                    total.append(u)
                     u = json.loads(dict(urlparse.parse_qsl(u.replace('?','')))['source'])[0]
                     next.append(u)
                 except:
                     break
-            for i in range(-1000000,0)[::-1]:
+            for i in range(-10000,0)[::-1]:
                 try:
                     u = control.infoLabel('ListItem(%s).FolderPath' % str(i))
+                    if u in total: raise Exception()
+                    total.append(u)
                     u = json.loads(dict(urlparse.parse_qsl(u.replace('?','')))['source'])[0]
                     prev.append(u)
                 except:
                     break
 
+
             items = json.loads(source)
 
             source, quality = items[0]['source'], items[0]['quality']
-            items = [i for i in items+next+prev if i['quality'] == quality and i['source'] == source][:15]
-            items += [i for i in next+prev if i['quality'] == quality and not i['source'] == source][:35]
+            items = [i for i in items+next+prev if i['quality'] == quality and i['source'] == source][:10]
+            items += [i for i in next+prev if i['quality'] == quality and not i['source'] == source][:10]
+
+
+            import xbmc
+
+            dialog = control.progressDialog
+            dialog.create(control.addonInfo('name'), '')
+            dialog.update(0)
 
             block = None
 
-            for i in items:
+            for i in range(len(items)):
                 try:
-                    if i['source'] == block: raise Exception()
+                    dialog.update(int((100 / float(len(items))) * i), str(items[i]['label']))
 
-                    w = workers.Thread(self.sourcesResolve, i['url'], i['provider'])
-                    w.start() ; time.sleep(20)
+                    if items[i]['source'] == block: raise Exception()
 
-                    if w.is_alive() == True: block = i['source']
+                    w = workers.Thread(self.sourcesResolve, items[i]['url'], items[i]['provider'])
+                    w.start()
+
+                    for x in range(0, 15 * 2):
+                        if dialog.iscanceled(): return dialog.close()
+                        if xbmc.abortRequested == True: return sys.exit()
+                        if w.is_alive() == False: break
+                        time.sleep(0.5)
+
+                    if w.is_alive() == True: block = items[i]['source']
 
                     if self.url == None: raise Exception()
 
+                    try: dialog.close()
+                    except: pass
+
                     if control.setting('playback_info') == 'true':
-                        control.infoDialog(i['label'], heading=name)
+                        control.infoDialog(items[i]['label'], heading=name)
 
                     from resources.lib.libraries.player import player
                     player().run(content, name, self.url, imdb, tvdb)
@@ -200,6 +222,9 @@ class sources:
                     return self.url
                 except:
                     pass
+
+            try: dialog.close()
+            except: pass
 
             raise Exception()
 
@@ -591,28 +616,48 @@ class sources:
             prev = [y for x,y in enumerate(self.sources) if x < select][::-1]
 
             source, quality = items[0]['source'], items[0]['quality']
-            items = [i for i in items+next+prev if i['quality'] == quality and i['source'] == source][:15]
-            items += [i for i in next+prev if i['quality'] == quality and not i['source'] == source][:35]
+            items = [i for i in items+next+prev if i['quality'] == quality and i['source'] == source][:10]
+            items += [i for i in next+prev if i['quality'] == quality and not i['source'] == source][:10]
+
+
+            import xbmc
+
+            dialog = control.progressDialog
+            dialog.create(control.addonInfo('name'), '')
+            dialog.update(0)
 
             block = None
 
-            for i in items:
+            for i in range(len(items)):
                 try:
-                    if i['source'] == block: raise Exception()
+                    dialog.update(int((100 / float(len(items))) * i), str(items[i]['label']))
 
-                    w = workers.Thread(self.sourcesResolve, i['url'], i['provider'])
-                    w.start() ; time.sleep(20)
+                    if items[i]['source'] == block: raise Exception()
 
-                    if w.is_alive() == True: block = i['source']
+                    w = workers.Thread(self.sourcesResolve, items[i]['url'], items[i]['provider'])
+                    w.start()
+
+                    for x in range(0, 15 * 2):
+                        if dialog.iscanceled(): return dialog.close()
+                        if xbmc.abortRequested == True: return sys.exit()
+                        if w.is_alive() == False: break
+                        time.sleep(0.5)
+
+                    if w.is_alive() == True: block = items[i]['source']
 
                     if self.url == None: raise Exception()
 
-                    self.selectedSource = i['label']
+                    try: dialog.close()
+                    except: pass
+
+                    self.selectedSource = items[i]['label']
 
                     return self.url
                 except:
                     pass
 
+            try: dialog.close()
+            except: pass
         except:
             return
 
