@@ -218,12 +218,6 @@ class player(xbmc.Player):
 
 
     def onPlayBackEnded(self):
-        try:
-            bookmarks.deleteBookmark(self.name, self.imdb)
-        except:
-            pass
-        try:
-            self.setWatchedStatus()
-        except:
-            pass
+        self.onPlayBackStopped()
+
 
