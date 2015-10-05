@@ -23,6 +23,7 @@ import re,urllib,urlparse,json,time
 
 from resources.lib.libraries import cleantitle
 from resources.lib.libraries import client
+from resources.lib.libraries import cache
 
 
 class source:
@@ -35,15 +36,26 @@ class source:
         self.idmg_link = '/service/idmg?type=%s&a=%s&b=1%s&s=%s&e=%s&_=%s'
 
 
-    def get_show(self, imdb, tvdb, tvshowtitle, year):
+    def dizimag_shows(self):
         try:
             result = client.source(self.base_link)
+
             result = client.parseDOM(result, 'div', attrs = {'id': 'fil'})[0]
             result = zip(client.parseDOM(result, 'a', ret='href'), client.parseDOM(result, 'a'))
+            result = [(re.sub('http.+?//.+?/','/', i[0]), cleantitle.tv(i[1])) for i in result]
+
+            return result
+        except:
+            return
+
+
+    def get_show(self, imdb, tvdb, tvshowtitle, year):
+        try:
+            result = cache.get(self.dizimag_shows, 72)
 
             tvshowtitle = cleantitle.tv(tvshowtitle)
 
-            result = [i[0] for i in result if tvshowtitle == cleantitle.tv(i[1])][0]
+            result = [i[0] for i in result if tvshowtitle == i[1]][0]
 
             try: url = re.compile('//.+?(/.+)').findall(result)[0]
             except: url = result

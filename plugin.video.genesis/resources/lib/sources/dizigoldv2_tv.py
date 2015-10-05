@@ -24,6 +24,7 @@ import re,urllib,urlparse,json
 from resources.lib.libraries import cleantitle
 from resources.lib.libraries import cloudflare
 from resources.lib.libraries import client
+from resources.lib.libraries import cache
 
 
 class source:
@@ -31,32 +32,33 @@ class source:
         self.base_link = 'http://www.dizigold.net'
         self.headers = {'X-Requested-With': 'XMLHttpRequest'}
         self.ajax_link = '/sistem/ajax.php'
-        self.search_link = 'aranan=%s&tip=aranans'
-        self.episode_link = 'sezon_id=%s&dizi_id=%s&tip=sezons'
         self.player_link = 'id=%s&tip=view'
+
+
+    def dizigold_shows(self):
+        try:
+            result = cloudflare.source(self.base_link)
+
+            result = client.parseDOM(result, 'div', attrs = {'class': 'dizis'})[0]
+            result = re.compile('href="(.+?)">(.+?)<').findall(result)
+            result = [(re.sub('http.+?//.+?/','/', i[0]), cleantitle.tv(i[1])) for i in result]
+
+            return result
+        except:
+            return
 
 
     def get_show(self, imdb, tvdb, tvshowtitle, year):
         try:
-            query = urlparse.urljoin(self.base_link, self.ajax_link)
-            post = self.search_link % (urllib.quote_plus(tvshowtitle))
-
-            result = cloudflare.source(query, post=post, headers=self.headers)
-            result = json.loads(result)
+            result = cache.get(self.dizigold_shows, 72)
 
             tvshowtitle = cleantitle.tv(tvshowtitle)
-            years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
 
-            result = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'h3'), re.compile('<h5>.+?(\d{4}).+?</h5>').findall(i)) for i in result]
-            result = [(i[0][0], i[1][0], i[2][0]) for i in result if len(i[0]) > 0 and len(i[1]) > 0 and len(i[2]) > 0]
-            result = [i for i in result if tvshowtitle == cleantitle.tv(i[1])]
-            result = [i[0] for i in result if any(x in i[2] for x in years)][0]
+            result = [i[0] for i in result if tvshowtitle == i[1]][0]
 
-            url = urlparse.urljoin(self.base_link, result)
-
-            result = cloudflare.source(url)
-
-            url = client.parseDOM(result, 'div', ret='value', attrs = {'id': 'icerikid'})[0]
+            try: url = re.compile('//.+?(/.+)').findall(result)[0]
+            except: url = result
+            url = client.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
         except:
@@ -67,13 +69,10 @@ class source:
         try:
             if url == None: return
 
-            query = urlparse.urljoin(self.base_link, self.ajax_link)
-            post = self.episode_link % ('%01d' % int(season), url)
+            query = urlparse.urljoin(self.base_link, url)
 
-            result = cloudflare.source(query, post=post, headers=self.headers)
+            result = cloudflare.source(query)
 
-            result = json.loads(result)
-            result = result['data']
             result = re.compile('href="(.+?)"').findall(result)
             result = [i for i in result if '/%01d-sezon/%01d-bolum' % (int(season), int(episode)) in i][-1]
 
@@ -110,12 +109,12 @@ class source:
             links += [{'url': '%s|User-Agent=%s&Referer=%s' % (i[0], urllib.quote_plus(client.agent()), urllib.quote_plus(url)), 'quality': i[1]} for i in result if not 'google' in i[0]]
 
 
-            try: sources.append({'source': 'GVideo', 'quality': '1080p', 'provider': 'Dizigold', 'url': [i['url'] for i in links if i['quality'] == '1080p'][0]})
+            try: sources.append({'source': 'GVideo', 'quality': '1080p', 'provider': 'Dizigoldv2', 'url': [i['url'] for i in links if i['quality'] == '1080p'][0]})
             except: pass
-            try: sources.append({'source': 'GVideo', 'quality': 'HD', 'provider': 'Dizigold', 'url': [i['url'] for i in links if i['quality'] == '720p'][0]})
+            try: sources.append({'source': 'GVideo', 'quality': 'HD', 'provider': 'Dizigoldv2', 'url': [i['url'] for i in links if i['quality'] == '720p'][0]})
             except: pass
-            try: sources.append({'source': 'GVideo', 'quality': 'SD', 'provider': 'Dizigold', 'url': [i['url'] for i in links if i['quality'] == '480p'][0]})
-            except: sources.append({'source': 'GVideo', 'quality': 'SD', 'provider': 'Dizigold', 'url': [i['url'] for i in links if i['quality'] == '360p'][0]})
+            try: sources.append({'source': 'GVideo', 'quality': 'SD', 'provider': 'Dizigoldv2', 'url': [i['url'] for i in links if i['quality'] == '480p'][0]})
+            except: sources.append({'source': 'GVideo', 'quality': 'SD', 'provider': 'Dizigoldv2', 'url': [i['url'] for i in links if i['quality'] == '360p'][0]})
 
 
             return sources
@@ -134,4 +133,5 @@ class source:
             return url
         except:
             return
+
 

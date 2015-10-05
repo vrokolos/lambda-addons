@@ -149,9 +149,10 @@ class getUrl(object):
         else:
             request = urllib2.Request(url,None)
         if mobile == True:
-            request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; CPU; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7')
+            request.add_header('User-Agent', 'Apple-iPhone/701.341')
         else:
-            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36')
+            #request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36')
+            request.add_header('User-Agent', 'Mozilla/5.0 (compatible, MSIE 11, Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko')
         if not referer is None:
             request.add_header('Referer', referer)
         if not cookie is None:
@@ -1405,9 +1406,11 @@ class resolver:
             yifySrcs = re.compile('pic=(.+?)dpenc').findall(result)
             
             urlArr = list()
+            filtered = getSetting("problematic")
+            domains = ['mediafire.com', 'uptostream.com']
             for url in yifySrcs:
                 try:
-                    url = 'http://yify.tv/player/pk/pk/plugins/player_p2.php?url=' + url + 'dpenc'
+                    url = 'http://yify.tv/player/pk/pk/plugins/player_p2.php?url=%sdpenc' % url
 
                     result = getUrl(url, referer=url, close=False).result
                     result = json.loads(result)
@@ -1415,12 +1418,16 @@ class resolver:
                     url = [i['url'] for i in result if 'x-shockwave-flash' in i['type']]
                     url += [i['url'] for i in result if 'video/mpeg4' in i['type']]
                     url = url[-1]
-
-                    url = getUrl(url, output='geturl').result
-                    if 'requiressl=yes' in url: url = url.replace('http://', 'https://')
+                    
+                    #response.geturl() causing links to redirect to other than the video files 
+                    if 'googlevideo.com' in url: 
+                        url = getUrl(url, output='geturl').result
+                        if 'requiressl=yes' in url: url = url.replace('http://', 'https://')
+                        else: url = url.replace('https://', 'http://')
                     if 'https://' in url: url = url.replace(':443/', '/')
-                    #else: url = url.replace('https://', 'http://')
-                    if 'uptostream.com' not in url: urlArr.extend([url])
+                    if filtered == 'true':
+                        if not any(domain in url for domain in domains): urlArr.extend([url])
+                    else: urlArr.extend([url])
                 except:
                     pass
             
@@ -1439,10 +1446,10 @@ class resolver:
                 try: imdb = re.findall('imdb.com/title/tt(\d+)', getUrl(referer).result, re.I)[0]
                 except: pass
             if imdb == None:
-                try: imdb = json.loads(getUrl('http://www.imdbapi.com/?t=%s&y=%s' % (urllib.quote_plus(title), str(int(year)))).result)['imdbID']
+                try: imdb = json.loads(getUrl('http://www.omdbapi.com/?t=%s&y=%s' % (urllib.quote_plus(title), str(int(year)))).result)['imdbID']
                 except: pass
             if imdb == None:
-                try: imdb = json.loads(getUrl('http://www.imdbapi.com/?t=%s&y=%s' % (urllib.quote_plus(title), str(int(year)-1))).result)['imdbID']
+                try: imdb = json.loads(getUrl('http://www.omdbapi.com/?t=%s&y=%s' % (urllib.quote_plus(title), str(int(year)-1))).result)['imdbID']
                 except: pass
 
             imdb = re.sub('[^0-9]', '', imdb)
@@ -1459,7 +1466,7 @@ class resolver:
         try:
             movie25_sources = []
 
-            result = getUrl('http://www.imdbapi.com/?i=tt%s' % imdb).result
+            result = getUrl('http://www.omdbapi.com/?i=tt%s' % imdb).result
             result = json.loads(result)
             title = result['Title']
             year = result['Year']

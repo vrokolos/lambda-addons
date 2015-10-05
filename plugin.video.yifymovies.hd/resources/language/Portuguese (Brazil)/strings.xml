@@ -112,4 +112,7 @@
 	<string id="30509">Idiomas</string>
 	<string id="30510">Favoritos</string>
 	<string id="30511">Procurar</string>
+        <string id="30512">Save movie in separate folder</string>
+        <string id="30513">Disable AutoPlay</string>
+	<string id="30514">Disable problematic sources</string>
 </strings>

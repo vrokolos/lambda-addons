@@ -79,7 +79,7 @@
 		<setting id="muchmoviesv2_tv" type="bool" label="Muchmovies" default="true" />
 		<setting id="moviefarsiv2_tv" type="bool" label="Moviefarsi" default="true" />
 		<setting id="ororo_tv" type="bool" label="Ororo" default="true" />
-		<setting id="dizigold_tv" type="bool" label="Dizigold" default="true" />
+		<setting id="dizigoldv2_tv" type="bool" label="Dizigold" default="true" />
 		<setting id="dizilab_tv" type="bool" label="Dizilab" default="true" />
 		<setting id="dizimag_tv" type="bool" label="Dizimag" default="true" />
 		<setting id="tvrelease_tv" type="bool" label="TVrelease" default="true" />

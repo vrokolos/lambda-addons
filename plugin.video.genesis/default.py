@@ -304,7 +304,7 @@ elif action == 'movieToLibrary':
 
 elif action == 'moviesToLibrary':
     from resources.lib.libraries import libtools
-    libtools.libmovies().range(url, query)
+    libtools.libmovies().range(url)
 
 elif action == 'tvshowToLibrary':
     from resources.lib.libraries import libtools
@@ -312,7 +312,7 @@ elif action == 'tvshowToLibrary':
 
 elif action == 'tvshowsToLibrary':
     from resources.lib.libraries import libtools
-    libtools.libtvshows().range(url, query)
+    libtools.libtvshows().range(url)
 
 elif action == 'updateLibrary':
     from resources.lib.libraries import libtools
@@ -345,7 +345,7 @@ elif action == 'sources':
 
 elif action == 'playItem':
     from resources.lib.sources import sources
-    sources().playItem(content, name, imdb, tvdb, source)
+    sources().playItem(content, name, year, imdb, tvdb, source)
 
 elif action == 'alterSources':
     from resources.lib.sources import sources

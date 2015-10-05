@@ -1,4 +1,19 @@
 ------------------------
+Yify Movies HD v1.7.2 (29-Sep-15)
+------------------------
+
+- Updated omdbapi.com urls.
+- Fixed URL issue causing links to be redirected to other than the video files.
+- Updated User-Agent string.
+- Fixed "Years" category.
+- Added option to disable autoplay and manually select mirror.
+- Added option to save file to a seperate directory matching the video name.
+- Added missing strings for other languages (English only).
+- Minor fixes.
+- Code cosmetics.
+
+
+------------------------
 Yify Movies HD v1.6.1 (27-Jun-14)
 ------------------------
 

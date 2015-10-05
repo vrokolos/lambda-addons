@@ -112,4 +112,7 @@
 	<string id="30509">Talen</string>
 	<string id="30510">Favorieten</string>
 	<string id="30511">Zoeken</string>
+        <string id="30512">Save movie in separate folder</string>
+        <string id="30513">Disable AutoPlay</string>
+	<string id="30514">Disable problematic sources</string>
 </strings>
