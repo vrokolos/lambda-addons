@@ -11,7 +11,7 @@
 		<setting id="downloads" type="folder" label="30007" default=""/>
 		<setting id="save2dir" type="bool" label="30512" default="true"/>
         <setting id="autoplay" type="bool" label="30513" default="false"/>
-        <setting id="problematic" type="bool" label="30514" default="true"/>
+        <setting id="problematic" type="bool" label="30514" default="false"/>
 	</category>
 
 	<category label="30040">

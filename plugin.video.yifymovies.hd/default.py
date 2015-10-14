@@ -1402,7 +1402,7 @@ class resolver:
         referer = url
 
         try:
-            result = getUrl(url, referer=url, close=False).result
+            result = getUrl(url, referer=referer, close=False).result
             yifySrcs = re.compile('pic=(.+?)dpenc').findall(result)
             
             urlArr = list()
@@ -1410,9 +1410,11 @@ class resolver:
             domains = ['mediafire.com', 'uptostream.com']
             for url in yifySrcs:
                 try:
-                    url = 'http://yify.tv/player/pk/pk/plugins/player_p2.php?url=%sdpenc' % url
+                    pk_link = 'http://yify.tv/player/pk/pk/plugins/player_p2.php'
+                    url = url + 'dpenc'
+                    post = urllib.urlencode({'url': url, 'fv': '16', 'sou': 'pic'})
 
-                    result = getUrl(url, referer=url, close=False).result
+                    result = getUrl(pk_link, post=post, referer=referer).result
                     result = json.loads(result)
 
                     url = [i['url'] for i in result if 'x-shockwave-flash' in i['type']]
