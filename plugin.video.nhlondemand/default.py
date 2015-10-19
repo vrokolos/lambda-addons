@@ -691,11 +691,15 @@ class resolver:
             url += re.compile('(youtube.com/embed/.+?)"').findall(result)
             url += re.compile('(/video.nhl.com.+?playlist=.+?)"').findall(result)
             url += re.compile('"file","(.+?)"').findall(result)
+            url += re.compile('"//(rutube.ru/play/embed/.+?)"').findall(result)
+            url += re.compile('(http://videoapi.my.mail.ru/videos/embed/mail/(.+?)/_myvideo/(.+?).html)').findall(result)
             url = url[0]
 
             if '/vk.com' in url: url = self.vk(url)
             elif 'youtube.com' in url: url = self.youtube(url)
             elif 'nhl.com' in url: url = self.nhl(url)
+            elif 'mail.ru' in url[0]: url = self.mail(url)
+            elif 'rutube.ru' in url: url = self.rutube(url)
             return url
         except:
             return
@@ -713,6 +717,39 @@ class resolver:
             return url
         except:
             return
+            
+    def rutube(self, url):
+        try:
+            url = 'http://%s' % url
+            result = getUrl(url).result
+
+            m3u8 = re.compile('video_balancer&quot;: {.*?&quot;m3u8&quot;: &quot;(.*?)&quot;}').findall(result)[0]
+            result = getUrl(m3u8).result
+            
+            url = re.compile('"\n(.+?)\n').findall(result)
+            url = url[::-1]
+
+            return url[0]
+        except:
+            return           
+            
+    def mail(self, url):
+        try:
+            url = "http://videoapi.my.mail.ru/videos/mail/%s/_myvideo/%s.json?ver=0.2.60" % (url[1], url[2])
+            result = getUrl(url).result
+            cookie = getUrl(url, output='cookie').result
+            result = json.loads(result)['videos']
+            cookie = "|Cookie=%s" % urllib.quote(cookie)
+
+            url = [i['url'] for i in result if '720p' in i['key']]
+            url += [i['url'] for i in result if '1080p' in i['key']]
+            if not url: url = result[0]['url']
+            else: url = url[-1]
+            url = url + cookie
+            
+            return url
+        except:
+            return                 
 
     def nhl(self, url):
         try:

@@ -28,6 +28,7 @@ try:    import StorageServer
 except: import storageserverdummy as StorageServer
 from metahandler import metahandlers
 from metahandler import metacontainers
+from resources.lib.libraries import client
 
 
 action              = None
@@ -55,6 +56,9 @@ viewData            = os.path.join(dataPath,'views.cfg')
 offData             = os.path.join(dataPath,'offset.cfg')
 subData             = os.path.join(dataPath,'subscriptions2.cfg')
 favData             = os.path.join(dataPath,'favourites2.cfg')
+user                = getSetting("user")
+password            = getSetting("password")
+
 
 
 class main:
@@ -153,41 +157,17 @@ class main:
             index().container_view('episodes', {'skin.confluence' : 504})
         xbmcplugin.setPluginFanart(int(sys.argv[1]), addonFanart)
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
+        if user == '' or password == '': self.openSettings(addonId)
         return
 
-class getUrl(object):
-    def __init__(self, url, close=True, proxy=None, post=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
-        if not proxy is None:
-            proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
-            opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
-            opener = urllib2.install_opener(opener)
-        if output == 'cookie' or not close == True:
-            import cookielib
-            cookie_handler = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
-            opener = urllib2.build_opener(cookie_handler, urllib2.HTTPBasicAuthHandler(), urllib2.HTTPHandler())
-            opener = urllib2.install_opener(opener)
-        if not post is None:
-            request = urllib2.Request(url, post)
-        else:
-            request = urllib2.Request(url,None)
-        if mobile == True:
-            request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; CPU; CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7')
-        else:
-            request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36')
-        if not referer is None:
-            request.add_header('Referer', referer)
-        if not cookie is None:
-            request.add_header('cookie', cookie)
-        response = urllib2.urlopen(request, timeout=int(timeout))
-        if output == 'cookie':
-            result = str(response.headers.get('Set-Cookie'))
-        elif output == 'geturl':
-            result = response.geturl()
-        else:
-            result = response.read()
-        if close == True:
-            response.close()
-        self.result = result
+    def openSettings(self, id=addonId):
+        try:
+            xbmc.executebuiltin('Dialog.Close(busydialog)')
+            xbmc.executebuiltin('Addon.OpenSettings(%s)' % id)
+            #xbmc.executebuiltin('SetFocus(%i)' % (2 + 200))
+            #xbmc.executebuiltin('SetFocus(%i)' % (3 + 100))
+        except:
+            return
 
 class uniqueList(object):
     def __init__(self, list):
@@ -1248,7 +1228,7 @@ class root:
         rootList.append({'name': 30501, 'image': 'Title.png', 'action': 'shows_title'})
         rootList.append({'name': 30502, 'image': 'Release.png', 'action': 'shows_release'})
         rootList.append({'name': 30503, 'image': 'Rating.png', 'action': 'shows_rating'})
-        rootList.append({'name': 30504, 'image': 'Genres.png', 'action': 'genres_shows'})
+        #rootList.append({'name': 30504, 'image': 'Genres.png', 'action': 'genres_shows'})
         rootList.append({'name': 30505, 'image': 'Favourites.png', 'action': 'shows_favourites'})
         rootList.append({'name': 30506, 'image': 'Subscriptions.png', 'action': 'shows_subscriptions'})
         rootList.append({'name': 30507, 'image': 'Search.png', 'action': 'shows_search'})
@@ -1257,9 +1237,14 @@ class root:
 
 class link:
     def __init__(self):
-        self.ororo_base = 'http://ororo.tv'
-        self.ororo_key = base64.urlsafe_b64decode('dXNlciU1QnBhc3N3b3JkJTVEPWMyNjUxMzU2JnVzZXIlNUJlbWFpbCU1RD1jMjY1MTM1NiU0MGRyZHJiLmNvbQ==')
-        self.ororo_sign = 'http://ororo.tv/users/sign_in'
+        self.base_link = 'http://ororo.tv'
+        self.sign_link = 'http://ororo.tv/en/users/sign_in'
+        self.cookie = None
+        self.lang_cookie = 'locale=en; nl=true'
+        #self.user = user
+        #self.password = password
+        self.post = {'user[email]': user, 'user[password]': password, 'user[remember_me]': 1}
+        self.post = urllib.urlencode(self.post)
 
 class genres:
     def __init__(self):
@@ -1273,11 +1258,13 @@ class genres:
 
     def ororo_list(self):
         try:
-            result = getUrl(link().ororo_base).result
+            cookie = link().cookie
+            url = link().base_link
+            result = client.source(url, cookie=link().lang_cookie)
 
-            if not "'index show'" in result:
-                result = getUrl(link().ororo_sign, post=link().ororo_key, close=False).result
-                result = getUrl(link().ororo_base).result
+            if not "'index show'" in str(result) and not (user == '' or password == ''):
+                if cookie == None: cookie = client.source(link().sign_link, post=link().post, cookie=link().lang_cookie, output='cookie')
+                result = client.source(url, cookie='%s; %s' % (cookie, link().lang_cookie))
 
             genres = common.parseDOM(result, "select", attrs = { "id": "genre-select" })[0]
             genres = re.compile('(<option.+?</option>)').findall(genres)
@@ -1343,11 +1330,13 @@ class shows:
 
     def ororo_list(self):
         try:
-            result = getUrl(link().ororo_base).result
+            cookie = link().cookie
+            url = link().base_link
+            result = client.source(url, cookie=link().lang_cookie)
 
-            if not "'index show'" in result:
-                result = getUrl(link().ororo_sign, post=link().ororo_key, close=False).result
-                result = getUrl(link().ororo_base).result
+            if not "'index show'" in str(result) and not (user == '' or password == ''):
+                if cookie == None: cookie = client.source(link().sign_link, post=link().post, cookie=link().lang_cookie, output='cookie')
+                result = client.source(url, cookie='%s; %s' % (cookie, link().lang_cookie))
 
             shows = common.parseDOM(result, "div", attrs = { "class": "shows" })[0]
             shows = shows.replace("'index show'", "'index show'><a")
@@ -1366,12 +1355,12 @@ class shows:
                 year = year.encode('utf-8')
 
                 url = common.parseDOM(show, "a", ret="href")[0]
-                url = '%s%s' % (link().ororo_base, url)
+                url = '%s%s' % (link().base_link, url)
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
                 image = common.parseDOM(show, "img", ret="data-original")[0]
-                image = '%s%s' % (link().ororo_base, image)
+                image = '%s%s' % (link().base_link, image)
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
@@ -1417,12 +1406,13 @@ class seasons:
             return self.list
 
     def ororo_list(self, url, image, year, imdb, genre, plot, show):
-        try:
-            result = getUrl(url).result
+        try: 
+            cookie = link().cookie
+            result = client.source(url, cookie=link().lang_cookie)
 
-            if not "menu season-tabs" in result:
-                result = getUrl(link().ororo_sign, post=link().ororo_key, close=False).result
-                result = getUrl(url).result
+            if not "menu season-tabs" in str(result) and not (user == '' or password == ''):
+                if cookie == None: cookie = client.source(link().sign_link, post=link().post, cookie=link().lang_cookie, output='cookie')
+                result = client.source(url, cookie='%s; %s' % (cookie, link().lang_cookie))
 
             seasons = common.parseDOM(result, "ul", attrs = { "class": "ui tabular menu season-tabs" })[0]
             seasons = re.sub('<li\s.+?>','<li>', seasons)
@@ -1462,11 +1452,13 @@ class episodes:
     def ororo_list(self, name, url, image, year, imdb, genre, plot, show, idx_data):
         try:
             if not idx_data == '': result = idx_data
-            else: result = getUrl(url).result
+            else:
+                cookie = link().cookie
+                result = client.source(url, cookie=link().lang_cookie)
 
-            if not "menu season-tabs" in result:
-                result = getUrl(link().ororo_sign, post=link().ororo_key, close=False).result
-                result = getUrl(url).result
+            if not "menu season-tabs" in str(result) and not (user == '' or password == ''):
+                if cookie == None: cookie = client.source(link().sign_link, post=link().post, cookie=link().lang_cookie, output='cookie')
+                result = client.source(url, cookie='%s; %s' % (cookie, link().lang_cookie))
 
             season = re.sub('[^0-9]', '', name)
             season = season.encode('utf-8')
@@ -1485,7 +1477,7 @@ class episodes:
                 title = common.replaceHTMLCodes(title)
                 title = title.encode('utf-8')
 
-                num = common.parseDOM(episode, "a", ret="href")[0]
+                num = common.parseDOM(episode, "a", attrs = { "class": "episode" }, ret=" href")[0]
                 num = re.sub('[^0-9]', '', num.split("-")[-1])
                 num = num.encode('utf-8')
 
@@ -1494,7 +1486,7 @@ class episodes:
                 name = name.encode('utf-8')
 
                 url = common.parseDOM(episode, "a", ret="data-href")[0]
-                url = '%s%s' % (link().ororo_base, url)
+                url = '%s%s' % (link().base_link, url)
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
@@ -1525,21 +1517,22 @@ class resolver:
 
     def ororo(self, url):
         try:
-            result = getUrl(url).result
+            cookie = link().cookie
+            result = client.source(url, cookie=link().lang_cookie)
 
-            if not "my_video" in result:
-                result = getUrl(link().ororo_sign, post=link().ororo_key, close=False).result
-                result = getUrl(url).result
+            if not "my_video" in str(result) and not (user == '' or password == ''):
+                if cookie == None: cookie = client.source(link().sign_link, post=link().post, cookie=link().lang_cookie, output='cookie')
+                result = client.source(url, cookie='%s; %s' % (cookie, link().lang_cookie))
 
             url = None
             try: url = common.parseDOM(result, "source", ret="src", attrs = { "type": "video/webm" })[0]
             except: pass
-            try: url = url = common.parseDOM(result, "source", ret="src", attrs = { "type": "video/mp4" })[0]
+            try: url = common.parseDOM(result, "source", ret="src", attrs = { "type": "video/mp4" })[0]
             except: pass
 
-            if url is None: return
-            if not url.startswith('http://'): url = '%s%s' % (link().ororo_base, url)
-            url = '%s|Cookie=%s' % (url, urllib.quote_plus('video=true'))
+            if url == None: return
+
+            url = '%s|User-Agent=%s&Cookie=%s' % (url, urllib.quote_plus(client.agent()), urllib.quote_plus('video=true'))
 
             return url
         except:
