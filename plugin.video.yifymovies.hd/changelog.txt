@@ -1,4 +1,12 @@
 ------------------------
+Yify Movies HD v1.7.6
+------------------------
+
+***DOES NOT WORK ON ANDROID OR MAC***
+***REQUIRES PYTHON V2.7***
+
+
+------------------------
 Yify Movies HD v1.7.2 (29-Sep-15)
 ------------------------
 

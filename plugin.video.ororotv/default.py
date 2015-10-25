@@ -166,6 +166,7 @@ class main:
             xbmc.executebuiltin('Addon.OpenSettings(%s)' % id)
             #xbmc.executebuiltin('SetFocus(%i)' % (2 + 200))
             #xbmc.executebuiltin('SetFocus(%i)' % (3 + 100))
+            xbmc.executebuiltin("XBMC.Container.Update(addons://sources/video/,replace)")
         except:
             return
 
@@ -1228,7 +1229,7 @@ class root:
         rootList.append({'name': 30501, 'image': 'Title.png', 'action': 'shows_title'})
         rootList.append({'name': 30502, 'image': 'Release.png', 'action': 'shows_release'})
         rootList.append({'name': 30503, 'image': 'Rating.png', 'action': 'shows_rating'})
-        #rootList.append({'name': 30504, 'image': 'Genres.png', 'action': 'genres_shows'})
+        rootList.append({'name': 30504, 'image': 'Genres.png', 'action': 'genres_shows'})
         rootList.append({'name': 30505, 'image': 'Favourites.png', 'action': 'shows_favourites'})
         rootList.append({'name': 30506, 'image': 'Subscriptions.png', 'action': 'shows_subscriptions'})
         rootList.append({'name': 30507, 'image': 'Search.png', 'action': 'shows_search'})
@@ -1359,7 +1360,10 @@ class shows:
                 url = common.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
-                image = common.parseDOM(show, "img", ret="data-original")[0]
+                try:
+                    image = common.parseDOM(show, "img", ret="data-original")[0]
+                except:
+                    image = common.parseDOM(show, "img", ret="src")[0]
                 image = '%s%s' % (link().base_link, image)
                 image = common.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
@@ -1371,7 +1375,7 @@ class shows:
                 try:
                     genre = common.parseDOM(show, "a", ret="data-info")[0]
                     genre = genre.split(' ')
-                    genre = [i for i in genre if any(x == i for x in ['action', 'adventure', 'animation', 'biography', 'comedy', 'crime', 'documentary', 'drama', 'education', 'family', 'fantasy', 'history', 'horror', 'music', 'mystery', 'reality-tv', 'romance', 'sci-fi', 'sport', 'talk-show', 'thriller', 'war', 'western'])]
+                    genre = [i for i in genre if any(x == i for x in ['Action', 'Adventure', 'Animation', 'Biography', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Education', 'Family', 'Fantasy', 'Game-Show', 'History', 'Horror', 'Music', 'Musical', 'Mystery', 'Reality-TV', 'Romance', 'Sci-Fi', 'Sport', 'Talk-Show', 'Thriller', 'War', 'Western'])]
                     genre = [i.title() for i in genre]
                     genre = " / ".join(genre)
                     genre = common.replaceHTMLCodes(genre)

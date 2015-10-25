@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import urllib,urllib2,re,os,threading,datetime,time,base64,xbmc,xbmcplugin,xbmcgui,xbmcaddon,xbmcvfs
+import urllib,urllib2,re,os,threading,datetime,time,base64,xbmc,xbmcplugin,xbmcgui,xbmcaddon,xbmcvfs,urlparse
 from operator import itemgetter
 try:    import json
 except: import simplejson as json
@@ -28,6 +28,9 @@ try:    import StorageServer
 except: import storageserverdummy as StorageServer
 from metahandler import metahandlers
 from metahandler import metacontainers
+from resources.lib.libraries import cleantitle
+from resources.lib.libraries import cloudflare
+from resources.lib.libraries import client
 
 
 action              = None
@@ -126,52 +129,41 @@ class main:
         xbmcplugin.setPluginFanart(int(sys.argv[1]), addonFanart)
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
         return
-
+        
 class getUrl(object):
-    def __init__(self, url, close=True, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='20'):
-        if not proxy == None:
+    def __init__(self, url, close=True, proxy=None, post=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
+        if not proxy is None:
             proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
             opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
             opener = urllib2.install_opener(opener)
         if output == 'cookie' or not close == True:
             import cookielib
-            cookies = cookielib.LWPCookieJar()
-            handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
-            opener = urllib2.build_opener(*handlers)
+            cookie_handler = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
+            opener = urllib2.build_opener(cookie_handler, urllib2.HTTPBasicAuthHandler(), urllib2.HTTPHandler())
             opener = urllib2.install_opener(opener)
-        try: headers.update(headers)
-        except: headers = {}
-        if 'User-Agent' in headers:
-            pass
-        elif not mobile == True:
-            headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20100101 Firefox/34.0'
+        if not post is None:
+            request = urllib2.Request(url, post)
         else:
-            headers['User-Agent'] = 'Apple-iPhone/701.341'
-        if 'referer' in headers:
-            pass
-        elif referer == None:
-            headers['referer'] = url
+            request = urllib2.Request(url,None)
+        if mobile == True:
+            request.add_header('User-Agent', 'Apple-iPhone/701.341')
         else:
-            headers['referer'] = referer
-        if not 'Accept-Language' in headers:
-            headers['Accept-Language'] = 'en-US'
-        if 'cookie' in headers:
-            pass
-        elif not cookie == None:
-            headers['cookie'] = cookie
-        request = urllib2.Request(url, data=post, headers=headers)
+            #request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36')
+            request.add_header('User-Agent', 'Mozilla/5.0 (compatible, MSIE 11, Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko')
+        if not referer is None:
+            request.add_header('Referer', referer)
+        if not cookie is None:
+            request.add_header('cookie', cookie)
         response = urllib2.urlopen(request, timeout=int(timeout))
         if output == 'cookie':
-            result = []
-            for c in cookies: result.append('%s=%s' % (c.name, c.value))
-            result = "; ".join(result)
+            result = str(response.headers.get('Set-Cookie'))
         elif output == 'geturl':
             result = response.geturl()
         else:
             result = response.read()
         if close == True:
             response.close()
-        self.result = result
+        self.result = result        
 
 class uniqueList(object):
     def __init__(self, list):
@@ -933,7 +925,7 @@ class pages:
 
     def muchmovies_list(self, url):
         try:
-            result = getUrl(link().muchmovies_root, mobile=True).result
+            result = cloudflare.source(link().muchmovies_root, mobile=True)
 
             pages = common.parseDOM(result, "select", attrs = { "class": "goto" })[0]
             pages = re.compile('(<option.+?</option>)').findall(pages)
@@ -969,7 +961,7 @@ class genres:
 
     def muchmovies_list(self, url):
         try:
-            result = getUrl(link().muchmovies_genre, mobile=True).result
+            result = cloudflare.source(link().muchmovies_genre, mobile=True)
 
             genres = common.parseDOM(result, "ul", attrs = { "class": "genres.+?" })
             genres = common.parseDOM(genres, "li")
@@ -1046,8 +1038,8 @@ class movies:
     def muchmovies_list(self, url):
         try:
             post = url.split('?')[-1]
-            result = getUrl(link().muchmovies_sort, post=post, mobile=True, close=False).result
-            result = getUrl(url, mobile=True).result
+            #result = cloudflare.source(link().muchmovies_sort, post=post, mobile=True, close=False)
+            result = cloudflare.source(url, mobile=True)
 
             movies = common.parseDOM(result, "ul", attrs = { "class": "movies.+?" })
             movies = common.parseDOM(movies, "li")
@@ -1130,7 +1122,7 @@ class trailer:
 
             query = url.split("?q=")[-1].split("/")[-1].split("?")[0]
             url = url.replace(query, urllib.quote_plus(query))
-            result = getUrl(url).result
+            result = client.source(url)
             result = common.parseDOM(result, "entry")
             result = common.parseDOM(result, "id")
 
@@ -1149,7 +1141,7 @@ class trailer:
                 return
             id = url.split("?v=")[-1].split("/")[-1].split("?")[0].split("&")[0]
             state, reason = None, None
-            result = getUrl(self.youtube_info % id).result
+            result = client.source(self.youtube_info % id)
             try:
                 state = common.parseDOM(result, "yt:state", ret="name")[0]
                 reason = common.parseDOM(result, "yt:state", ret="reasonCode")[0]
@@ -1157,7 +1149,7 @@ class trailer:
                 pass
             if state == 'deleted' or state == 'rejected' or state == 'failed' or reason == 'requesterRegion' : return
             try:
-                result = getUrl(self.youtube_watch % id).result
+                result = client.source(self.youtube_watch % id)
                 alert = common.parseDOM(result, "div", attrs = { "id": "watch7-notification-area" })[0]
                 return
             except:
@@ -1183,13 +1175,20 @@ class resolver:
 
     def muchmovies(self, url):
         try:
+            referer = url
             try: url = link().muchmovies_base + re.compile('//.+?(/.+)').findall(url)[0]
             except: pass
 
-            result = getUrl(url, mobile=True).result
+            result = cloudflare.source(url, mobile=True)
 
             url = common.parseDOM(result, "a", ret="href", attrs = { "data-role": "button" })
             url = [i for i in url if str('.mp4') in i][0]
+            url = client.replaceHTMLCodes(url)
+            url = url.encode('utf-8')
+            
+            u = '%s://%s' % (urlparse.urlparse(url).scheme, urlparse.urlparse(url).netloc)
+            cookie = cloudflare.cloudflare(u, post=None, headers=None, mobile=False, safe=False, timeout='30')
+            url = '%s|Accept=%s&User-Agent=%s&Referer=%s&Cookie=%s' % (url, urllib.quote_plus('text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'), urllib.quote_plus(client.agent()), urllib.quote_plus(url), urllib.quote_plus(cookie))
             return url
         except:
             return

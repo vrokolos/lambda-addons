@@ -1403,16 +1403,29 @@ class resolver:
 
         try:
             result = getUrl(url, referer=referer, close=False).result
-            yifySrcs = re.compile('pic=(.+?)dpenc').findall(result)
+            result = common.parseDOM(result, 'script', attrs = {'type': 'text/javascript'})
+            result = [i for i in result if 'parametros;' in i][0]
+            result = 'function' + result.split('function', 1)[-1]
+            result = result.rsplit('parametros;', 1)[0] + 'parametros;'
+
+
+            from resources.lib.libraries import js2py
+
+            result = js2py.evaljs.eval_js(result)
+            result = str(result)
+
+
+            links = re.compile('pic=([^&]+)').findall(result)
+            links = [x for y,x in enumerate(links) if x not in links[:y]]
             
             urlArr = list()
             filtered = getSetting("problematic")
             domains = ['mediafire.com', 'uptostream.com']
-            for url in yifySrcs:
+            for i in links:
                 try:
                     pk_link = 'http://yify.tv/player/pk/pk/plugins/player_p2.php'
-                    url = url + 'dpenc'
-                    post = urllib.urlencode({'url': url, 'fv': '16', 'sou': 'pic'})
+                    #url = url + 'dpenc'
+                    post = urllib.urlencode({'url': i, 'fv': '19', 'sou': 'pic'})
 
                     result = getUrl(pk_link, post=post, referer=referer).result
                     result = json.loads(result)
