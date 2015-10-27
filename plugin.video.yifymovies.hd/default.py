@@ -20,6 +20,7 @@
 
 import urllib,urllib2,re,os,threading,datetime,time,base64,xbmc,xbmcplugin,xbmcgui,xbmcaddon,xbmcvfs,array,random
 from operator import itemgetter
+from resources.lib.libraries import client
 try:    import json
 except: import simplejson as json
 try:    import CommonFunctions
@@ -133,40 +134,6 @@ class main:
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
         return
 
-class getUrl(object):
-    def __init__(self, url, close=True, proxy=None, post=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
-        if not proxy is None:
-            proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
-            opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
-            opener = urllib2.install_opener(opener)
-        if output == 'cookie' or not close == True:
-            import cookielib
-            cookie_handler = urllib2.HTTPCookieProcessor(cookielib.LWPCookieJar())
-            opener = urllib2.build_opener(cookie_handler, urllib2.HTTPBasicAuthHandler(), urllib2.HTTPHandler())
-            opener = urllib2.install_opener(opener)
-        if not post is None:
-            request = urllib2.Request(url, post)
-        else:
-            request = urllib2.Request(url,None)
-        if mobile == True:
-            request.add_header('User-Agent', 'Apple-iPhone/701.341')
-        else:
-            #request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36')
-            request.add_header('User-Agent', 'Mozilla/5.0 (compatible, MSIE 11, Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko')
-        if not referer is None:
-            request.add_header('Referer', referer)
-        if not cookie is None:
-            request.add_header('cookie', cookie)
-        response = urllib2.urlopen(request, timeout=int(timeout))
-        if output == 'cookie':
-            result = str(response.headers.get('Set-Cookie'))
-        elif output == 'geturl':
-            result = response.geturl()
-        else:
-            result = response.read()
-        if close == True:
-            response.close()
-        self.result = result
 
 class uniqueList(object):
     def __init__(self, list):
@@ -993,23 +960,23 @@ class genres:
 
     def yify_list(self):
         try:
-            result = getUrl(link().yify_genre, timeout='30').result
-            result = common.parseDOM(result, "div", attrs = { "class": "datagrid" })[0]
+            result = client.request(link().yify_genre, safe=True)
+            result = client.parseDOM(result, "div", attrs = { "class": "datagrid" })[0]
             genres = re.compile('(<a.+?</a>)').findall(result)
         except:
             return
 
         for genre in genres:
             try:
-                name = common.parseDOM(genre, "a")[0]
+                name = client.parseDOM(genre, "a")[0]
                 if name == '': raise Exception()
-                name = common.replaceHTMLCodes(name)
+                name = client.replaceHTMLCodes(name)
                 name = name.encode('utf-8')
 
-                url = common.parseDOM(genre, "a", ret="href")[0]
+                url = client.parseDOM(genre, "a", ret="href")[0]
                 if not url.startswith('/genre/'): raise Exception()
                 url = '%s%s%s' % (link().yify_base, url, link().yify_post)
-                url = common.replaceHTMLCodes(url)
+                url = client.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
                 image = addonGenres.encode('utf-8')
@@ -1033,21 +1000,21 @@ class years:
 
     def yify_list(self):
         try:
-            result = getUrl(link().yify_year, referer=link().yify_base, timeout='30').result
-            result = common.parseDOM(result, "div", attrs = { "class": "datagrid" })[0]
+            result = client.request(link().yify_year, referer=link().yify_base, safe=True)
+            result = client.parseDOM(result, "div", attrs = { "class": "datagrid" })[0]
             years = re.compile('(<a.+?</a>)').findall(result)
         except:
             return
         for year in years:
             try:
-                name = common.parseDOM(year, "a")[0]
-                name = common.replaceHTMLCodes(name)
+                name = client.parseDOM(year, "a")[0]
+                name = client.replaceHTMLCodes(name)
                 name = name.encode('utf-8')
 
-                url = common.parseDOM(year, "a", ret="href")[0]
+                url = client.parseDOM(year, "a", ret="href")[0]
                 if not url.startswith('/years/'): raise Exception()
                 url = '%s%s%s' % (link().yify_base, url, link().yify_post)
-                url = common.replaceHTMLCodes(url)
+                url = client.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
                 image = addonYears.encode('utf-8')
@@ -1070,23 +1037,23 @@ class languages:
 
     def yify_list(self):
         try:
-            result = getUrl(link().yify_language, timeout='30').result
-            result = common.parseDOM(result, "div", attrs = { "class": "datagrid" })[0]
+            result = client.request(link().yify_language, safe=True)
+            result = client.parseDOM(result, "div", attrs = { "class": "datagrid" })[0]
             languages = re.compile('(<a.+?</a>)').findall(result)
         except:
             return
 
         for language in languages:
             try:
-                name = common.parseDOM(language, "a")[0]
+                name = client.parseDOM(language, "a")[0]
                 if name == '': raise Exception()
-                name = common.replaceHTMLCodes(name)
+                name = client.replaceHTMLCodes(name)
                 name = name.encode('utf-8')
 
-                url = common.parseDOM(language, "a", ret="href")[0]
+                url = client.parseDOM(language, "a", ret="href")[0]
                 if not url.startswith('/languages/'): raise Exception()
                 url = '%s%s%s' % (link().yify_base, url, link().yify_post)
-                url = common.replaceHTMLCodes(url)
+                url = client.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
                 image = addonLanguages.encode('utf-8')
@@ -1156,7 +1123,7 @@ class movies:
 
     def yify_list(self, url):
         try:
-            result = getUrl(url, timeout='30').result
+            result = client.request(url, safe=True)
             movies = re.compile('var posts = ({.+?});').findall(result)[0]
             movies = json.loads(movies)
             movies = movies['posts']
@@ -1164,8 +1131,8 @@ class movies:
             return
 
         try:
-            next = common.parseDOM(result, "a", ret="href", attrs = { "class": "nextpostslink" })[0]
-            next = common.replaceHTMLCodes(next)
+            next = client.parseDOM(result, "a", ret="href", attrs = { "class": "nextpostslink" })[0]
+            next = client.replaceHTMLCodes(next)
             next = next.encode('utf-8')
         except:
             next = ''
@@ -1173,7 +1140,7 @@ class movies:
         for movie in movies:
             try:
                 title = movie['title']
-                title = common.replaceHTMLCodes(title)
+                title = client.replaceHTMLCodes(title)
                 title = title.encode('utf-8')
 
                 year = movie['year']
@@ -1181,29 +1148,29 @@ class movies:
                 year = year.encode('utf-8')
 
                 name = '%s (%s)' % (title, year)
-                name = common.replaceHTMLCodes(name)
+                name = client.replaceHTMLCodes(name)
                 name = name.encode('utf-8')
 
                 url = movie['link']
-                url = common.replaceHTMLCodes(url)
+                url = client.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
                 image = movie['image']
-                image = common.replaceHTMLCodes(image)
+                image = client.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
                 try:
                     genre = movie['genre']
                     genre = [i.strip() for i in genre.split(',')]
                     genre = " / ".join(genre)
-                    genre = common.replaceHTMLCodes(genre)
+                    genre = client.replaceHTMLCodes(genre)
                     genre = genre.encode('utf-8')
                 except:
                     genre = ''
 
                 try:
                     plot = movie['post_content']
-                    plot = common.replaceHTMLCodes(plot)
+                    plot = client.replaceHTMLCodes(plot)
                     plot = plot.encode('utf-8')
                 except:
                     plot = ''
@@ -1216,10 +1183,10 @@ class movies:
 
     def yify_list2(self, query):
         try:
-            result = getUrl(link().yify_ajax, post=query, timeout='30').result
+            result = client.request(link().yify_ajax, post=query, safe=True)
             result = json.loads(result)
             result = result['post']['all']
-            result = [common.replaceHTMLCodes(i['post_link']) for i in result]
+            result = [client.replaceHTMLCodes(i['post_link']) for i in result]
             if result == []: raise Exception()
 
             threads = []
@@ -1236,26 +1203,26 @@ class movies:
         for movie in movies:
             try:
                 html = movie['html']
-                r1 = common.parseDOM(html, "div", attrs = { "id": "sin_sinops" })[0]
+                r1 = client.parseDOM(html, "div", attrs = { "id": "sin_sinops" })[0]
                 r1 = r1.encode('utf-8').replace("&#8217;", "'")
 
-                title = common.parseDOM(r1, "span", attrs = { "itemprop": "name" })[0]
+                title = client.parseDOM(r1, "span", attrs = { "itemprop": "name" })[0]
                 title = title.encode('utf-8')
 
                 year = re.compile('>Release Date:<(.+?)</div>').findall(html.replace('\n',''))[0]
-                year = common.parseDOM(year, "a", attrs = { "rel": "tag" })[0]
+                year = client.parseDOM(year, "a", attrs = { "rel": "tag" })[0]
                 year = year.encode('utf-8')
 
                 name = '%s (%s)' % (title, year)
-                name = common.replaceHTMLCodes(name)
+                name = client.replaceHTMLCodes(name)
                 name = name.encode('utf-8')
 
                 url = movie['url']
-                url = common.replaceHTMLCodes(url)
+                url = client.replaceHTMLCodes(url)
                 url = url.encode('utf-8')
 
-                image = common.parseDOM(r1, "meta", ret="content", attrs = { "itemprop": "thumbnail" })[0]
-                image = common.replaceHTMLCodes(image)
+                image = client.parseDOM(r1, "meta", ret="content", attrs = { "itemprop": "thumbnail" })[0]
+                image = client.replaceHTMLCodes(image)
                 image = image.encode('utf-8')
 
                 try:
@@ -1266,17 +1233,17 @@ class movies:
 
                 try:
                     genre = re.compile('>Genre:<(.+?)</div>').findall(html.replace('\n',''))[0]
-                    genre = common.parseDOM(genre, "span")[0]
+                    genre = client.parseDOM(genre, "span")[0]
                     genre = [i.strip() for i in genre.split(',')]
                     genre = " / ".join(genre)
-                    genre = common.replaceHTMLCodes(genre)
+                    genre = client.replaceHTMLCodes(genre)
                     genre = genre.encode('utf-8')
                 except:
                     genre = ''
 
                 try:
-                    plot = common.parseDOM(r1, "p")[0]
-                    plot = common.replaceHTMLCodes(plot)
+                    plot = client.parseDOM(r1, "p")[0]
+                    plot = client.replaceHTMLCodes(plot)
                     plot = plot.encode('utf-8')
                 except:
                     plot = ''
@@ -1289,7 +1256,7 @@ class movies:
 
     def thread(self, url, i):
         try:
-            result = getUrl(url, timeout='30').result
+            result = client.request(url, safe=True)
             self.data[i] = {'html': result, 'url': url}
         except:
             return
@@ -1328,9 +1295,9 @@ class trailer:
 
             query = url.split("?q=")[-1].split("/")[-1].split("?")[0]
             url = url.replace(query, urllib.quote_plus(query))
-            result = getUrl(url).result
-            result = common.parseDOM(result, "entry")
-            result = common.parseDOM(result, "id")
+            result = client.request(url, safe=True)
+            result = client.parseDOM(result, "entry")
+            result = client.parseDOM(result, "id")
 
             for url in result[:5]:
                 url = url.split("/")[-1]
@@ -1347,16 +1314,16 @@ class trailer:
                 return
             id = url.split("?v=")[-1].split("/")[-1].split("?")[0].split("&")[0]
             state, reason = None, None
-            result = getUrl(self.youtube_info % id).result
+            result = client.request(self.youtube_info % id, safe=True)
             try:
-                state = common.parseDOM(result, "yt:state", ret="name")[0]
-                reason = common.parseDOM(result, "yt:state", ret="reasonCode")[0]
+                state = client.parseDOM(result, "yt:state", ret="name")[0]
+                reason = client.parseDOM(result, "yt:state", ret="reasonCode")[0]
             except:
                 pass
             if state == 'deleted' or state == 'rejected' or state == 'failed' or reason == 'requesterRegion' : return
             try:
-                result = getUrl(self.youtube_watch % id).result
-                alert = common.parseDOM(result, "div", attrs = { "id": "watch7-notification-area" })[0]
+                result = client.request(self.youtube_watch % id, safe=True)
+                alert = client.parseDOM(result, "div", attrs = { "id": "watch7-notification-area" })[0]
                 return
             except:
                 pass
@@ -1369,183 +1336,66 @@ class resolver:
     def run(self, url, name, download=False):
         try:
             url = self.yify(url, name)
-            if url is None: raise Exception()
-            
-            if getSetting("autoplay") == 'true' and len(url) > 1:
-                mirrors = list()
-                count = 1
-                for i in url:
-                    mirrors.extend(['Mirror #%s' % count])
-                    count += 1
-            
-                dialog = xbmcgui.Dialog()
-                src = dialog.select('Choose a mirror', mirrors)
-                       
-                #if url[src] is None: raise Exception()
-            
-                if download == True: return url[src]
-            
-                player().run(name, url[src])
-                return url[src]
-            else:
-                url = random.choice(url)
-                #if url is None: raise Exception()
-                if download == True: return url
-                player().run(name, url)
-                return url
+            if url == None or url == False: raise Exception()
+
+            if download == True: return url
+            player().run(name, url)
+            return url
         except:
             if not index().getProperty('PseudoTVRunning') == 'True':
                 index().infoDialog(language(30318).encode("utf-8"))
             return
 
     def yify(self, url, name):
-        referer = url
-
         try:
-            result = getUrl(url, referer=referer, close=False).result
-            result = common.parseDOM(result, 'script', attrs = {'type': 'text/javascript'})
-            result = [i for i in result if 'parametros;' in i][0]
-            result = 'function' + result.split('function', 1)[-1]
-            result = result.rsplit('parametros;', 1)[0] + 'parametros;'
+            title, year = re.compile('(.+?) [(](\d{4})[)]$').findall(name)[0]
 
 
-            from resources.lib.libraries import js2py
-
-            result = js2py.evaljs.eval_js(result)
-            result = str(result)
-
-
-            links = re.compile('pic=([^&]+)').findall(result)
-            links = [x for y,x in enumerate(links) if x not in links[:y]]
-            
-            urlArr = list()
-            filtered = getSetting("problematic")
-            domains = ['mediafire.com', 'uptostream.com']
-            for i in links:
-                try:
-                    pk_link = 'http://yify.tv/player/pk/pk/plugins/player_p2.php'
-                    #url = url + 'dpenc'
-                    post = urllib.urlencode({'url': i, 'fv': '19', 'sou': 'pic'})
-
-                    result = getUrl(pk_link, post=post, referer=referer).result
-                    result = json.loads(result)
-
-                    url = [i['url'] for i in result if 'x-shockwave-flash' in i['type']]
-                    url += [i['url'] for i in result if 'video/mpeg4' in i['type']]
-                    url = url[-1]
-                    
-                    #response.geturl() causing links to redirect to other than the video files 
-                    if 'googlevideo.com' in url: 
-                        url = getUrl(url, output='geturl').result
-                        if 'requiressl=yes' in url: url = url.replace('http://', 'https://')
-                        else: url = url.replace('https://', 'http://')
-                    if 'https://' in url: url = url.replace(':443/', '/')
-                    if filtered == 'true':
-                        if not any(domain in url for domain in domains): urlArr.extend([url])
-                    else: urlArr.extend([url])
-                except:
-                    pass
-            
-            urlArr = list(filter(None, urlArr))
-            #print urlArr
-            return urlArr
-        except:
-            pass
-
-        try:
-            imdb = None
-            title = name.rsplit(' (', 1)[0].strip()
-            year = '%04d' % int(name.rsplit(' (', 1)[-1].split(')')[0])
-
-            if imdb == None:
-                try: imdb = re.findall('imdb.com/title/tt(\d+)', getUrl(referer).result, re.I)[0]
-                except: pass
-            if imdb == None:
-                try: imdb = json.loads(getUrl('http://www.omdbapi.com/?t=%s&y=%s' % (urllib.quote_plus(title), str(int(year)))).result)['imdbID']
-                except: pass
-            if imdb == None:
-                try: imdb = json.loads(getUrl('http://www.omdbapi.com/?t=%s&y=%s' % (urllib.quote_plus(title), str(int(year)-1))).result)['imdbID']
+            for i in ['_mv', '_tv', '_mv_tv']:
+                try: call = __import__('resources.lib.sources.%s%s' % ('afdah', i), globals(), locals(), ['object'], -1).source()
                 except: pass
 
-            imdb = re.sub('[^0-9]', '', imdb)
-            url = self.movie25(imdb)
-            return url
-        except:
-            pass
+            movie_url = call.get_movie('0', title, year)
+            afdah = call.get_sources(movie_url, [], [], [])
 
-    def movie25(self, imdb):
-        hostDict = ['Firedrive', 'Putlocker', 'Sockshare', 'Played', 'Promptfile', 'Mightyupload', 'Gorillavid', 'Divxstage', 'Movreel', 'Bestreams', 'Flashx', 'Vidbull', 'Daclips', 'Movpod', 'Nosvideo', 'Novamov', 'Movshare', 'Vidx', 'Sharesix', 'Videoweed', 'Sharerepo', 'Uploadc', 'Filenuke']
-        self.base_link = 'http://www.movie25.so'
-        self.search_link = 'http://www.movie25.so/search.php?key=%s'
+            for i in ['_mv', '_tv', '_mv_tv']:
+                try: call = __import__('resources.lib.sources.%s%s' % ('watchfree', i), globals(), locals(), ['object'], -1).source()
+                except: pass
 
-        try:
-            movie25_sources = []
+            import urlresolver
 
-            result = getUrl('http://www.omdbapi.com/?i=tt%s' % imdb).result
-            result = json.loads(result)
-            title = result['Title']
-            year = result['Year']
+            movie_url = call.get_movie('0', title, year)
+            watchfree = call.get_sources(movie_url, [], [], [])
+            watchfree = [(i, urlresolver.HostedMediaFile(i['url']).valid_url()) for i in watchfree]
+            watchfree = [i[0] for i in watchfree if i[1] == True]
 
-            query = self.search_link % urllib.quote_plus(title)
+            url = afdah + watchfree
 
-            result = getUrl(query).result
-            result = result.decode('iso-8859-1').encode('utf-8')
-            result = common.parseDOM(result, "div", attrs = { "class": "movie_table" })[0]
-            result = common.parseDOM(result, "li")
+            if len(url) == 1:
+                u = urlresolver.HostedMediaFile(url=url[0]['url']).resolve()
+                return u
 
-            match = [i for i in result if any(x in i for x in [' (%s)' % str(year), ' (%s)' % str(int(year)+1), ' (%s)' % str(int(year)-1)])]
-            match2 = [self.base_link + common.parseDOM(i, "a", ret="href")[0] for i in match]
-            if match2 == []: return
-            for i in match2[:10]:
-                try:
-                    result = getUrl(i).result
-                    result = result.decode('iso-8859-1').encode('utf-8')
-                    if str('tt' + imdb) in result:
-                        match3 = result
-                        break
-                except:
-                    pass
+            elif not getSetting("autoplay") == 'true':
+                for i in url:
+                    try:
+                        u = urlresolver.HostedMediaFile(url=i['url']).resolve()
+                        if not u == False: return u
+                    except:
+                        pass
 
-            result = common.parseDOM(match3, "div", attrs = { "class": "links_quality" })[0]
-            links = common.parseDOM(result, "ul")
-            for i in links:
-                try:
-                    name = common.parseDOM(i, "a")[0]
-                    name = common.replaceHTMLCodes(name)
-                    if name.isdigit(): raise Exception()
-                    host = common.parseDOM(i, "li", attrs = { "class": "link_name" })[0]
-                    host = common.replaceHTMLCodes(host)
-                    host = host.encode('utf-8')
-                    host = [x for x in hostDict if host.lower() == x.lower()][0]
-                    url = common.parseDOM(i, "a", ret="href")[0]
-                    url = '%s%s' % (self.base_link, url)
-                    url = common.replaceHTMLCodes(url)
-                    url = url.encode('utf-8')
-                    movie25_sources.append({'source': host, 'url': url})
-                except:
-                    pass
+            elif type(url) == list:
+                url = sorted(url, key=lambda k: k['quality'])
+                for i in url: i.update((k, '720p') for k, v in i.iteritems() if v == 'HD')
+                for i in url: i.update((k, '480p') for k, v in i.iteritems() if v == 'SD')
+                q = ['[B]%s[/B] | %s' % (i['source'].upper(), i['quality'].upper()) for i in url]
+                u = [i['url'] for i in url]
+                select = xbmcgui.Dialog().select(addonName, q)
+                if select == -1: return
+                u = urlresolver.HostedMediaFile(url=u[select]).resolve()
+                return u
 
-            filter = []
-            for host in hostDict: filter += [i for i in movie25_sources if i['source'].lower() == host.lower()]
-            movie25_sources = filter
         except:
             return
-
-        for i in movie25_sources:
-            try:
-                result = getUrl(i['url']).result
-                result = result.decode('iso-8859-1').encode('utf-8')
-                url = common.parseDOM(result, "input", ret="onclick")
-                url = [i for i in url if 'location.href' in i and 'http://' in i][0]
-                url = url.split("'", 1)[-1].rsplit("'", 1)[0]
-
-                import urlresolver
-                resolver = urlresolver.resolve(url)
-                xbmc.sleep(1000)
-                if not resolver.startswith('http://'): raise Exception()
-                if not resolver == url: return resolver
-            except:
-                pass
 
 
 main()
