@@ -444,7 +444,7 @@ class movies:
 
             items = []
             for i in result:
-                try: items.append(i['movie'])
+                try: items.append(i)
                 except: pass
             if len(items) == 0:
                 items = result
@@ -462,11 +462,13 @@ class movies:
         except:
             next = ''
 
-        for item in items:
+        for tmpitem in items:
             try:
+                item = tmpitem['movie']
                 title = item['title']
                 title = client.replaceHTMLCodes(title)
                 title = title.encode('utf-8')
+                if 'rating' in url: title = '[' + str(tmpitem['rating']).zfill(2) + '] ' + title
 
                 year = item['year']
                 year = re.sub('[^0-9]', '', str(year))
