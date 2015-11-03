@@ -1192,7 +1192,7 @@ class episodes:
                 cm = []
 
                 cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
-
+                cm.append(("Torrents", "ActivateWindow(10025, \"plugin://plugin.video.kmediatorrent/kat/search?query_suffix=category%3atv&sort_field=seeders&query=" + systitle + " season:" + season + " episode:" + episode + "&sort_order=desc\", return)"))
                 if isFolder == False:
                     cm.append((control.lang(30261).encode('utf-8'), 'RunPlugin(%s?action=queueItem)' % sysaddon))
 
