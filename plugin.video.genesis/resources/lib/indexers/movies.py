@@ -1131,6 +1131,7 @@ class movies:
                 cm = []
 
                 cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
+                cm.append(("Torrents", "ActivateWindow(10025, \"plugin://plugin.video.kmediatorrent/kat/search?content_type=movies&query_suffix=category%3amovies&sort_field=seeders&query=imdb%3A" + imdb.replace("tt", "") + "&sort_order=desc\", return)"))
 
                 cm.append((control.lang(30205).encode('utf-8'), 'Action(Info)'))
 
